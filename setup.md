@@ -1,0 +1,1 @@
+1. Npm init dlu, install express nya, cors, prisma

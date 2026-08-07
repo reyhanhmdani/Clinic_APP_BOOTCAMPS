@@ -1,0 +1,257 @@
+{
+  "patients": [
+    {
+      "id": "1",
+      "no_rm": "RM-2025-001",
+      "name": "Budi Santoso",
+      "gender": "Male",
+      "age": 28,
+      "phone": "0812-XXXX-1111",
+      "address": "Jl. Merdeka No. 123, Jakarta"
+    },
+    {
+      "id": "2",
+      "no_rm": "RM-2025-002",
+      "name": "Siti Aisyah",
+      "gender": "Female",
+      "age": 25,
+      "phone": "0813-XXXX-2222",
+      "address": "Jl. Mawar No. 45, Bandung"
+    },
+    {
+      "id": "3",
+      "no_rm": "RM-2025-003",
+      "name": "John Doe",
+      "gender": "Male",
+      "age": 35,
+      "phone": "0814-XXXX-3333",
+      "address": "Jl. Sudirman No. 88, Jakarta"
+    },
+    {
+      "id": "4",
+      "no_rm": "RM-2025-004",
+      "name": "Ahmad Rizky",
+      "gender": "Male",
+      "age": 30,
+      "phone": "0815-XXXX-4444",
+      "address": "Jl. Gatot Subroto No. 12, Surabaya"
+    },
+    {
+      "id": "5",
+      "no_rm": "RM-2025-005",
+      "name": "Marina Putri",
+      "gender": "Female",
+      "age": 22,
+      "phone": "0816-XXXX-5555",
+      "address": "Jl. Pemuda No. 9, Semarang"
+    }
+  ],
+  "doctors": [
+    {
+      "id": "1",
+      "name": "Dr. Andri",
+      "spesialis": "General Practitioner",
+      "phone": "0811-0001-0001"
+    },
+    {
+      "id": "2",
+      "name": "Dr. Budi",
+      "spesialis": "General Practitioner",
+      "phone": "0811-0002-0002"
+    },
+    {
+      "id": "3",
+      "name": "Dr. Sarah",
+      "spesialis": "Pediatrician",
+      "phone": "0811-0003-0003"
+    }
+  ],
+  "visits": [
+    {
+      "id": "VIS-2025-000123",
+      "patient_id": "1",
+      "doctor_id": "1",
+      "patient_name": "Budi Santoso",
+      "doctor_name": "Dr. Andri",
+      "queue_number": 1,
+      "time": "08:30 AM",
+      "visit_date": "2025-05-21",
+      "status": "waiting"
+    },
+    {
+      "id": "VIS-2025-000124",
+      "patient_id": "2",
+      "doctor_id": "1",
+      "patient_name": "Siti Aisyah",
+      "doctor_name": "Dr. Andri",
+      "queue_number": 2,
+      "time": "08:45 AM",
+      "visit_date": "2025-05-21",
+      "status": "waiting"
+    },
+    {
+      "id": "VIS-2025-000125",
+      "patient_id": "3",
+      "doctor_id": "2",
+      "patient_name": "John Doe",
+      "doctor_name": "Dr. Budi",
+      "queue_number": 3,
+      "time": "09:00 AM",
+      "visit_date": "2025-05-21",
+      "status": "in_consultation"
+    },
+    {
+      "id": "VIS-2025-000126",
+      "patient_id": "4",
+      "doctor_id": "3",
+      "patient_name": "Ahmad Rizky",
+      "doctor_name": "Dr. Sarah",
+      "queue_number": 4,
+      "time": "09:15 AM",
+      "visit_date": "2025-05-21",
+      "status": "waiting"
+    },
+    {
+      "id": "VIS-2025-000127",
+      "patient_id": "5",
+      "doctor_id": "3",
+      "patient_name": "Marina Putri",
+      "doctor_name": "Dr. Sarah",
+      "queue_number": 5,
+      "time": "09:30 AM",
+      "visit_date": "2025-05-21",
+      "status": "waiting"
+    }
+  ],
+  "diagnoses": [
+    {
+      "id": "1",
+      "code": "J00",
+      "name": "Common Cold"
+    },
+    {
+      "id": "2",
+      "code": "K21.9",
+      "name": "Gastro-esophageal reflux disease (GERD)"
+    },
+    {
+      "id": "3",
+      "code": "R50.9",
+      "name": "Fever, unspecified"
+    },
+    {
+      "id": "4",
+      "code": "G44.2",
+      "name": "Tension-type headache"
+    }
+  ],
+  "treatments": [
+    {
+      "id": "1",
+      "name": "General Physical Examination",
+      "price": 30000
+    },
+    {
+      "id": "2",
+      "name": "Specialist Consultation Fee",
+      "price": 50000
+    },
+    {
+      "id": "3",
+      "name": "Wound Dressing / Treatment",
+      "price": 25000
+    }
+  ],
+  "medicines": [
+    {
+      "id": "1",
+      "name": "Paracetamol 500mg",
+      "price": 5000,
+      "stock": 100,
+      "unit": "Strip"
+    },
+    {
+      "id": "2",
+      "name": "Vitamin C 500mg",
+      "price": 3000,
+      "stock": 150,
+      "unit": "Strip"
+    },
+    {
+      "id": "3",
+      "name": "Amoxicillin 500mg",
+      "price": 8000,
+      "stock": 80,
+      "unit": "Strip"
+    },
+    {
+      "id": "4",
+      "name": "Antasida Doen",
+      "price": 4000,
+      "stock": 60,
+      "unit": "Strip"
+    }
+  ],
+  "consultations": [
+    {
+      "id": "1",
+      "visit_id": "VIS-2025-000123",
+      "patient_id": "1",
+      "doctor_id": "1",
+      "complaint": "Demam dan sakit kepala sejak 2 hari yang lalu.",
+      "diagnosis": "Common Cold (J00)",
+      "treatment": "Paracetamol 500mg",
+      "consultation_fee": 30000,
+      "notes": "Istirahat cukup, Minum air hangat",
+      "prescribed_medicines": [
+        {
+          "medicine_id": "1",
+          "name": "Paracetamol 500mg",
+          "qty": 1,
+          "price": 5000,
+          "amount": 5000
+        },
+        {
+          "medicine_id": "2",
+          "name": "Vitamin C 500mg",
+          "qty": 1,
+          "price": 3000,
+          "amount": 3000
+        }
+      ]
+    }
+  ],
+  "invoices": [
+    {
+      "id": "1",
+      "invoice_no": "INV-2025-000123",
+      "visit_id": "VIS-2025-000123",
+      "patient_name": "Budi Santoso",
+      "doctor_name": "Dr. Andri",
+      "date": "May 21, 2025 - 09:15 AM",
+      "status": "unpaid",
+      "subtotal": 38000,
+      "total": 38000,
+      "items": [
+        {
+          "name": "Consultation Fee",
+          "qty": 1,
+          "price": 30000,
+          "amount": 30000
+        },
+        {
+          "name": "Paracetamol 500mg",
+          "qty": 1,
+          "price": 5000,
+          "amount": 5000
+        },
+        {
+          "name": "Vitamin C 500mg",
+          "qty": 1,
+          "price": 3000,
+          "amount": 3000
+        }
+      ]
+    }
+  ]
+}

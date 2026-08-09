@@ -88,7 +88,7 @@ async function main() {
 
   for (let index = 0; index < db.visits.length; index++) {
     const v = db.visits[index];
-    let statusEnum = VisitStatus.WAITING;
+    let statusEnum: VisitStatus = VisitStatus.WAITING;
 
     if (v.status === 'in_consultation') {
       statusEnum = VisitStatus.IN_KONSULTASI;

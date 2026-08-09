@@ -9,8 +9,8 @@ export const validateZod = (schema: z.ZodSchema) => {
       next();
     } catch (error) {
       // misal gagal ketika melakukan sesuatu untuk upload file, gambar tetep tidak masuk ke folder public .. / mencegah masuk
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
+      if ((req as any).file) {
+        fs.unlinkSync((req as any).file.path);
       }
       if (error instanceof z.ZodError) {
         const formattedErrors = error.issues.map((err) => ({

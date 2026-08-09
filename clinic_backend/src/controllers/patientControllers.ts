@@ -31,7 +31,7 @@ export const getPatientByIdController = async (req: Request, res: Response, next
     const getPatiendById = await getPatientByIdService(Number(idPatient));
 
     return res.status(200).json({
-      message: `Data Patient dengan id ${getPatiendById.id} berhasil di temukan`,
+      message: `Berhasil mengambil data pasien dengan id ${getPatiendById.id}`,
       data: getPatiendById,
     });
   } catch (error) {
@@ -45,7 +45,7 @@ export const updatePatientController = async (req: Request, res: Response, next:
     const updatePatient = await updatePatientService(Number(idPatient), req.body);
 
     return res.status(201).json({
-      message: `Data Pasien dengan id ${updatePatient.id} Berhasil di Update`,
+      message:  `Berhasil mengUpdate data medicine dengan Id ${updatePatient.id}`,
       data: updatePatient,
     });
   } catch (error) {

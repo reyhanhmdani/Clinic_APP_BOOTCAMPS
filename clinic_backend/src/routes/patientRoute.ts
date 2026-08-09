@@ -12,8 +12,8 @@ import { createPatientSchema, updatePatientSchema } from '../validation/patientS
 const router = Router();
 
 router.get('/', getAllPatientsController);
-router.get('/:idPatient', getPatientByIdController);
 router.post('/', validateZod(createPatientSchema), createPatientController);
+router.get('/:idPatient', getPatientByIdController);
 router.patch('/:idPatient', validateZod(updatePatientSchema), updatePatientController);
 router.delete('/:idPatient', deletePatienController);
 

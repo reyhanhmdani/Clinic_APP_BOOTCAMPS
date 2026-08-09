@@ -25,7 +25,7 @@ export const createDoctorController = async (req: Request, res: Response, next: 
     const createDoctor = await createDoctorService(req.body);
 
     return res.status(201).json({
-      message: `Data Doctor dengan Nama ${createDoctor.name} sudah Berhasil di Buat`,
+      message: `Berhasil Membuat Data baru dengan no ${createDoctor.id}`,
       data: createDoctor,
     });
   } catch (error) {}
@@ -38,7 +38,7 @@ export const getDoctorByIdController = async (req: Request, res: Response, next:
     const getDoctorById = await getDoctorByIdService(Number(idDoctor));
 
     return res.status(200).json({
-      message: `Data Doctor dengan id ${getDoctorById.id} berhasil di temukan`,
+      message: `Berhasil mengambil data Doctor dengan Id ${getDoctorById.id}`,
       data: getDoctorById,
     });
   } catch (error) {
@@ -53,7 +53,7 @@ export const updateDoctorController = async (req: Request, res: Response, next: 
     const updateDoctorById = await updateDoctorService(Number(idDoctor), req.body);
 
     return res.status(200).json({
-      message: `Data Doctor dengan id ${updateDoctorById.id} Berhasil di Update`,
+      message: `Berhasil mengUpdate data Doctor dengan Id ${updateDoctorById.id}`,
       data: updateDoctorById,
     });
   } catch (error) {

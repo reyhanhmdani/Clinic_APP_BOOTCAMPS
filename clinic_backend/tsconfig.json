@@ -22,7 +22,9 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
+    // sebelumnya true btw, karna di bagian input update dan create akan ada garis merah, ts nya cerewet
+    // Aturan "exactOptionalPropertyTypes": true di TypeScript sangat ketat membedakan antara properti yang diabaikan (omitted) dengan properti bernilai undefined buatan Zod.
 
     // Style Options
     // "noImplicitReturns": true,
@@ -39,6 +41,6 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

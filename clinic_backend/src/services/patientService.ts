@@ -72,7 +72,7 @@ export const updatePatientService = async (id: number, input: UpdatePatientInput
 
   const uptPatient = await prisma.patient.update({
     where: { id },
-    data: input as Prisma.PatientUpdateInput,
+    data: input,
   });
 
   return uptPatient;

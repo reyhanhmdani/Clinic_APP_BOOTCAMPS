@@ -42,11 +42,11 @@ enum PaymentMethod {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   username String? @db.VarChar(255)
-  email String @unique @db.VarChar(255)
-  password String @db.VarChar(255)
-  role Role @default(ADMIN)
+  email    String  @unique @db.VarChar(255)
+  password String  @db.VarChar(255)
+  role     Role    @default(ADMIN)
 
   @@map("users")
 }
@@ -87,8 +87,8 @@ model Visit {
   visitDate   DateTime    @map("visit_date")
   status      VisitStatus @default(WAITING)
   checkInTime DateTime?   @map("check_in_time")
-  createdAt   DateTime    @map("created_at")
-  updatedAt   DateTime    @map("updated_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at")
 
   //relasi
   patient      Patient       @relation(fields: [patientId], references: [id])

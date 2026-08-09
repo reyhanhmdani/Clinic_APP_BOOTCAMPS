@@ -19,7 +19,7 @@ export const createPatientController = async (req: Request, res: Response, next:
   const createPatient = await createPatientService(req.body);
 
   return res.status(201).json({
-    message: `Data patient dengan nama ${createPatient.name} sudah berhasil di buat`,
+    message: `Data Patient dengan Nama ${createPatient.name} Sudah Berhasil di Buat`,
     data: createPatient,
   });
 };
@@ -31,8 +31,8 @@ export const getPatientByIdController = async (req: Request, res: Response, next
     const getPatiendById = await getPatientByIdService(Number(idPatient));
 
     return res.status(200).json({
-      data: getPatiendById,
       message: `Data Patient dengan id ${getPatiendById.id} berhasil di temukan`,
+      data: getPatiendById,
     });
   } catch (error) {
     next(error);
@@ -60,7 +60,7 @@ export const deletePatienController = async (req: Request, res: Response, next: 
     const deletePatient = await deletePatientService(Number(idPatient));
 
     return res.status(200).json({
-      message: `Kamu berhasil menghapus pasient dengan id ${deletePatient.id}`,
+      message: `Berhasil menghapus pasient dengan id ${deletePatient.id}`,
     });
   } catch (error) {
     next(error);

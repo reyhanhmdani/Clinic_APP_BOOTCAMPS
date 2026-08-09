@@ -1,0 +1,76 @@
+import { Request, Response, NextFunction } from 'express';
+import {
+  createDoctorService,
+  deleteDoctorService,
+  getAllDoctorsService,
+  getDoctorByIdService,
+  updateDoctorService,
+} from '../services/doctorService.js';
+import { number } from 'zod';
+
+export const getAllDoctorsController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const doctors = await getAllDoctorsService();
+
+    return res.status(200).json({
+      data: doctors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createDoctorController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const createDoctor = await createDoctorService(req.body);
+
+    return res.status(201).json({
+      message: `Data Doctor dengan Nama ${createDoctor.name} sudah Berhasil di Buat`,
+      data: createDoctor,
+    });
+  } catch (error) {}
+};
+
+export const getDoctorByIdController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idDoctor } = req.params;
+
+    const getDoctorById = await getDoctorByIdService(Number(idDoctor));
+
+    return res.status(200).json({
+      message: `Data Doctor dengan id ${getDoctorById.id} berhasil di temukan`,
+      data: getDoctorById,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateDoctorController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idDoctor } = req.params;
+
+    const updateDoctorById = await updateDoctorService(Number(idDoctor), req.body);
+
+    return res.status(200).json({
+      message: `Data Doctor dengan id ${updateDoctorById.id} Berhasil di Update`,
+      data: updateDoctorById,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteDoctorController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idDoctor } = req.params;
+
+    const deleteDoctorById = await deleteDoctorService(Number(idDoctor));
+
+    return res.status(200).json({
+      message: `Berhasil menghapus Doctor dengan id ${deleteDoctorById.id}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

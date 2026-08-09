@@ -36,10 +36,10 @@ async function main() {
   });
 
   // 3. Seed Patients
+  const patientIdMap = new Map<string, number>();
   for (const p of db.patients) {
-    await prisma.patient.create({
+    const createdPatient = await prisma.patient.create({
       data: {
-        // id: parseInt(p.id),
         noRm: p.no_rm,
         name: p.name,
         gender: p.gender.toUpperCase() as Gender,
@@ -48,28 +48,30 @@ async function main() {
         address: p.address,
       },
     });
+    patientIdMap.set(p.id, createdPatient.id);
   }
   console.log('✅ Patients seeded.');
 
   // 4. Seed Doctors
+  const doctorIdMap = new Map<string, number>();
   for (const d of db.doctors) {
-    await prisma.doctor.create({
+    const createdDoctor = await prisma.doctor.create({
       data: {
-        // id: parseInt(d.id),
         name: d.name,
         spesialis: d.spesialis,
         phone: d.phone,
       },
     });
+    doctorIdMap.set(d.id, createdDoctor.id);
   }
   console.log('✅ Doctors seeded.');
 
   // 5. Seed Medicines
+  const medicineIdMap = new Map<string, number>();
   for (let index = 0; index < db.medicines.length; index++) {
     const m = db.medicines[index];
-    await prisma.medicine.create({
+    const createdMedicine = await prisma.medicine.create({
       data: {
-        // id: parseInt(m.id),
         code: `MED-00${index + 1}`,
         name: m.name,
         price: m.price,
@@ -77,6 +79,7 @@ async function main() {
         unit: m.unit,
       },
     });
+    medicineIdMap.set(m.id, createdMedicine.id);
   }
   console.log('✅ Medicines seeded.');
 
@@ -93,10 +96,15 @@ async function main() {
       statusEnum = VisitStatus.COMPLETED;
     }
 
+    const realPatientId = patientIdMap.get(v.patient_id);
+    const realDoctorId = doctorIdMap.get(v.doctor_id);
+
+    if (!realPatientId || !realDoctorId) continue;
+
     const createdVisit = await prisma.visit.create({
       data: {
-        patientId: parseInt(v.patient_id),
-        doctorID: parseInt(v.doctor_id),
+        patientId: realPatientId,
+        doctorID: realDoctorId,
         queueNumber: v.queue_number,
         visitDate: new Date(v.visit_date),
         status: statusEnum,
@@ -127,10 +135,13 @@ async function main() {
 
     if (c.prescribed_medicines) {
       for (const item of c.prescribed_medicines) {
+        const realMedicineId = medicineIdMap.get(item.medicine_id);
+        if (!realMedicineId) continue;
+
         await prisma.consultationMedicine.create({
           data: {
             consultationId: createdConsultation.id,
-            medicineId: parseInt(item.medicine_id),
+            medicineId: realMedicineId,
             qty: item.qty,
             price: item.price,
             subTotal: item.amount,

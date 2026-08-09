@@ -1,12 +1,10 @@
-import { tr } from 'zod/locales';
 import prisma from '../config/prisma.js';
-import { Request, Response } from 'express';
 import { ApiError } from '../utils/apiError.js';
-import { CreatePatientInput, updatePatientInput } from '../validation/patientSchema.js';
+import { CreatePatientInput, UpdatePatientInput } from '../validation/patientSchema.js';
 import { Prisma } from '@prisma/client';
 
 export const getAllPatientsService = async () => {
-  const existingPatient = await prisma.patient.findMany({
+  const patients = await prisma.patient.findMany({
     select: {
       id: true,
       name: true,
@@ -18,10 +16,10 @@ export const getAllPatientsService = async () => {
     },
   });
 
-  if (!existingPatient) {
-    throw new ApiError(404, 'data patient kosong');
+  if (!patients) {
+    throw new ApiError(404, 'Data Patient KOSONG');
   }
-  return existingPatient;
+  return patients;
 };
 
 export const createPatientService = async (input: CreatePatientInput) => {
@@ -61,7 +59,7 @@ export const getPatientByIdService = async (id: number) => {
   return patient;
 };
 
-export const updatePatientService = async (id: number, input: updatePatientInput) => {
+export const updatePatientService = async (id: number, input: UpdatePatientInput) => {
   const patient = await prisma.patient.findUnique({
     where: {
       id: id,
@@ -90,11 +88,17 @@ export const deletePatientService = async (id: number) => {
     throw new ApiError(404, 'patien yang ingin di hapus nya tidak di temukan');
   }
 
-  const deletePatient = await prisma.patient.delete({
-    where: {
-      id: id,
-    },
-  });
-
-  return deletePatient;
+  try {
+    const deletePatient = await prisma.patient.delete({
+      where: {
+        id: id,
+      },
+    });
+    return deletePatient;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      throw new ApiError(400, 'Pasien tidak dapat dihapus karena memiliki riwayat rekam medis/kunjungan');
+    }
+    throw error;
+  }
 };

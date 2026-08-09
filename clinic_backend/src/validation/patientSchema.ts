@@ -15,7 +15,7 @@ export type CreatePatientInput = z.infer<typeof createPatientSchema>;
 
 // menggunakan partial mengcopy yanga ada di create tapi jadi opsional semua isinya
 export const updatePatientSchema = createPatientSchema.partial();
-export type updatePatientInput = z.infer<typeof updatePatientSchema>;
+export type UpdatePatientInput = z.infer<typeof updatePatientSchema>;
 
 // cara 2
 // export const updatePatientSchema = z.object({

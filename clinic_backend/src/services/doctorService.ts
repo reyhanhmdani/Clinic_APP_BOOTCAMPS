@@ -1,6 +1,6 @@
 import prisma from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
-import { CreateDoctorInput, UpdateDoctorInput } from '../validation/doctrorSchemaa.js';
+import { CreateDoctorInput, UpdateDoctorInput } from '../validation/doctorSchema.js';
 import { Prisma } from '@prisma/client';
 
 export const getAllDoctorsService = async () => {

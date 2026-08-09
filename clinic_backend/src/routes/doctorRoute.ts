@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { validateZod } from '../middlewares/validateZod.js';
-import { getAllPatientsController } from '../controllers/patientControllers.js';
 import {
   createDoctorController,
   deleteDoctorController,
@@ -8,7 +7,7 @@ import {
   getDoctorByIdController,
   updateDoctorController,
 } from '../controllers/doctorController.js';
-import { createDoctorSchema, updateDoctorSchema } from '../validation/doctrorSchemaa.js';
+import { createDoctorSchema, updateDoctorSchema } from '../validation/doctorSchema.js';
 
 const router = Router();
 

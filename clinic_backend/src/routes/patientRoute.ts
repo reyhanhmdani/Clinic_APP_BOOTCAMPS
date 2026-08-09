@@ -6,7 +6,7 @@ import {
   getAllPatientsController,
   getPatientByIdController,
   updatePatientController,
-} from '../controllers/patientControllers.js';
+} from '../controllers/patientController.js';
 import { createPatientSchema, updatePatientSchema } from '../validation/patientSchema.js';
 
 const router = Router();

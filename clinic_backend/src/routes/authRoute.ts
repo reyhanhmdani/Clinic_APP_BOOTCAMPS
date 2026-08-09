@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginController } from '../controllers/authControllers.js';
+import { loginController } from '../controllers/authController.js';
 import { validateZod } from '../middlewares/validateZod.js';
 import { loginSchema } from '../validation/userSchema.js';
 

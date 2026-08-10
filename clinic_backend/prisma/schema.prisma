@@ -82,7 +82,7 @@ model Doctor {
 model Visit {
   id          Int         @id @default(autoincrement())
   patientId   Int         @map("patient_id")
-  doctorID    Int         @map("doctor_id")
+  doctorId    Int         @map("doctor_id")
   queueNumber Int         @map("queue_number")
   visitDate   DateTime    @map("visit_date")
   status      VisitStatus @default(WAITING)
@@ -92,7 +92,7 @@ model Visit {
 
   //relasi
   patient      Patient       @relation(fields: [patientId], references: [id])
-  doctor       Doctor        @relation(fields: [doctorID], references: [id])
+  doctor       Doctor        @relation(fields: [doctorId], references: [id])
   consultation Consultation?
   invoice      Invoice?
 

@@ -239,11 +239,12 @@ async function main() {
 
   // 5. Seed Medicines
   const medicineIdMap = new Map<string, number>();
-  for (let index = 0; index < MEDICINES_DATA.length; index++) {
-    const m = MEDICINES_DATA[index];
+  let medIdx = 0;
+  for (const m of MEDICINES_DATA) {
+    medIdx++;
     const createdMedicine = await prisma.medicine.create({
       data: {
-        code: `MED-${String(index + 1).padStart(3, '0')}`,
+        code: `MED-${String(medIdx).padStart(3, '0')}`,
         name: m.name,
         price: m.price,
         stock: m.stock,
@@ -257,8 +258,7 @@ async function main() {
   // 6. Seed Visits
   const visitIdMap = new Map<string, number>();
 
-  for (let index = 0; index < VISITS_DATA.length; index++) {
-    const v = VISITS_DATA[index];
+  for (const v of VISITS_DATA) {
     let statusEnum: VisitStatus = VisitStatus.WAITING;
 
     if (v.status === 'in_consultation') {
@@ -275,7 +275,7 @@ async function main() {
     const createdVisit = await prisma.visit.create({
       data: {
         patientId: realPatientId,
-        doctorID: realDoctorId,
+        doctorId: realDoctorId,
         queueNumber: v.queue_number,
         visitDate: new Date(v.visit_date),
         status: statusEnum,

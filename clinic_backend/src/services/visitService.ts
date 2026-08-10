@@ -9,7 +9,7 @@ import { VisitStatus } from '@prisma/client';
 export const getAllVisitService = async () => {
   const visits = await prisma.visit.findMany();
 
-  if (!visits) {
+  if (visits.length === 0) {
     throw new ApiError(404, 'Data Visit Kosong');
   }
 

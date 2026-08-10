@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validateZod } from '../middlewares/validateZod.js';
+import { authorization } from '../middlewares/authorization.js';
 import {
   createPatientController,
   deletePatienController,
@@ -10,6 +11,8 @@ import {
 import { createPatientSchema, updatePatientSchema } from '../validation/patientSchema.js';
 
 const router = Router();
+
+router.use(authorization('ADMIN'));
 
 router.get('/', getAllPatientsController);
 router.post('/', validateZod(createPatientSchema), createPatientController);

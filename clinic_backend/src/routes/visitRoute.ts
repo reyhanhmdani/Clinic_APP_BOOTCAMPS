@@ -6,9 +6,12 @@ import {
   updateVisitController,
 } from '../controllers/visitController.js';
 import { validateZod } from '../middlewares/validateZod.js';
+import { authorization } from '../middlewares/authorization.js';
 import { createVisitSchema, updateVisitSchema } from '../validation/visitSchema.js';
 
 const router = Router();
+
+router.use(authorization('ADMIN'));
 
 router.get('/', getAllVisitController);
 router.post('/', validateZod(createVisitSchema), createVisitController);

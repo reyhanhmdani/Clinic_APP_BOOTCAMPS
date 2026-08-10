@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 export const getAllDoctorsService = async () => {
   const doctors = await prisma.doctor.findMany();
 
-  if (!doctors) {
+  if (doctors.length === 0) {
     throw new ApiError(404, 'Data Doctor KOSONG');
   }
 

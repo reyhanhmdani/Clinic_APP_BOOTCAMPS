@@ -6,10 +6,13 @@ import {
   updateMedicineController,
 } from '../controllers/medicineController.js';
 import { validateZod } from '../middlewares/validateZod.js';
+import { authorization } from '../middlewares/authorization.js';
 import { createMedicineSchema, updateMedicineSchema } from '../validation/medicineSchema.js';
 import { Router } from 'express';
 
 const router = Router();
+
+router.use(authorization('ADMIN'));
 
 router.get('/', getAllMedicineController);
 router.post('/', validateZod(createMedicineSchema), createMedicineController);

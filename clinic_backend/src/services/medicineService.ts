@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 export const getAllMedicineService = async () => {
   const medicines = await prisma.medicine.findMany();
 
-  if (!medicines) {
+  if (medicines.length === 0) {
     throw new ApiError(404, 'Medicine nya Kosong');
   }
 

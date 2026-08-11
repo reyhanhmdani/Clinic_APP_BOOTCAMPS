@@ -4,6 +4,7 @@ import patientRoutes from './patientRoute.js';
 import doctorRoutes from './doctorRoute.js';
 import medicineRoutes from './medicineRoute.js';
 import visitRoutes from './visitRoute.js';
+import invoiceRoutes from './invoiceRoute.js';
 import consultationRoutes from './consultationRoute.js';
 import { authentication } from '../middlewares/authentication.js';
 
@@ -21,5 +22,6 @@ mainRouter.use('/doctors', doctorRoutes);
 mainRouter.use('/medicines', medicineRoutes);
 mainRouter.use('/visits', visitRoutes);
 mainRouter.use('/consultations', consultationRoutes);
+mainRouter.use('/invoices', invoiceRoutes);
 
 export default mainRouter;

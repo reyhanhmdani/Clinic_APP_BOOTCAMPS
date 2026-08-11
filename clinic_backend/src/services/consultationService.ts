@@ -4,6 +4,7 @@ import { ApiError } from '../utils/apiError.js';
 import { CreateConsultationInput, UpdateConsultationInput } from '../validation/consultationSchema.js';
 import { getVisitByIdService } from './visitService.js';
 import { getMedicineByIdService } from './medicineService.js';
+import { getDoctorByIdService } from './doctorService.js';
 
 const consultationSelectPayload = {
   id: true,
@@ -65,7 +66,8 @@ export const getAllConsultationService = async () => {
 
 export const createConsultationService = async (input: CreateConsultationInput) => {
   // Validasi ada ga Visitnya
-  await getVisitByIdService(input.visitId);
+  const visit = await getVisitByIdService(input.visitId);
+  const doctor = await getDoctorByIdService(visit.doctorId);
 
   // Validasi Stok Obat terlebih dahulu (Sebelum membuat transaksi)
   if (input.medicine && input.medicine.length > 0) {
@@ -84,7 +86,7 @@ export const createConsultationService = async (input: CreateConsultationInput) 
       complaint: input.complaint,
       diagnosis: input.diagnosis,
       notes: input.notes,
-      consultationFee: input.consultationFee,
+      consultationFee: doctor.fee,
     },
   });
 

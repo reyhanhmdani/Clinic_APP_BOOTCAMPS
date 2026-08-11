@@ -18,6 +18,7 @@ export const createDoctorService = async (input: CreateDoctorInput) => {
     data: {
       name: input.name,
       spesialis: input.spesialis,
+      fee: input.fee,
       phone: input.phone ?? null,
       isActive: input.isActive,
     },

@@ -79,13 +79,13 @@ const PATIENTS_DATA = [
 ];
 
 const DOCTORS_DATA = [
-  { id: '1', name: 'Dr. Andri Wijaya', spesialis: 'Spesialis Penyakit Dalam', phone: '0811-0001-0001' },
-  { id: '2', name: 'Dr. Budi Santoso', spesialis: 'Dokter Umum', phone: '0811-0002-0002' },
-  { id: '3', name: 'Dr. Sarah Lestari', spesialis: 'Spesialis Gigi & Mulut', phone: '0811-0003-0003' },
-  { id: '4', name: 'Dr. Hendra Gunawan', spesialis: 'Spesialis Tulang & Orthopedi', phone: '0811-0004-0004' },
-  { id: '5', name: 'Dr. Maya Indah', spesialis: 'Spesialis Kulit & Kelamin', phone: '0811-0005-0005' },
-  { id: '6', name: 'Dr. Rizky Alamsyah', spesialis: 'Spesialis Anak', phone: '0811-0006-0006' },
-  { id: '7', name: 'Dr. Dewi Sartika', spesialis: 'Spesialis Mata', phone: '0811-0007-0007' },
+  { id: '1', name: 'Dr. Andri Wijaya', spesialis: 'Spesialis Penyakit Dalam', phone: '0811-0001-0001', fee: 150000 },
+  { id: '2', name: 'Dr. Budi Santoso', spesialis: 'Dokter Umum', phone: '0811-0002-0002', fee: 50000 },
+  { id: '3', name: 'Dr. Sarah Lestari', spesialis: 'Spesialis Gigi & Mulut', phone: '0811-0003-0003', fee: 100000 },
+  { id: '4', name: 'Dr. Hendra Gunawan', spesialis: 'Spesialis Tulang & Orthopedi', phone: '0811-0004-0004', fee: 200000 },
+  { id: '5', name: 'Dr. Maya Indah', spesialis: 'Spesialis Kulit & Kelamin', phone: '0811-0005-0005', fee: 120000 },
+  { id: '6', name: 'Dr. Rizky Alamsyah', spesialis: 'Spesialis Anak', phone: '0811-0006-0006', fee: 130000 },
+  { id: '7', name: 'Dr. Dewi Sartika', spesialis: 'Spesialis Mata', phone: '0811-0007-0007', fee: 110000 },
 ];
 
 const MEDICINES_DATA = [
@@ -231,6 +231,7 @@ async function main() {
         name: d.name,
         spesialis: d.spesialis,
         phone: d.phone,
+        fee: d.fee,
       },
     });
     doctorIdMap.set(d.id, createdDoctor.id);

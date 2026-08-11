@@ -5,53 +5,55 @@ import { CreateConsultationInput, UpdateConsultationInput } from '../validation/
 import { getVisitByIdService } from './visitService.js';
 import { getMedicineByIdService } from './medicineService.js';
 
-export const getAllConsultationService = async () => {
-  const consultations = await prisma.consultation.findMany({
+const consultationSelectPayload = {
+  id: true,
+  complaint: true,
+  diagnosis: true,
+  notes: true,
+  consultationFee: true,
+  createdAt: true,
+  visit: {
     select: {
       id: true,
-      complaint: true,
-      diagnosis: true,
-      notes: true,
-      consultationFee: true,
-      createdAt: true,
-      visit: {
+      visitDate: true,
+      patient: {
         select: {
           id: true,
-          visitDate: true,
-          patient: {
-            select: {
-              id: true,
-              noRm: true,
-              name: true,
-            },
-          },
-          doctor: {
-            select: {
-              id: true,
-              name: true,
-              spesialis: true,
-            },
-          },
+          noRm: true,
+          name: true,
         },
       },
-      consultationMedicines: {
+      doctor: {
         select: {
           id: true,
-          qty: true,
-          price: true,
-          subTotal: true,
-          instructions: true,
-          medicine: {
-            select: {
-              id: true,
-              code: true,
-              name: true,
-              unit: true,
-            },
-          },
+          name: true,
+          spesialis: true,
         },
       },
     },
+  },
+  consultationMedicines: {
+    select: {
+      id: true,
+      qty: true,
+      price: true,
+      subTotal: true,
+      instructions: true,
+      medicine: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          unit: true,
+        },
+      },
+    },
+  },
+};
+
+export const getAllConsultationService = async () => {
+  const consultations = await prisma.consultation.findMany({
+    select: consultationSelectPayload,
   });
 
   if (consultations.length === 0) {
@@ -124,51 +126,7 @@ export const getConsultationByIdService = async (id: number) => {
     where: {
       id,
     },
-    select: {
-      id: true,
-      complaint: true,
-      diagnosis: true,
-      notes: true,
-      consultationFee: true,
-      createdAt: true,
-      visit: {
-        select: {
-          id: true,
-          visitDate: true,
-          patient: {
-            select: {
-              id: true,
-              noRm: true,
-              name: true,
-            },
-          },
-          doctor: {
-            select: {
-              id: true,
-              name: true,
-              spesialis: true,
-            },
-          },
-        },
-      },
-      consultationMedicines: {
-        select: {
-          id: true,
-          qty: true,
-          price: true,
-          subTotal: true,
-          instructions: true,
-          medicine: {
-            select: {
-              id: true,
-              code: true,
-              name: true,
-              unit: true,
-            },
-          },
-        },
-      },
-    },
+    select: consultationSelectPayload,
   });
 
   if (!getConsultation) {

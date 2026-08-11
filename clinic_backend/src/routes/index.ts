@@ -4,6 +4,7 @@ import patientRoutes from './patientRoute.js';
 import doctorRoutes from './doctorRoute.js';
 import medicineRoutes from './medicineRoute.js';
 import visitRoutes from './visitRoute.js';
+import consultationRoutes from './consultationRoute.js';
 import { authentication } from '../middlewares/authentication.js';
 
 const mainRouter = express.Router();
@@ -19,5 +20,6 @@ mainRouter.use('/patients', patientRoutes);
 mainRouter.use('/doctors', doctorRoutes);
 mainRouter.use('/medicines', medicineRoutes);
 mainRouter.use('/visits', visitRoutes);
+mainRouter.use('/consultations', consultationRoutes);
 
 export default mainRouter;

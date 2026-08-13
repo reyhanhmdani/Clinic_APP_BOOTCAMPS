@@ -16,6 +16,12 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Filter hanya dokter yang status praktiknya aktif
+  const activeDoctors = doctors.filter((d) => d.isActive !== false);
+
   // 1. Form State DULU
   const [newPatient, setNewPatient] = useState({
     name: '',
@@ -27,27 +33,42 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
   // 2. BARU Handler Function
   const handleCreatePatient = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createPatientService({ ...newPatient, gender: newPatient.gender as Gender, age: Number(newPatient.age) });
-    // kosongkan form kembali
-    setNewPatient({
-      name: '',
-      gender: 'MALE',
-      age: '',
-      phone: '',
-      address: '',
-    });
-    // untuk menutup modal
-    onClose();
+    setErrorMessage(null);
+    setIsSubmitting(true);
+    try {
+      await createPatientService({ ...newPatient, gender: newPatient.gender as Gender, age: Number(newPatient.age) });
+      setNewPatient({
+        name: '',
+        gender: 'MALE',
+        age: '',
+        phone: '',
+        address: '',
+      });
+      onClose();
+      window.location.reload();
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.message || 'Gagal meregistrasi pasien baru.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreateVisit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createVisitService({
-      patientId: Number(selectedPatientId),
-      doctorId: Number(selectedDoctorId),
-    });
-    onClose();
-    window.location.reload();
+    setErrorMessage(null);
+    setIsSubmitting(true);
+    try {
+      await createVisitService({
+        patientId: Number(selectedPatientId),
+        doctorId: Number(selectedDoctorId),
+      });
+      onClose();
+      window.location.reload();
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.message || 'Gagal mendaftarkan antrian pasien.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -77,6 +98,19 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
+
+        {/* Error Alert Message */}
+        {errorMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-rose-100 border-2 border-[#18181b] text-xs font-black text-rose-700 shadow-[2px_2px_0px_#18181b] flex items-center justify-between">
+            <span>⚠️ {errorMessage}</span>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-xs text-rose-700 underline font-bold cursor-pointer"
+            >
+              Tutup
+            </button>
+          </div>
+        )}
 
         {/* Tab Pilihan: Pasien Terdaftar vs Pasien Baru */}
         <div className="flex gap-2 mb-5">
@@ -139,7 +173,7 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
                   required
                 >
                   <option value="">-- Pilih Dokter Spesialis --</option>
-                  {doctors.map((d) => (
+                  {activeDoctors.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.name} ({d.spesialis})
                     </option>

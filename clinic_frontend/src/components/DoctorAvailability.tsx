@@ -29,7 +29,7 @@ export const DoctorAvailability: React.FC<DoctorAvailabilityProps> = ({ doctors 
       {/* Doctor Cards */}
       <div className="space-y-3.5">
         {displayedDoctors.map((doctor) => {
-          const isActive = doctor.status === 'ACTIVE' || doctor.status === undefined || doctor.status === null;
+          const isActive = doctor.isActive ?? true;
           const initials = doctor.name
             .split(' ')
             .map((n) => n[0])

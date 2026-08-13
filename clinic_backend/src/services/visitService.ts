@@ -8,6 +8,9 @@ import { VisitStatus } from '@prisma/client';
 
 export const getAllVisitService = async () => {
   const visits = await prisma.visit.findMany({
+    orderBy: {
+      queueNumber: 'asc',
+    },
     include: {
       patient: true,
       doctor: true,

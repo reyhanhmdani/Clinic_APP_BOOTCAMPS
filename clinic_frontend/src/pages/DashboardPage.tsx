@@ -1,34 +1,47 @@
 import React, { useState } from 'react';
-import { useOutletContext } from 'react-router';
+import { useOutletContext, useNavigate } from 'react-router';
 import { StatsGrid } from '../components/StatsGrid';
 import { DoctorAvailability } from '../components/DoctorAvailability';
 import { HomeDashboard } from '../components/HomeDashboard';
 import { WorkflowGuide } from '../components/WorkflowGuide';
 import type { DashboardContextType } from '../types/clinic';
+import { updateVisitService } from '../services/visitService';
+import type { Visit } from '../types/clinic';
 
 export const DashboardPage: React.FC = () => {
   const [activeWorkflowTab, setActiveWorkflowTab] = useState<string>('ALL');
 
-  const { doctors, visits, stats, isLoading } = useOutletContext<DashboardContextType>();
+  const { doctors, visits, stats, isLoading, refreshData } = useOutletContext<DashboardContextType>();
+
+  const navigate = useNavigate();
+  const handleActionClick = async (visit: Visit, actionType: string) => {
+    if (actionType === 'CALL_PATIENT') {
+      try {
+        await updateVisitService(visit.id, { status: 'IN_KONSULTASI' });
+        await refreshData();
+      } catch (err: any) {
+        alert(`Gagal memanggil pasien: ${err?.response?.data?.message || err.message}`);
+      }
+    } else if (actionType === 'CONSULTATION') {
+      navigate(`/consultations?visitId=${visit.id}`);
+    }
+  };
 
   return (
     <div className="space-y-6 w-full">
       {/* Workflow Guide Banner */}
-      <WorkflowGuide
-        activeTab={activeWorkflowTab}
-        onTabChange={(tab) => setActiveWorkflowTab(tab)}
-      />
+      <WorkflowGuide activeTab={activeWorkflowTab} onTabChange={(tab) => setActiveWorkflowTab(tab)} />
 
       {/* Operational Stats Grid */}
       <StatsGrid stats={stats} />
 
-      {/* Bento Columns: Queue Table (8 cols) + Doctor Availability (4 cols) */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start w-full">
         <div className="col-span-1 md:col-span-8">
           <HomeDashboard
             visits={visits}
             activeFilter={activeWorkflowTab}
             onFilterChange={(tab) => setActiveWorkflowTab(tab)}
+            onActionClick={handleActionClick}
           />
         </div>
         <div className="col-span-1 md:col-span-4">

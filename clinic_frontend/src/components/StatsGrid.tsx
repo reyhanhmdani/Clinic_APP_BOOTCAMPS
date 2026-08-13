@@ -25,9 +25,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           <span className="text-sm font-semibold text-[#18181b]">Total Checked In</span>
         </div>
         <div className="flex items-end justify-between">
-          <span className="text-3xl font-extrabold text-[#18181b] tracking-tight">
-            {stats.totalCheckedIn}
-          </span>
+          <span className="text-3xl font-extrabold text-[#18181b] tracking-tight">{stats.totalCheckedIn}</span>
           <div className="neubrutal-badge-green text-xs px-2 py-1 rounded-md flex items-center">
             <span className="material-symbols-outlined text-[14px] mr-1">trending_up</span> +12%
           </div>
@@ -45,9 +43,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           <span className="text-sm font-semibold text-[#18181b]">Currently Waiting</span>
         </div>
         <div className="flex items-end justify-between">
-          <span className="text-3xl font-extrabold text-[#18181b] tracking-tight">
-            {stats.currentlyWaiting}
-          </span>
+          <span className="text-3xl font-extrabold text-[#18181b] tracking-tight">{stats.currentlyWaiting}</span>
           <div className="neubrutal-badge-yellow text-xs px-2.5 py-1 rounded-md font-extrabold">
             ~ {stats.avgWaitTimeMinutes ?? 15} Mnt Tunggu
           </div>
@@ -66,12 +62,8 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
         </div>
         <div className="flex items-end justify-between">
           <div>
-            <span className="text-3xl font-extrabold text-[#18181b] tracking-tight block">
-              {stats.awaitingPayment}
-            </span>
-            <span className="text-xs font-bold text-[#166534]">
-              {formattedRevenue}
-            </span>
+            <span className="text-3xl font-extrabold text-[#18181b] tracking-tight block">{stats.awaitingPayment}</span>
+            <span className="text-xs font-bold text-[#166534]">{formattedRevenue}</span>
           </div>
           <div className="neubrutal-badge-blue text-xs px-2 py-1 rounded-md flex items-center">
             <span className="material-symbols-outlined text-[14px] mr-1">trending_up</span> +5%
@@ -97,9 +89,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           <span className="text-sm font-extrabold text-[#18181b]">Completed Visits</span>
         </div>
         <div className="flex items-end justify-between relative z-10">
-          <span className="text-3xl font-black text-[#18181b] tracking-tight">
-            {stats.completedVisits}
-          </span>
+          <span className="text-3xl font-black text-[#18181b] tracking-tight">{stats.completedVisits}</span>
           <span className="neubrutal-badge-green text-xs px-2 py-1 rounded-md">Total</span>
         </div>
       </div>

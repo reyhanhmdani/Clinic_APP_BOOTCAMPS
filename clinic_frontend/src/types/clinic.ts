@@ -117,9 +117,9 @@ export interface QueueItemDTO {
 export interface DashboardStats {
   totalCheckedIn: number;
   currentlyWaiting: number;
-  awaitingPaymentCount: number;
+  awaitingPayment: number;
   todayEstimatedRevenue: number;
-  completedVisitsCount: number;
+  completedVisits: number;
   checkedInGrowth?: number;
   avgWaitTimeMinutes?: number;
   awaitingPaymentGrowth?: number;

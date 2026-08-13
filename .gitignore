@@ -1,42 +1,54 @@
-# Dependencies
-node_modules/
-**/node_modules/
+# ==============================================================================
+# Fullstack Project Root .gitignore (Clinic Monorepo / Multi-Folder)
+# ==============================================================================
 
-# Environment Variables
+# 1. Dependencies (Semua node_modules di root & subfolder)
+**/node_modules/
+node_modules/
+
+# 2. Environment Variables & Secrets (Sangat Penting!)
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.*
+!**/.env.example
 
-# Build Outputs & Cache
-dist/
-build/
-out/
-.cache/
-*.tsbuildinfo
+# 3. Build & Compiled Outputs
+**/dist/
+**/dist-ssr/
+**/build/
+**/generated/
 
-# Logs
+# 4. Logs & Debugging
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Prisma Generated Code
-**/generated/
-**/generated/prisma/
-
-# Operating System & IDE Files
+# 5. IDE & OS Configuration Files
+.vscode/*
+!.vscode/extensions.json
+.idea/
 .DS_Store
 Thumbs.db
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-.idea/
-*.swp
-*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.windsurf/
+.claude/
+.agents/
 
-# Temporary Files
-tmp/
-*.tmp
+# 6. Testing & Coverage
+**/coverage/
+.nyc_output/
+
+# 7. Local Storage / Temporary Files
+*.local
+.localstorage*
+
+.COMMIT_CONVENTION.md

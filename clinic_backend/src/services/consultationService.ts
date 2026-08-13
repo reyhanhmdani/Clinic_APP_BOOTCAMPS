@@ -67,6 +67,12 @@ export const getAllConsultationService = async () => {
 export const createConsultationService = async (input: CreateConsultationInput) => {
   // Validasi ada ga Visitnya
   const visit = await getVisitByIdService(input.visitId);
+  const existingConsultation = await prisma.consultation.findUnique({
+    where: { visitId: input.visitId },
+  });
+  if (existingConsultation) {
+    throw new ApiError(400, `Kunjungan (visitId: ${input.visitId}) sudah memiliki data konsultasi.`);
+  }
   const doctor = await getDoctorByIdService(visit.doctorId);
 
   // Validasi Stok Obat terlebih dahulu (Sebelum membuat transaksi)

@@ -132,7 +132,7 @@ const VISITS_DATA = [
     doctor_id: '4',
     queue_number: 4,
     visit_date: '2025-05-21',
-    status: 'waiting',
+    status: 'completed',
   },
   {
     id: 'VIS-2025-000127',
@@ -140,7 +140,7 @@ const VISITS_DATA = [
     doctor_id: '5',
     queue_number: 5,
     visit_date: '2025-05-21',
-    status: 'waiting',
+    status: 'completed',
   },
   {
     id: 'VIS-2025-000128',
@@ -155,14 +155,43 @@ const VISITS_DATA = [
 const CONSULTATIONS_DATA = [
   {
     id: '1',
-    visit_id: 'VIS-2025-000123',
-    patient_id: '1',
-    doctor_id: '1',
-    complaint: 'Demam, badan pegal, dan sakit kepala sejak 2 hari yang lalu.',
-    diagnosis: 'Flu & Batuk Pilek (Common Cold - J00)',
-    treatment: 'Konsultasi Dokter Spesialis',
-    consultation_fee: 75000,
-    notes: 'Istirahat cukup minimal 8 jam, perbanyak minum air hangat.',
+    visit_id: 'VIS-2025-000126', // Ahmad Rizky (Completed, Unpaid)
+    patient_id: '4',
+    doctor_id: '4',
+    complaint: 'Nyeri pada pergelangan kaki setelah terkilir.',
+    diagnosis: 'Sprain Ankle Grade 1 (S93.4)',
+    treatment: 'Konsultasi Orthopedi & Pembebat',
+    consultation_fee: 200000,
+    notes: 'Istirahat dan kompres es.',
+    prescribed_medicines: [
+      { medicine_id: '5', name: 'Ibuprofen 400mg (Anti Nyeri)', qty: 1, price: 6000, amount: 6000 },
+    ],
+  },
+  {
+    id: '2',
+    visit_id: 'VIS-2025-000127', // Marina Putri (Completed, Paid)
+    patient_id: '5',
+    doctor_id: '5',
+    complaint: 'Alergi gatal pada kulit tangan.',
+    diagnosis: 'Dermatitis Alergika (L23.9)',
+    treatment: 'Konsultasi Spesialis Kulit',
+    consultation_fee: 120000,
+    notes: 'Hindari pemicu alergi.',
+    prescribed_medicines: [
+      { medicine_id: '6', name: 'CTM 4mg (Obat Alergi)', qty: 1, price: 2500, amount: 2500 },
+      { medicine_id: '10', name: 'Salep Acyclovir 5g', qty: 1, price: 15000, amount: 15000 },
+    ],
+  },
+  {
+    id: '3',
+    visit_id: 'VIS-2025-000128', // Eko Prasetyo (Completed, Paid)
+    patient_id: '6',
+    doctor_id: '6',
+    complaint: 'Demam tinggi pada anak 3 hari.',
+    diagnosis: 'Demam Dengue / Viral Infection (A90)',
+    treatment: 'Konsultasi Spesialis Anak',
+    consultation_fee: 130000,
+    notes: 'Minum banyak cairan dan cek lab rutin.',
     prescribed_medicines: [
       { medicine_id: '1', name: 'Paracetamol 500mg', qty: 1, price: 5000, amount: 5000 },
       { medicine_id: '2', name: 'Vitamin C 500mg', qty: 1, price: 3000, amount: 3000 },
@@ -173,10 +202,30 @@ const CONSULTATIONS_DATA = [
 const INVOICES_DATA = [
   {
     id: '1',
-    invoice_no: 'INV-2025-000123',
-    visit_id: 'VIS-2025-000123',
+    invoice_no: 'INV-2025-000126',
+    visit_id: 'VIS-2025-000126',
     status: 'unpaid',
-    total: 83000,
+    consultation_fee: 200000,
+    medicine_fee: 6000,
+    total: 206000,
+  },
+  {
+    id: '2',
+    invoice_no: 'INV-2025-000127',
+    visit_id: 'VIS-2025-000127',
+    status: 'paid',
+    consultation_fee: 120000,
+    medicine_fee: 17500,
+    total: 137500,
+  },
+  {
+    id: '3',
+    invoice_no: 'INV-2025-000128',
+    visit_id: 'VIS-2025-000128',
+    status: 'paid',
+    consultation_fee: 130000,
+    medicine_fee: 8000,
+    total: 138000,
   },
 ];
 

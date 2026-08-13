@@ -7,7 +7,13 @@ import { getPatientByIdService } from './patientService.js';
 import { VisitStatus } from '@prisma/client';
 
 export const getAllVisitService = async () => {
-  const visits = await prisma.visit.findMany();
+  const visits = await prisma.visit.findMany({
+    include: {
+      patient: true,
+      doctor: true,
+      invoice: true,
+    },
+  });
 
   if (visits.length === 0) {
     throw new ApiError(404, 'Data Visit Kosong');

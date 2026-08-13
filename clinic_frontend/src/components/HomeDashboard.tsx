@@ -3,7 +3,6 @@ import type { Visit } from '../types/clinic';
 
 interface HomeDashboardProps {
   visits: Visit[];
-  searchQuery?: string;
   activeFilter?: string;
   onFilterChange?: (filter: string) => void;
   onActionClick?: (visit: Visit, actionType: string) => void;
@@ -12,7 +11,6 @@ interface HomeDashboardProps {
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   visits,
-  searchQuery = '',
   activeFilter = 'ALL',
   onFilterChange,
   onActionClick,
@@ -21,8 +19,16 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     'ALL',
   );
 
+  // fungsi buat searching
+  const [search, setSearch] = useState('');
+
+  // State untuk Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
+
   const currentFilter = onFilterChange ? activeFilter : internalFilter;
   const handleTabClick = (filter: any) => {
+    setCurrentPage(1); // reset ke halaman 1 saat tab berubah
     if (onFilterChange) {
       onFilterChange(filter);
     } else {
@@ -46,8 +52,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     if (currentFilter === 'COMPLETED' && !isCompleted) return false;
 
     // Search Query Filter Logic (Nama Pasien / RM / Dokter)
-    if (searchQuery.trim() !== '') {
-      const q = searchQuery.toLowerCase();
+    if (search.trim() !== '') {
+      const q = search.toLowerCase();
       const patientName = item.patient?.name?.toLowerCase() || '';
       const noRm = item.patient?.noRm?.toLowerCase() || '';
       const doctorName = item.doctor?.name?.toLowerCase() || '';
@@ -57,8 +63,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     return true;
   });
 
-  // Limit 10 item untuk tampilan Dashboard
-  const displayedVisits = filteredVisits.slice(0, 10);
+  // Calculate Pagination Values
+  const totalPages = Math.max(1, Math.ceil(filteredVisits.length / itemsPerPage));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredVisits.length);
+  const displayedVisits = filteredVisits.slice(startIndex, endIndex);
 
   // Tab Badge Counter
   const countWaiting = visits.filter((v) => v.status === 'WAITING' && v.invoice?.status !== 'UNPAID').length;
@@ -67,9 +77,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
     (v) => v.invoice?.status === 'UNPAID' || (v.status === 'COMPLETED' && v.invoice?.status !== 'PAID'),
   ).length;
   const countCompleted = visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length;
-
-  // fungsi buat searching
-  const [search, setSearch] = useState('');
 
   return (
     <div className="neubrutal-card p-6 flex flex-col">
@@ -185,44 +192,52 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
                 return (
                   <tr key={item.id} className="border-b border-[#18181b]/20 hover:bg-[#fef08a]/20 transition-colors">
-                    {/* Patient Name */}
+                    {/* Queue Number & Patient Name */}
                     <td className="py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#fef08a] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] font-black text-xs shrink-0 shadow-[1px_1px_0px_#18181b]">
-                          {item.id}
+                        <div
+                          className="w-8 h-8 rounded-full bg-[#fde047] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] font-black text-xs shrink-0 shadow-[1px_1px_0px_#18181b]"
+                          title={`No. Antrian #${item.queueNumber}`}
+                        >
+                          {item.queueNumber}
                         </div>
-                        <span className="text-[#18181b] font-bold">{item.patient?.name}</span>
+                        <div>
+                          <span className="text-[#18181b] font-extrabold text-sm block">{item.patient?.name}</span>
+                          <span className="text-[11px] font-bold text-[#52525b]">
+                            {item.patient?.gender === 'MALE' ? '👨 Laki-Laki' : '👩 Perempuan'} ({item.patient?.age} thn)
+                          </span>
+                        </div>
                       </div>
                     </td>
 
                     {/* Arrival & Doctor */}
                     <td className="py-4 text-[#18181b]">
-                      <div className="text-sm font-bold">
+                      <div className="text-xs font-black text-[#18181b]">
                         {formattedTime} - {item.doctor?.name}
                       </div>
-                      <div className="text-xs font-semibold text-[#52525b]">{item.patient?.noRm}</div>
+                      <div className="text-[11px] font-bold text-[#52525b] mt-0.5">{item.patient?.noRm}</div>
                     </td>
 
                     {/* Status Badge */}
                     <td className="py-4">
                       {isUnpaid ? (
-                        <span className="bg-[#f472b6] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
+                        <span className="bg-[#f472b6] text-[#18181b] border-2 border-[#18181b] font-black text-[11px] px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
                           Belum Bayar
                         </span>
                       ) : isWaiting ? (
-                        <span className="bg-[#fde047] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
+                        <span className="bg-[#fde047] text-[#18181b] border-2 border-[#18181b] font-black text-[11px] px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
                           Waiting
                         </span>
                       ) : item.status === 'IN_KONSULTASI' ? (
-                        <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
+                        <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-[11px] px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
                           In Session
                         </span>
                       ) : isCancelled ? (
-                        <span className="bg-[#cbd5e1] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
+                        <span className="bg-[#cbd5e1] text-[#52525b] border-2 border-[#18181b] font-extrabold text-[11px] px-2.5 py-1 rounded-md">
                           Cancelled
                         </span>
                       ) : (
-                        <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
+                        <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-[11px] px-2.5 py-1 rounded-md shadow-[1px_1px_0px_#18181b]">
                           Completed
                         </span>
                       )}
@@ -247,10 +262,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       ) : item.status === 'IN_KONSULTASI' ? (
                         <button
                           onClick={() => onActionClick && onActionClick(item, 'CONSULTATION')}
-                          className="bg-[#38bdf8] text-[#18181b] font-black text-xs px-3.5 py-1.5 rounded-lg border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] cursor-pointer"
+                          className="bg-[#38bdf8] text-[#18181b] font-black text-xs px-3.5 py-1.5 rounded-lg border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] hover:bg-[#0284c7] hover:text-white transition-all cursor-pointer"
                         >
                           Diperiksa Dokter
                         </button>
+                      ) : isCancelled ? (
+                        <span className="bg-[#cbd5e1] text-[#52525b] border-2 border-[#18181b] font-extrabold text-xs px-3 py-1.5 rounded-lg inline-block">
+                          Dibatalkan
+                        </span>
                       ) : (
                         <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3 py-1.5 rounded-lg inline-block shadow-[1px_1px_0px_#18181b]">
                           Lunas & Selesai
@@ -264,6 +283,54 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </table>
         )}
       </div>
+
+      {/* Pagination Controls Footer */}
+      {filteredVisits.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 mt-4 border-t-2 border-[#18181b]/10 text-xs font-bold text-[#18181b]">
+          <div>
+            Menampilkan <span className="font-black">{filteredVisits.length === 0 ? 0 : startIndex + 1}</span> -{' '}
+            <span className="font-black">{endIndex}</span> dari{' '}
+            <span className="font-black">{filteredVisits.length}</span> antrian
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* Prev Button */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={validCurrentPage === 1}
+              className="px-2.5 py-1.5 rounded-lg border-2 border-[#18181b] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#fde047] transition-all cursor-pointer shadow-[1px_1px_0px_#18181b] flex items-center gap-1 font-black"
+            >
+              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              <span>Prev</span>
+            </button>
+
+            {/* Page Number Badges */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`w-7 h-7 rounded-lg border-2 border-[#18181b] text-xs font-black transition-all cursor-pointer ${
+                  validCurrentPage === pageNum
+                    ? 'bg-[#a3e635] text-[#18181b] shadow-[2px_2px_0px_#18181b]'
+                    : 'bg-white text-[#18181b] hover:bg-zinc-100 shadow-[1px_1px_0px_#18181b]'
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={validCurrentPage === totalPages}
+              className="px-2.5 py-1.5 rounded-lg border-2 border-[#18181b] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#fde047] transition-all cursor-pointer shadow-[1px_1px_0px_#18181b] flex items-center gap-1 font-black"
+            >
+              <span>Next</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

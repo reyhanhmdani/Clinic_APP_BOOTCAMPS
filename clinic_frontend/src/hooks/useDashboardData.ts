@@ -16,33 +16,34 @@ export const useDashboardData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // fetch api doctorny
+  // Fungsi reusable untuk memuat seluruh data dashboard
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setApiError(null);
+
+      // fetch API secara paralel sekaligus
+      const [doctorsRes, patientsRes, visitsRest, invoicesRes] = await Promise.all([
+        getDoctorsService(),
+        getPatientService(),
+        getVisitService(),
+        getInvoiceService(),
+      ]);
+
+      setDoctors(doctorsRes);
+      setPatients(patientsRes);
+      setVisits(visitsRest);
+      setInvoices(invoicesRes);
+    } catch (error) {
+      console.log(`Error di fetch Dashboard Data`, error);
+      setApiError('Gagal memuat data dashboard');
+    } finally {
+      setIsLoading(false); // matikan loading setelah selesai
+    }
+  };
+
   useEffect(() => {
-    const fetchApiDoctor = async () => {
-      try {
-        setIsLoading(true);
-        setApiError(null);
-
-        // fetch API secara paralel sekaligus
-        const [doctorsRes, patientsRes, visitsRest, invoicesRes] = await Promise.all([
-          getDoctorsService(),
-          getPatientService(),
-          getVisitService(),
-          getInvoiceService(),
-        ]);
-
-        setDoctors(doctorsRes);
-        setPatients(patientsRes);
-        setVisits(visitsRest);
-        setInvoices(invoicesRes);
-      } catch (error) {
-        console.log(`Error di fetch Doctor`, error);
-        setApiError('Gagal memuat data dokter');
-      } finally {
-        setIsLoading(false); // matikan loading setelah selesai
-      }
-    };
-    fetchApiDoctor();
+    fetchDashboardData();
   }, []);
 
   const stats: DashboardStats = useMemo(() => {
@@ -61,7 +62,9 @@ export const useDashboardData = () => {
     return {
       totalCheckedIn: visits.length,
       currentlyWaiting: visits.filter((v) => v.status === 'WAITING' && v.invoice?.status !== 'UNPAID').length,
-      awaitingPayment: visits.filter((v) => v.invoice?.status === 'UNPAID' || (v.status === 'COMPLETED' && v.invoice?.status !== 'PAID')).length,
+      awaitingPayment: visits.filter(
+        (v) => v.invoice?.status === 'UNPAID' || (v.status === 'COMPLETED' && v.invoice?.status !== 'PAID'),
+      ).length,
       completedVisits: visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length,
       // total pemasukan kalau udah bayar yaa ...
       todayEstimatedRevenue: invoices
@@ -72,5 +75,5 @@ export const useDashboardData = () => {
       awaitingPaymentGrowth: -5,
     };
   }, [visits, invoices]);
-  return { doctors, patients, visits, invoices, stats, isLoading, apiError };
+  return { doctors, patients, visits, invoices, stats, isLoading, apiError, refreshData: fetchDashboardData };
 };

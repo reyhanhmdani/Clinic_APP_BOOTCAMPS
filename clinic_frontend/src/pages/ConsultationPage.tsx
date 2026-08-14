@@ -96,28 +96,31 @@ export const ConsultationPage: React.FC = () => {
   return (
     <div className="organic-bg min-h-screen w-full p-4 sm:p-6 md:p-8 text-[#18181b] font-sans antialiased">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* 1. Header & Status Bar */}
+        {/* 1. Header & Status Bar ala PZN */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <Link
               to="/dashboard"
-              className="w-10 h-10 rounded-xl bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] active:translate-y-0.5 transition-all"
+              className="w-10 h-10 bg-white border-2 border-[#18181b] shadow-[3px_3px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] active:translate-y-0.5 transition-all"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </Link>
             <div>
-              <h1 className="text-2xl font-black text-[#18181b] tracking-tight">
-                Form Pemeriksaan & Konsultasi Dokter
+              <div className="inline-block bg-[#a3e635] text-[#18181b] font-black text-[9px] px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase tracking-wider mb-0.5">
+                EXAMINATION SUITE
+              </div>
+              <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
+                FORM PEMERIKSAAN DOKTER
               </h1>
-              <p className="text-xs font-semibold text-[#52525b]">
+              <p className="text-xs font-bold text-[#52525b]">
                 Input Anamnesis, Diagnosis ICD-10, dan Resep Obat Pasien
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3 py-1.5 rounded-lg shadow-[2px_2px_0px_#18181b]">
-              Status: In Session (Sedang Diperiksa)
+            <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3 py-1.5 shadow-[3px_3px_0px_#18181b] uppercase tracking-wider">
+              Status: Sedang Diperiksa
             </span>
           </div>
         </div>
@@ -130,9 +133,9 @@ export const ConsultationPage: React.FC = () => {
           {/* Left Column: Keluhan Utama & Catatan Dokter (7 Cols) */}
           <div className="lg:col-span-7 space-y-6 flex flex-col">
             {/* Keluhan Utama Pasien */}
-            <div className="neubrutal-card p-6 bg-white border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex-1 flex flex-col">
-              <h3 className="text-sm font-black text-[#18181b] uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-blue-600">notes</span>
+            <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] flex-1 flex flex-col space-y-3">
+              <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-blue-600">notes</span>
                 <span>Keluhan Utama Pasien (Anamnesis) <span className="text-rose-500">*</span></span>
               </h3>
 
@@ -141,14 +144,14 @@ export const ConsultationPage: React.FC = () => {
                 value={complaint}
                 onChange={(e) => setComplaint(e.target.value)}
                 placeholder="Tuliskan keluhan pasien, riwayat penyakit, gejala, dan hasil pemeriksaan..."
-                className="w-full flex-1 p-3.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-medium text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b] min-h-[140px]"
+                className="w-full flex-1 p-3.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] min-h-[140px] transition-all"
               />
             </div>
 
             {/* Catatan / Saran Medis Dokter */}
-            <div className="neubrutal-card p-6 bg-white border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b]">
-              <h3 className="text-sm font-black text-[#18181b] uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-purple-600">edit_note</span>
+            <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] space-y-3">
+              <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-purple-600">edit_note</span>
                 <span>Catatan & Instruksi Khusus (Opsional)</span>
               </h3>
 
@@ -157,7 +160,7 @@ export const ConsultationPage: React.FC = () => {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Contoh: Istirahat cukup, hindari makanan pedas, kontrol ulang 3 hari..."
-                className="w-full p-3 rounded-xl border-2 border-[#18181b] bg-white text-xs font-medium text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+                className="w-full p-3 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] transition-all"
               />
             </div>
           </div>
@@ -165,9 +168,9 @@ export const ConsultationPage: React.FC = () => {
           {/* Right Column: Diagnosis ICD-10 & Resep Obat (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             {/* Diagnosis (ICD-10) */}
-            <div className="neubrutal-card p-6 bg-white border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b]">
-              <h3 className="text-sm font-black text-[#18181b] uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-emerald-600">medical_services</span>
+            <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] space-y-3">
+              <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-emerald-600">medical_services</span>
                 <span>Diagnosis Medis (ICD-10) <span className="text-rose-500">*</span></span>
               </h3>
               <input
@@ -175,7 +178,7 @@ export const ConsultationPage: React.FC = () => {
                 value={diagnosis}
                 onChange={(e) => setDiagnosis(e.target.value)}
                 placeholder="Contoh: J00 - Acute Common Cold"
-                className="w-full p-3 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+                className="w-full p-3 border-2 border-[#18181b] bg-white text-xs font-black text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] transition-all"
               />
             </div>
 
@@ -194,7 +197,7 @@ export const ConsultationPage: React.FC = () => {
             type="button"
             disabled={isSubmitting}
             onClick={handleSubmitConsultation}
-            className="neubrutal-btn-primary px-8 py-3.5 rounded-xl text-xs font-black text-[#18181b] cursor-pointer shadow-[4px_4px_0px_#18181b] hover:scale-105 active:translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50"
+            className="neubrutal-btn-primary px-8 py-3.5 text-xs font-black text-[#18181b] border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b] hover:scale-105 active:translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider cursor-pointer"
           >
             <span>{isSubmitting ? 'Menyimpan Konsultasi...' : 'Selesai Konsultasi & Buat Tagihan Kasir'}</span>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

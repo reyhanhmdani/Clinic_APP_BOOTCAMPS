@@ -26,9 +26,9 @@ export const DashboardPage: React.FC = () => {
         alert(`Gagal memanggil pasien: ${err?.response?.data?.message || err.message}`);
       }
     } else if (actionType === 'CONSULTATION') {
-      navigate(`/consultations?visitId=${visit.id}`);
+      navigate(`/dashboard/consultations?visitId=${visit.id}`);
     } else if (actionType === 'PROCESS_PAYMENT') {
-      navigate(`/invoices?visitId=${visit.id}`);
+      navigate(`/dashboard/invoices?visitId=${visit.id}`);
     }
   };
 

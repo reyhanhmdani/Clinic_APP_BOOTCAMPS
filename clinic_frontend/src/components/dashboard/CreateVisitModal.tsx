@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { Patient, Doctor, Gender } from '../types/clinic';
-import { createPatientService } from '../services/patientService';
-import { createVisitService } from '../services/visitService';
+import type { Patient, Doctor, Gender } from '../../types/clinic';
+import { createPatientService } from '../../services/patientService';
+import { createVisitService } from '../../services/visitService';
 
 interface CreateVisitModalProps {
   isOpen: boolean;

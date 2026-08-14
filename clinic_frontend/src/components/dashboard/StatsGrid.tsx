@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DashboardStats } from '../types/clinic';
+import type { DashboardStats } from '../../types/clinic';
 
 interface StatsGridProps {
   stats: DashboardStats;

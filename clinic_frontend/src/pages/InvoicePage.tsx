@@ -29,7 +29,7 @@ export const InvoicePage: React.FC = () => {
       await refreshData();
 
       alert('Pemaybayaran berhasil dilunasi (PAID)');
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       alert(`Gagal memproses pembayaran: ${error?.response?.data?.message || error.message}`);
     } finally {
@@ -55,7 +55,7 @@ export const InvoicePage: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Link
-              to="/"
+              to="/dashboard"
               className="w-10 h-10 rounded-xl bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] active:translate-y-0.5 transition-all"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>

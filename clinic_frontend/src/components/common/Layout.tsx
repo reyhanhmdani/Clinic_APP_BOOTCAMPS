@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 import { TopAppBar } from './TopAppBar';
 import { ApiErrorCard } from './ApiErrorCard';
 import { CreateVisitModal } from '../dashboard/CreateVisitModal';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useDashboardData } from '../../hooks/useClinicData';
 import type { DashboardContextType } from '../../types/clinic';
 
 export function Layout() {

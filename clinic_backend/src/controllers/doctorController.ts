@@ -6,7 +6,6 @@ import {
   getDoctorByIdService,
   updateDoctorService,
 } from '../services/doctorService.js';
-import { number } from 'zod';
 
 export const getAllDoctorsController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -28,7 +27,9 @@ export const createDoctorController = async (req: Request, res: Response, next: 
       message: `Berhasil Membuat Data baru dengan no ${createDoctor.id}`,
       data: createDoctor,
     });
-  } catch (error) {}
+  } catch (error) {
+    next(error)
+  }
 };
 
 export const getDoctorByIdController = async (req: Request, res: Response, next: NextFunction) => {

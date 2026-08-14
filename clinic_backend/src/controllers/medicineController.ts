@@ -6,7 +6,6 @@ import {
   getMedicineByIdService,
   updateMedicineService,
 } from '../services/medicineService.js';
-import { number } from 'zod';
 
 export const getAllMedicineController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -62,7 +61,7 @@ export const updateMedicineController = async (req: Request, res: Response, next
   }
 };
 
-export const deletemedicineController = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteMedicineController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { idMedicine } = req.params;
     const deleteMedicine = await deleteMedicineService(Number(idMedicine));

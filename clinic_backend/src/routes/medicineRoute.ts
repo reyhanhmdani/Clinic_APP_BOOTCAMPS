@@ -1,6 +1,6 @@
 import {
   createMedicineController,
-  deletemedicineController,
+  deleteMedicineController,
   getAllMedicineController,
   getMedicineByIdController,
   updateMedicineController,
@@ -18,6 +18,6 @@ router.get('/', getAllMedicineController);
 router.post('/', validateZod(createMedicineSchema), createMedicineController);
 router.get('/:idMedicine', getMedicineByIdController);
 router.patch('/:idMedicine', validateZod(updateMedicineSchema), updateMedicineController);
-router.delete('/:idMedicine', deletemedicineController);
+router.delete('/:idMedicine', deleteMedicineController);
 
 export default router;

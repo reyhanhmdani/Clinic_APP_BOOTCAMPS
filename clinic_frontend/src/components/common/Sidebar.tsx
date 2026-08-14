@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
-import { logoutService } from '../../services/authService';
+import { logoutService, getCurrentUser } from '../../services/authService';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -10,9 +10,15 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute = '/dashboard' }) => {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
+  const userInitials = currentUser?.username
+    ? currentUser.username.slice(0, 3).toUpperCase()
+    : 'REY';
+  const userName = currentUser?.username ? currentUser.username.toUpperCase() : 'REY ADMIN';
+  const userRole = currentUser?.role || 'ADMIN KLINIK';
 
   const handleLogout = () => {
-    if (window.confirm('Apakah anda yakin ingin keluar dari sistem?')) {
+    if (window.confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
       logoutService();
       onClose();
       navigate('/login');
@@ -24,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
     { label: 'Antrean Pasien', icon: 'groups', path: '/dashboard/queue' },
     { label: 'Konsultasi Dokter', icon: 'stethoscope', path: '/dashboard/consultations' },
     { label: 'Tagihan Kasir', icon: 'payments', path: '/dashboard/invoices' },
-    { label: 'Farmasi & Obat', icon: 'medication', path: '/dashboard/pharmacy' },
+    { label: 'Farmasi & Obat', icon: 'medication', path: '/dashboard/medicines' },
     { label: 'Data Dokter', icon: 'badge', path: '/dashboard/doctors' },
   ];
 
@@ -33,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
       {/* Mobile Drawer Overlay Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 md:hidden transition-opacity"
           onClick={onClose}
         />
       )}
@@ -46,19 +52,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
       >
         <div>
           {/* Mobile Drawer Header */}
-          <div className="flex items-center justify-between pb-4 border-b-2 border-[#18181b]">
+          <div className="flex items-center justify-between pb-4 border-b-3 border-[#18181b]">
             <div className="flex items-center gap-3">
-              <span
-                className="material-symbols-outlined text-[#50604f] text-[30px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                spa
-              </span>
-              <span className="font-black text-lg text-[#18181b] tracking-tight">ReyClinic</span>
+              <div className="w-10 h-10 rounded-xl bg-[#a3e635] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] shadow-[2px_2px_0px_#18181b]">
+                <span
+                  className="material-symbols-outlined text-[24px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  spa
+                </span>
+              </div>
+              <div>
+                <span className="font-black text-lg text-[#18181b] tracking-tight uppercase block">ReyClinic</span>
+                <span className="text-[10px] font-black text-[#71717a] uppercase tracking-wider">Sistem Rawat Jalan</span>
+              </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] text-[#18181b] hover:bg-[#fde047] transition-colors cursor-pointer"
+              className="p-1.5 bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] text-[#18181b] hover:bg-[#fde047] active:translate-y-0.5 transition-all cursor-pointer font-black"
               aria-label="Close Menu"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -66,13 +78,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
           </div>
 
           {/* User Profile Card */}
-          <div className="flex items-center gap-3 my-5 p-3 rounded-xl bg-[#fef08a] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b]">
-            <div className="w-10 h-10 rounded-full bg-[#a3e635] text-[#18181b] font-black text-xs flex items-center justify-center border-2 border-[#18181b] shrink-0 shadow-[1px_1px_0px_#18181b]">
-              REY
+          <div className="flex items-center gap-3 my-5 p-3 bg-[#fef08a] border-3 border-[#18181b] shadow-[3px_3px_0px_#18181b]">
+            <div className="w-10 h-10 bg-[#a3e635] text-[#18181b] font-black text-xs flex items-center justify-center border-2 border-[#18181b] shrink-0 shadow-[1px_1px_0px_#18181b]">
+              {userInitials}
             </div>
-            <div>
-              <p className="text-xs font-black text-[#18181b]">Rey Receptionist</p>
-              <p className="text-[11px] font-bold text-[#52525b]">Front Desk Admin</p>
+            <div className="overflow-hidden">
+              <p className="text-xs font-black text-[#18181b] truncate uppercase">{userName}</p>
+              <p className="text-[10px] font-bold text-[#52525b] uppercase tracking-wider">{userRole}</p>
             </div>
           </div>
 
@@ -89,14 +101,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
                   key={item.label}
                   href={item.path}
                   onClick={onClose}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black border-2 border-[#18181b] transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 text-xs font-black border-2 border-[#18181b] uppercase tracking-wider transition-all ${
                     isActive
-                      ? 'bg-[#a3e635] text-[#18181b] shadow-[3px_3px_0px_#18181b]'
-                      : 'bg-white text-[#18181b] hover:bg-[#fde047]/30 hover:shadow-[2px_2px_0px_#18181b]'
+                      ? 'bg-[#18181b] text-white shadow-[3px_3px_0px_#a3e635]'
+                      : 'bg-white text-[#18181b] hover:bg-[#fde047] hover:shadow-[2px_2px_0px_#18181b]'
                   }`}
                 >
                   <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                  {item.label}
+                  <span>{item.label}</span>
                 </a>
               );
             })}
@@ -104,18 +116,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
         </div>
 
         {/* Mobile Drawer Bottom Actions */}
-        <div className="pt-4 border-t-2 border-[#18181b] space-y-2">
+        <div className="pt-4 border-t-3 border-[#18181b] space-y-2">
           <a
             href="/dashboard/settings"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-black text-[#18181b] bg-white border-2 border-[#18181b] hover:bg-zinc-100 transition-colors shadow-[2px_2px_0px_#18181b]"
+            className="flex items-center gap-3 px-4 py-2.5 text-xs font-black text-[#18181b] bg-white border-2 border-[#18181b] hover:bg-zinc-100 uppercase tracking-wider transition-colors shadow-[2px_2px_0px_#18181b]"
           >
             <span className="material-symbols-outlined text-[19px]">settings</span>
-            Pengaturan
+            <span>Pengaturan</span>
           </a>
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-black text-white bg-rose-500 border-2 border-[#18181b] hover:bg-rose-600 transition-colors shadow-[2px_2px_0px_#18181b] cursor-pointer"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black text-white bg-rose-600 border-2 border-[#18181b] hover:bg-rose-700 uppercase tracking-wider transition-colors shadow-[2px_2px_0px_#18181b] cursor-pointer"
           >
             <span className="material-symbols-outlined text-[19px]">logout</span>
             <span>Keluar (Logout)</span>
@@ -124,14 +136,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
       </aside>
 
       {/* Fixed Compact Pill Dock Sidebar for Desktop (Vertically Centered on Screen) */}
-      <aside className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 w-14 py-3.5 rounded-[32px] bg-white border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex-col items-center justify-between z-40 gap-2.5 max-h-[85vh] overflow-y-auto scrollbar-none">
+      <aside className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 w-14 py-3.5 rounded-[32px] bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex-col items-center justify-between z-40 gap-2.5 max-h-[85vh] overflow-y-auto scrollbar-none">
         {/* Top Black Circle 4-Dot / Dashboard Button */}
         <a
           href="/dashboard"
           className={`w-9 h-9 rounded-full flex items-center justify-center border-2 border-[#18181b] transition-transform hover:scale-105 shrink-0 ${
             activeRoute === '/dashboard' || activeRoute === '/'
               ? 'bg-[#a3e635] text-[#18181b] font-black shadow-[2px_2px_0px_#18181b]'
-              : 'bg-[#18181b] text-white shadow-xs'
+              : 'bg-[#18181b] text-white shadow-xs hover:bg-[#a3e635] hover:text-[#18181b]'
           }`}
           title="Dashboard"
         >
@@ -165,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
           <a
             href="/dashboard/settings"
             title="Settings"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#52525b] hover:bg-[#fde047] hover:text-[#18181b] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#52525b] hover:bg-[#fde047] hover:text-[#18181b] hover:border-2 hover:border-[#18181b] transition-colors"
           >
             <span className="material-symbols-outlined text-[17px]">settings</span>
           </a>
@@ -174,17 +186,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
             type="button"
             onClick={handleLogout}
             title="Logout"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#52525b] hover:bg-rose-100 hover:text-rose-600 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#52525b] hover:bg-rose-100 hover:text-rose-600 hover:border-2 hover:border-rose-600 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[17px]">logout</span>
           </button>
 
-          {/* Receptionist Profile Avatar Badge */}
+          {/* User Profile Avatar Badge */}
           <div
             className="w-8 h-8 rounded-full bg-[#a3e635] text-[#18181b] font-black text-[10px] flex items-center justify-center border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] cursor-pointer shrink-0 mt-0.5"
-            title="Rey Receptionist"
+            title={userName}
           >
-            Rey
+            {userInitials}
           </div>
         </div>
       </aside>

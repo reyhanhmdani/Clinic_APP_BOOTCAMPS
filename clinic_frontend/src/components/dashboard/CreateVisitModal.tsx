@@ -30,6 +30,7 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
     phone: '',
     address: '',
   });
+
   // 2. BARU Handler Function
   const handleCreatePatient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,25 +76,29 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="neubrutal-card bg-white w-full max-w-xl p-6 border-2 border-[#18181b] shadow-[6px_6px_0px_#18181b] max-h-[90vh] overflow-y-auto">
-        {/* Header Modal */}
-        <div className="flex justify-between items-center pb-4 border-b-2 border-[#18181b] mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#a3e635] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] font-black shadow-[2px_2px_0px_#18181b]">
+      <div className="bg-white w-full max-w-xl p-6 border-3 border-[#18181b] shadow-[8px_8px_0px_#18181b] max-h-[90vh] overflow-y-auto space-y-5">
+        {/* Header Modal ala PZN */}
+        <div className="flex justify-between items-start pb-4 border-b-2 border-[#18181b]">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 bg-[#a3e635] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] shadow-[2px_2px_0px_#18181b] shrink-0">
               <span className="material-symbols-outlined text-[22px]">person_add</span>
             </div>
             <div>
-              <h2 className="text-lg md:text-xl font-black text-[#18181b] tracking-tight">
-                Pendaftaran Antrian Pasien Baru
+              <div className="inline-block bg-[#fde047] text-[#18181b] font-black text-[9px] px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase tracking-wider mb-0.5">
+                PENDAFTARAN RAWAT JALAN
+              </div>
+              <h2 className="text-lg md:text-xl font-black text-[#18181b] tracking-tight uppercase">
+                ANTREAN PASIEN BARU
               </h2>
               <p className="text-xs text-[#52525b] font-bold">
-                Masukkan pasien ke dalam antrian periksa klinik hari ini
+                Masukkan pasien ke dalam alur pemeriksaan klinik hari ini
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] transition-all cursor-pointer"
+            className="p-1.5 bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-rose-500 hover:text-white transition-all cursor-pointer font-black"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
@@ -101,11 +106,12 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
 
         {/* Error Alert Message */}
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-100 border-2 border-[#18181b] text-xs font-black text-rose-700 shadow-[2px_2px_0px_#18181b] flex items-center justify-between">
+          <div className="p-3 bg-[#fecdd3] border-2 border-[#18181b] text-xs font-black text-[#9f1239] shadow-[2px_2px_0px_#18181b] flex items-center justify-between">
             <span>⚠️ {errorMessage}</span>
             <button
+              type="button"
               onClick={() => setErrorMessage(null)}
-              className="text-xs text-rose-700 underline font-bold cursor-pointer"
+              className="text-xs text-[#9f1239] underline font-black cursor-pointer uppercase"
             >
               Tutup
             </button>
@@ -113,14 +119,14 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
         )}
 
         {/* Tab Pilihan: Pasien Terdaftar vs Pasien Baru */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setPatientMode('EXISTING')}
-            className={`flex-1 py-2.5 px-3 rounded-xl border-2 border-[#18181b] text-xs font-black transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 px-3 border-2 border-[#18181b] text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               patientMode === 'EXISTING'
-                ? 'bg-[#a3e635] text-[#18181b] shadow-[2px_2px_0px_#18181b]'
-                : 'bg-white text-[#18181b] hover:bg-zinc-100'
+                ? 'bg-[#a3e635] text-[#18181b] shadow-[3px_3px_0px_#18181b]'
+                : 'bg-white text-[#18181b] hover:bg-[#fde047]/40'
             }`}
           >
             🔍 Pasien Terdaftar (Lama)
@@ -128,10 +134,10 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
           <button
             type="button"
             onClick={() => setPatientMode('NEW')}
-            className={`flex-1 py-2.5 px-3 rounded-xl border-2 border-[#18181b] text-xs font-black transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 px-3 border-2 border-[#18181b] text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               patientMode === 'NEW'
-                ? 'bg-[#fde047] text-[#18181b] shadow-[2px_2px_0px_#18181b]'
-                : 'bg-white text-[#18181b] hover:bg-zinc-100'
+                ? 'bg-[#fde047] text-[#18181b] shadow-[3px_3px_0px_#18181b]'
+                : 'bg-white text-[#18181b] hover:bg-[#fde047]/40'
             }`}
           >
             ✨ Registrasi Pasien Baru
@@ -142,14 +148,14 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
           {patientMode === 'EXISTING' ? (
             /* Mode 1: Pilih Pasien Terdaftar & Dokter Tujuan */
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-black text-[#18181b] mb-1.5 uppercase tracking-wider">
-                  Pilih Pasien Terdaftar *
+              <div className="space-y-1">
+                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                  Pilih Pasien Terdaftar <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={selectedPatientId}
                   onChange={(e) => setSelectedPatientId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+                  className="w-full px-3.5 py-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
                   required
                 >
                   <option value="">-- Pilih Pasien --</option>
@@ -161,15 +167,15 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
                 </select>
               </div>
 
-              {/* Pilih Dokter Tujuan (HANYA MUNCUL DI MODE PASIEN TERDAFTAR) */}
-              <div>
-                <label className="block text-xs font-black text-[#18181b] mb-1.5 uppercase tracking-wider">
-                  Pilih Dokter Tujuan *
+              {/* Pilih Dokter Tujuan */}
+              <div className="space-y-1">
+                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                  Pilih Dokter Tujuan <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={selectedDoctorId}
                   onChange={(e) => setSelectedDoctorId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+                  className="w-full px-3.5 py-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
                   required
                 >
                   <option value="">-- Pilih Dokter Spesialis --</option>
@@ -182,51 +188,57 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
               </div>
             </div>
           ) : (
-            /* Mode 2: Form Input Pasien Baru (Sesuai Field Schema Prisma Patient) */
-            <div className="space-y-3.5 p-4 rounded-xl border-2 border-[#18181b] bg-[#fefcf8] shadow-[2px_2px_0px_#18181b]">
+            /* Mode 2: Form Input Pasien Baru */
+            <div className="space-y-3.5 p-4 border-2 border-[#18181b] bg-[#fefcf8] shadow-[3px_3px_0px_#18181b]">
               {/* Auto-Generated No RM Badge Info */}
-              <div className="p-2.5 rounded-lg bg-[#a3e635]/20 border-2 border-[#18181b] flex items-center justify-between text-xs font-bold text-[#18181b]">
+              <div className="p-2.5 bg-[#a3e635]/20 border-2 border-[#18181b] flex items-center justify-between text-xs font-bold text-[#18181b]">
                 <span className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px]">pin</span>
                   <span>No. Rekam Medis (No RM)</span>
                 </span>
-                <span className="bg-[#a3e635] px-2 py-0.5 rounded border border-[#18181b] font-black text-[10px]">
+                <span className="bg-[#a3e635] px-2 py-0.5 border border-[#18181b] font-black text-[10px] uppercase">
                   Auto-Generated
                 </span>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-[#18181b] mb-1">Nama Lengkap Pasien *</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                  Nama Lengkap Pasien <span className="text-rose-500">*</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: Budi Santoso"
                   value={newPatient.name}
                   onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-[#18181b] bg-white text-xs font-semibold focus:outline-none shadow-[1px_1px_0px_#18181b]"
+                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
                   required={patientMode === 'NEW'}
                 />
               </div>
 
               {/* Grid 2 Kolom: Umur Pasien & Jenis Kelamin */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-black text-[#18181b] mb-1">Umur Pasien (Tahun) *</label>
+                <div className="space-y-1">
+                  <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                    Umur (Tahun) <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="number"
                     placeholder="Contoh: 30"
                     value={newPatient.age}
                     onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border-2 border-[#18181b] bg-white text-xs font-semibold focus:outline-none shadow-[1px_1px_0px_#18181b]"
+                    className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
                     required={patientMode === 'NEW'}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-black text-[#18181b] mb-1">Jenis Kelamin *</label>
+                <div className="space-y-1">
+                  <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                    Jenis Kelamin <span className="text-rose-500">*</span>
+                  </label>
                   <select
                     value={newPatient.gender}
                     onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value as Gender })}
-                    className="w-full px-3 py-2 rounded-lg border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[1px_1px_0px_#18181b]"
+                    className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[1px_1px_0px_#18181b] cursor-pointer"
                   >
                     <option value="MALE">Laki-Laki (MALE)</option>
                     <option value="FEMALE">Perempuan (FEMALE)</option>
@@ -234,25 +246,29 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-[#18181b] mb-1">No. Telepon / WA (phone)</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                  No. Telepon / WA (Phone)
+                </label>
                 <input
                   type="text"
                   placeholder="08123456789"
                   value={newPatient.phone}
                   onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-[#18181b] bg-white text-xs font-semibold focus:outline-none shadow-[1px_1px_0px_#18181b]"
+                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-black text-[#18181b] mb-1">Alamat Lengkap (address)</label>
+              <div className="space-y-1">
+                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
+                  Alamat Lengkap (Address)
+                </label>
                 <textarea
                   rows={2}
                   placeholder="Jl. Merdeka No. 45, Jakarta..."
                   value={newPatient.address}
                   onChange={(e) => setNewPatient({ ...newPatient, address: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-[#18181b] bg-white text-xs font-medium focus:outline-none shadow-[1px_1px_0px_#18181b]"
+                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-medium text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
                 />
               </div>
             </div>
@@ -263,13 +279,14 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onCl
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-extrabold text-[#18181b] hover:bg-zinc-100 transition-all cursor-pointer shadow-[2px_2px_0px_#18181b]"
+              className="px-4 py-2.5 border-2 border-[#18181b] bg-white text-xs font-black uppercase text-[#18181b] hover:bg-zinc-100 transition-all cursor-pointer shadow-[2px_2px_0px_#18181b]"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="neubrutal-btn-primary px-5 py-2.5 rounded-xl text-xs font-black text-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b]"
+              disabled={isSubmitting}
+              className="neubrutal-btn-primary px-5 py-2.5 text-xs font-black text-[#18181b] border-2 border-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] uppercase tracking-wider disabled:opacity-50"
             >
               {patientMode === 'EXISTING' ? '+ Simpan & Masukkan Antrian' : '+ Simpan Data Pasien Baru'}
             </button>

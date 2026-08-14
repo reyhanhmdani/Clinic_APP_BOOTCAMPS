@@ -103,10 +103,11 @@ export const LoginPage: React.FC = () => {
             {/* Tombol Submit Login */}
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl neubrutal-btn-primary text-xs font-black text-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] hover:scale-101 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2"
+              disabled={isLoading}
+              className="w-full py-3.5 rounded-xl neubrutal-btn-primary text-xs font-black text-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] hover:scale-101 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">login</span>
-              <span>Masuk ke Sistem Klinik</span>
+              <span>{isLoading ? 'Memproses Masuk...' : 'Masuk ke Sistem Klinik'}</span>
             </button>
           </form>
         </div>

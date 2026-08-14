@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router';
-import { StatsGrid } from '../components/StatsGrid';
-import { DoctorAvailability } from '../components/DoctorAvailability';
-import { HomeDashboard } from '../components/HomeDashboard';
-import { WorkflowGuide } from '../components/WorkflowGuide';
-import type { DashboardContextType } from '../types/clinic';
-import { updateVisitService } from '../services/visitService';
 import type { Visit } from '../types/clinic';
+import type { DashboardContextType } from '../types/clinic';
+
+import { updateVisitService } from '../services/visitService';
+
+// sub import
+import { StatsGrid } from '../components/dashboard/StatsGrid';
+import { WorkflowGuide } from '../components/common/WorkflowGuide';
+import { DoctorAvailability } from '../components/dashboard/DoctorAvailability';
+import { HomeDashboard } from '../components/dashboard/HomeDashboard';
 
 export const DashboardPage: React.FC = () => {
   const [activeWorkflowTab, setActiveWorkflowTab] = useState<string>('ALL');
@@ -24,6 +27,8 @@ export const DashboardPage: React.FC = () => {
       }
     } else if (actionType === 'CONSULTATION') {
       navigate(`/consultations?visitId=${visit.id}`);
+    } else if (actionType === 'PROCESS_PAYMENT') {
+      navigate(`/invoices?visitId=${visit.id}`);
     }
   };
 

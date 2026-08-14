@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Doctor } from '../types/clinic';
+import type { Doctor } from '../../types/clinic';
 
 interface DoctorAvailabilityProps {
   doctors: Doctor[];
@@ -14,16 +14,12 @@ export const DoctorAvailability: React.FC<DoctorAvailabilityProps> = ({ doctors 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-black text-[#18181b] tracking-tight">
-            Status Dokter Aktif
-          </h2>
+          <h2 className="text-xl font-black text-[#18181b] tracking-tight">Status Dokter Aktif</h2>
           <p className="text-xs text-[#52525b] font-medium mt-0.5">
             Daftar dokter yang jadwal praktiknya aktif hari ini
           </p>
         </div>
-        <span className="material-symbols-outlined text-[#18181b] cursor-pointer hover:text-[#50604f]">
-          more_horiz
-        </span>
+        <span className="material-symbols-outlined text-[#18181b] cursor-pointer hover:text-[#50604f]">more_horiz</span>
       </div>
 
       {/* Doctor Cards */}
@@ -55,12 +51,8 @@ export const DoctorAvailability: React.FC<DoctorAvailabilityProps> = ({ doctors 
                   />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-[#18181b]">
-                    {doctor.name}
-                  </p>
-                  <p className="text-[11px] font-semibold text-[#52525b]">
-                    {doctor.spesialis}
-                  </p>
+                  <p className="text-xs font-black text-[#18181b]">{doctor.name}</p>
+                  <p className="text-[11px] font-semibold text-[#52525b]">{doctor.spesialis}</p>
                 </div>
               </div>
 

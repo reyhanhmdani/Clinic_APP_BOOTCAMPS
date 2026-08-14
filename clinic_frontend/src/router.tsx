@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router';
-import { Layout } from './components/Layout';
+import { Layout } from './components/common/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { ConsultationPage } from './pages/ConsultationPage';
 import { InvoicePage } from './pages/InvoicePage';

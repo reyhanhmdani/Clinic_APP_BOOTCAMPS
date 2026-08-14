@@ -82,12 +82,8 @@ export const WorkflowGuide: React.FC<WorkflowGuideProps> = ({ activeTab = 'ALL',
                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
               </div>
               <div className="overflow-hidden">
-                <h3 className="text-xs font-black truncate text-[#18181b]">
-                  {item.title}
-                </h3>
-                <p className="text-[11px] font-semibold truncate text-[#52525b]">
-                  {item.desc}
-                </p>
+                <h3 className="text-xs font-black truncate text-[#18181b]">{item.title}</h3>
+                <p className="text-[11px] font-semibold truncate text-[#52525b]">{item.desc}</p>
               </div>
             </button>
           );

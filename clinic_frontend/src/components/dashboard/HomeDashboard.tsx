@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Visit } from '../types/clinic';
+import type { Visit } from '../../types/clinic';
 
 interface HomeDashboardProps {
   visits: Visit[];
@@ -180,7 +180,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </tr>
             </thead>
             <tbody className="text-sm font-normal">
-              {displayedVisits.map((item) => {
+              {displayedVisits.map((item, index) => {
+                const rowNumber = (currentPage - 1) * itemsPerPage + index + 1;
                 const isUnpaid =
                   item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
                 const isWaiting = item.status === 'WAITING';
@@ -192,19 +193,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
                 return (
                   <tr key={item.id} className="border-b border-[#18181b]/20 hover:bg-[#fef08a]/20 transition-colors">
-                    {/* Queue Number & Patient Name */}
+                    {/* antrian pasien dan nama pasiennya */}
+                    {/* liat BACKEND */}
                     <td className="py-4">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-8 h-8 rounded-full bg-[#fde047] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] font-black text-xs shrink-0 shadow-[1px_1px_0px_#18181b]"
-                          title={`No. Antrian #${item.queueNumber}`}
+                          title={`No. Antrian #${rowNumber}`}
                         >
-                          {item.queueNumber}
+                          {rowNumber}
                         </div>
                         <div>
                           <span className="text-[#18181b] font-extrabold text-sm block">{item.patient?.name}</span>
                           <span className="text-[11px] font-bold text-[#52525b]">
-                            {item.patient?.gender === 'MALE' ? '👨 Laki-Laki' : '👩 Perempuan'} ({item.patient?.age} thn)
+                            {item.patient?.gender === 'MALE' ? '👨 Laki-Laki' : '👩 Perempuan'} ({item.patient?.age}{' '}
+                            thn)
                           </span>
                         </div>
                       </div>

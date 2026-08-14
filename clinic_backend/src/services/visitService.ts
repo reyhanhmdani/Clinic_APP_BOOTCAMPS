@@ -9,7 +9,7 @@ import { VisitStatus } from '@prisma/client';
 export const getAllVisitService = async () => {
   const visits = await prisma.visit.findMany({
     orderBy: {
-      queueNumber: 'asc',
+      queueNumber: 'desc',
     },
     include: {
       patient: true,
@@ -42,16 +42,18 @@ export const createVisitService = async (input: CreateVisitInput) => {
   const endOfDay = new Date(`${dateStr}T23:59:59.000Z`);
 
   // hitung antrian khusus di hari tersebut aja
-  const todayVisit = await prisma.visit.count({
-    where: {
-      visitDate: {
-        gte: startOfDay,
-        lte: endOfDay,
-      },
-    },
-  });
+  // const todayVisit = await prisma.visit.count({
+  //   where: {
+  //     visitDate: {
+  //       gte: startOfDay,
+  //       lte: endOfDay,
+  //     },
+  //   },
+  // });
 
-  const queueNumber = todayVisit + 1;
+  const totalVisits = await prisma.visit.count();
+
+  const queueNumber = totalVisits + 1;
 
   const createVisit = await prisma.visit.create({
     data: {

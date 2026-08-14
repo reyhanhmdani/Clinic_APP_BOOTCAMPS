@@ -1,22 +1,52 @@
 import React, { useState } from 'react';
+import { useNavigate, useOutletContext, useSearchParams, Link } from 'react-router';
+import type { DashboardContextType } from '../types/clinic';
+import { payInvoiceService } from '../services/invoiceService';
 
 export const InvoicePage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const visitId = searchParams.get('visitId');
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'QRIS' | 'TRANSFER' | 'EDC'>('CASH');
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  const invoiceItems = [
-    { name: 'Jasa Konsultasi Dokter Spesialis', category: 'Tindakan', price: 150000, qty: 1 },
-    { name: 'Paracetamol 500mg (10 tablet)', category: 'Obat', price: 25000, qty: 1 },
-    { name: 'Vitamin C 500mg (10 tablet)', category: 'Obat', price: 30000, qty: 1 },
-    { name: 'Biaya Administrasi Klinik', category: 'Layanan', price: 15000, qty: 1 },
-  ];
+  const navigate = useNavigate();
+  const { visits, isLoading, refreshData } = useOutletContext<DashboardContextType>();
 
-  const totalAmount = invoiceItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  // cari data visit yang id nya sama dengan visitId dari Url
+  const activeVisit = visits.find((v) => v.id === Number(visitId));
+
+  const handlePayInvoice = async () => {
+    if (!activeVisit?.invoice?.id) {
+      return alert('Data tagihan Invoice tidak di temukan');
+    }
+
+    setIsProcessing(true);
+    try {
+      await payInvoiceService(activeVisit.invoice.id, {
+        paymentMethod: paymentMethod,
+      });
+
+      await refreshData();
+
+      alert('Pemaybayaran berhasil dilunasi (PAID)');
+      navigate('/');
+    } catch (error: any) {
+      alert(`Gagal memproses pembayaran: ${error?.response?.data?.message || error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isAlreadyPaid = activeVisit?.invoice?.status === 'PAID';
+  const totalConsultationFee = Number(activeVisit?.invoice?.totalConsultationFee || 0);
+  const totalMedicineFee = Number(activeVisit?.invoice?.totalMedicineFee || 0);
+  const invoiceTotal = activeVisit?.invoice?.totalAmount ? Number(activeVisit.invoice.totalAmount) : 0;
 
   const formattedTotal = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     maximumFractionDigits: 0,
-  }).format(totalAmount);
+  }).format(invoiceTotal);
 
   return (
     <div className="organic-bg min-h-screen w-full p-4 sm:p-6 md:p-8 text-[#18181b] font-sans antialiased">
@@ -24,24 +54,26 @@ export const InvoicePage: React.FC = () => {
         {/* Top Navigation Bar */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <a
-              href="/"
-              className="w-10 h-10 rounded-xl bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] transition-all"
+            <Link
+              to="/"
+              className="w-10 h-10 rounded-xl bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-[#fde047] active:translate-y-0.5 transition-all"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </a>
+            </Link>
             <div>
-              <h1 className="text-2xl font-black text-[#18181b] tracking-tight">
-                Kasir & Pelunasan Tagihan Pasien
-              </h1>
+              <h1 className="text-2xl font-black text-[#18181b] tracking-tight">Kasir & Pelunasan Tagihan Pasien</h1>
               <p className="text-xs font-semibold text-[#52525b]">
                 Proses pembayaran nota dan cetak bukti transaksi resmi klinik
               </p>
             </div>
           </div>
 
-          <span className="bg-[#f472b6] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3 py-1.5 rounded-lg shadow-[2px_2px_0px_#18181b]">
-            Status: Belum Bayar (UNPAID)
+          <span
+            className={`text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3 py-1.5 rounded-lg shadow-[2px_2px_0px_#18181b] ${
+              isAlreadyPaid ? 'bg-[#4ade80]' : 'bg-[#f472b6]'
+            }`}
+          >
+            Status: {isAlreadyPaid ? 'Lunas (PAID)' : 'Belum Bayar (UNPAID)'}
           </span>
         </div>
 
@@ -53,44 +85,60 @@ export const InvoicePage: React.FC = () => {
             <div className="flex justify-between items-start pb-4 border-b-2 border-[#18181b]">
               <div>
                 <h2 className="text-lg font-black text-[#18181b]">ReyClinic Outpatient Receipt</h2>
-                <p className="text-xs font-semibold text-[#52525b]">No. Faktur: INV-2026-0089</p>
+                <p className="text-xs font-semibold text-[#52525b]">
+                  No. Faktur: <b className="text-[#18181b]">{activeVisit?.invoice?.invoiceNo || '-'}</b>
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-black text-[#18181b]">13 Agu 2026</p>
+                <p className="text-xs font-black text-[#18181b]">
+                  {activeVisit?.invoice?.createdAt
+                    ? new Date(activeVisit.invoice.createdAt).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'Hari Ini'}
+                </p>
                 <p className="text-[11px] font-semibold text-[#52525b]">Kasir: Rey Admin</p>
               </div>
             </div>
 
-            {/* Info Pasien */}
+            {/* Info Pasien & Dokter */}
             <div className="p-3.5 rounded-xl bg-[#fef08a] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex justify-between items-center text-xs">
               <div>
-                <p className="font-black text-[#18181b]">Pasien: Budi Santoso</p>
-                <p className="font-semibold text-[#52525b]">RM: RM-2025-001</p>
+                <p className="font-black text-[#18181b]">
+                  Pasien: {activeVisit?.patient?.name || (isLoading ? 'Memuat...' : '-')}
+                </p>
+                <p className="font-semibold text-[#52525b]">RM: {activeVisit?.patient?.noRm || '-'}</p>
               </div>
-              <div className="text-right font-bold text-[#18181b]">
-                Dokter: Dr. Andri Wijaya
-              </div>
+              <div className="text-right font-bold text-[#18181b]">Dokter: {activeVisit?.doctor?.name || '-'}</div>
             </div>
 
-            {/* Tabel Item Tagihan */}
+            {/* Rincian Layanan & Obat Riil */}
             <div className="space-y-2.5">
               <h3 className="text-xs font-black uppercase text-[#18181b] tracking-wider mb-2">
                 Rincian Layanan & Obat
               </h3>
-              {invoiceItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center py-2 border-b border-[#18181b]/10 text-xs"
-                >
-                  <div>
-                    <span className="font-bold text-[#18181b] block">{item.name}</span>
-                    <span className="text-[10px] font-semibold text-[#52525b]">{item.category}</span>
-                  </div>
-                  <span className="font-black text-[#18181b]">
-                    Rp {item.price.toLocaleString('id-ID')}
+
+              {/* Jasa Konsultasi */}
+              <div className="flex justify-between items-center py-2.5 border-b border-[#18181b]/10 text-xs">
+                <div>
+                  <span className="font-bold text-[#18181b] block">Jasa Konsultasi Medis</span>
+                  <span className="text-[10px] font-semibold text-[#52525b]">
+                    {activeVisit?.doctor?.name} ({activeVisit?.doctor?.spesialis || 'Dokter'})
                   </span>
                 </div>
-              ))}
+                <span className="font-black text-[#18181b]">Rp {totalConsultationFee.toLocaleString('id-ID')}</span>
+              </div>
+
+              {/* Biaya Resep Obat */}
+              <div className="flex justify-between items-center py-2.5 border-b border-[#18181b]/10 text-xs">
+                <div>
+                  <span className="font-bold text-[#18181b] block">Total Resep Obat Apotek</span>
+                  <span className="text-[10px] font-semibold text-[#52525b]">Farmasi / Obat</span>
+                </div>
+                <span className="font-black text-[#18181b]">Rp {totalMedicineFee.toLocaleString('id-ID')}</span>
+              </div>
             </div>
 
             {/* Total Pembayaran Banner */}
@@ -98,9 +146,7 @@ export const InvoicePage: React.FC = () => {
               <span className="text-xs font-black uppercase tracking-wider text-[#18181b]">
                 Total Yang Harus Dibayar:
               </span>
-              <span className="text-xl font-black text-[#18181b]">
-                {formattedTotal}
-              </span>
+              <span className="text-xl font-black text-[#18181b]">{formattedTotal}</span>
             </div>
           </div>
 
@@ -142,14 +188,23 @@ export const InvoicePage: React.FC = () => {
             <div className="pt-4 border-t-2 border-[#18181b]/10 space-y-3">
               <button
                 type="button"
-                className="w-full py-3 rounded-xl neubrutal-btn-primary text-xs font-black text-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] flex items-center justify-center gap-2"
+                disabled={isProcessing || isAlreadyPaid || !activeVisit?.invoice?.id}
+                onClick={handlePayInvoice}
+                className="w-full py-3.5 rounded-xl neubrutal-btn-primary text-xs font-black text-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] hover:scale-102 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[18px]">check</span>
-                <span>Bayar Lunas & Selesai (PAID)</span>
+                <span className="material-symbols-outlined text-[18px]">{isAlreadyPaid ? 'verified' : 'check'}</span>
+                <span>
+                  {isProcessing
+                    ? 'Memproses Pembayaran...'
+                    : isAlreadyPaid
+                      ? 'Sudah Lunas (PAID)'
+                      : 'Bayar Lunas & Selesai (PAID)'}
+                </span>
               </button>
 
               <button
                 type="button"
+                onClick={() => window.print()}
                 className="w-full py-2.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-extrabold text-[#18181b] hover:bg-zinc-100 transition-all shadow-[2px_2px_0px_#18181b] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">print</span>

@@ -17,7 +17,8 @@ export const getAllPatientsService = async () => {
   });
 
   if (patients.length === 0) {
-    throw new ApiError(404, 'Data Patient KOSONG');
+    return [];
+    // throw new ApiError(404, 'Data Patient KOSONG');
   }
   return patients;
 };

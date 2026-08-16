@@ -51,4 +51,7 @@ Thumbs.db
 *.local
 .localstorage*
 
-.COMMIT_CONVENTION.md
+# 8. Markdown Notes & Documentation Backlogs
+NOTE_*.md
+NOTE*.md
+*.tmp.md

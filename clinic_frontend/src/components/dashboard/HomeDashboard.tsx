@@ -263,9 +263,19 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                           Batal
                         </span>
                       ) : (
-                        <span className="bg-[#4ade80] text-[#18181b] border border-[#18181b] font-black text-xs px-3 py-1 inline-block shadow-[1px_1px_0px_#18181b] uppercase">
-                          Lunas
-                        </span>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 inline-block shadow-[1px_1px_0px_#18181b] uppercase">
+                            Lunas
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => onActionClick && onActionClick(item, 'PRINT_RECEIPT')}
+                            className="p-1 border-2 border-[#18181b] bg-[#fde047] text-[#18181b] hover:bg-[#facc15] shadow-[2px_2px_0px_#18181b] active:translate-y-0.5 cursor-pointer font-black flex items-center justify-center transition-all"
+                            title="Lihat & Cetak Struk Nota"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

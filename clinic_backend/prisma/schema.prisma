@@ -92,7 +92,7 @@ model Visit {
   updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at")
 
   //relasi
-  patient      Patient       @relation(fields: [patientId], references: [id])
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctor       Doctor        @relation(fields: [doctorId], references: [id])
   consultation Consultation?
   invoice      Invoice?
@@ -109,7 +109,7 @@ model Consultation {
   consultationFee Decimal  @map("consultation_fee") @db.Decimal(12, 2)
   createdAt       DateTime @default(now()) @map("created_at")
 
-  visit                 Visit                  @relation(fields: [visitId], references: [id])
+  visit                 Visit                  @relation(fields: [visitId], references: [id], onDelete: Cascade)
   consultationMedicines ConsultationMedicine[]
 
   @@map("consultations")
@@ -139,7 +139,7 @@ model ConsultationMedicine {
   instructions   String?
   createdAt      DateTime @default(now()) @map("created_at")
 
-  consultation Consultation @relation(fields: [consultationId], references: [id])
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
   medicine     Medicine     @relation(fields: [medicineId], references: [id])
 
   @@map("consultation_medicine")
@@ -157,7 +157,7 @@ model Invoice {
   paidAt               DateTime?     @map("paid_at")
   createdAt            DateTime      @default(now()) @map("created_at")
 
-  visit Visit @relation(fields: [visitId], references: [id])
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
 
   @@map("invoice")
 }

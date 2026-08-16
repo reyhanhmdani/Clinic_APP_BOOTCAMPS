@@ -5,6 +5,8 @@ import { ConsultationPage } from './pages/ConsultationPage';
 import { InvoicePage } from './pages/InvoicePage';
 import { LoginPage } from './pages/LoginPage';
 import { MedicinePage } from './pages/MedicinePage';
+import { PatientPage } from './pages/PatientPage';
+import { DoctorPage } from './pages/DoctorPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -27,6 +29,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'patients',
+        element: <PatientPage />,
+      },
+      {
+        path: 'doctors',
+        element: <DoctorPage />,
       },
       {
         path: 'consultations',

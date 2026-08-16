@@ -4,10 +4,12 @@ import { CreateDoctorInput, UpdateDoctorInput } from '../validation/doctorSchema
 import { Prisma } from '@prisma/client';
 
 export const getAllDoctorsService = async () => {
-  const doctors = await prisma.doctor.findMany();
+  const doctors = await prisma.doctor.findMany({
+    orderBy: { id: 'desc' },
+  });
 
   if (doctors.length === 0) {
-    throw new ApiError(404, 'Data Doctor KOSONG');
+    return [];
   }
 
   return doctors;

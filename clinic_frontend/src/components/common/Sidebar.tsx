@@ -27,7 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activeRoute =
 
   const navItems = [
     { label: 'Dashboard', icon: 'grid_view', path: '/dashboard' },
-    { label: 'Antrean Pasien', icon: 'groups', path: '/dashboard/queue' },
+    { label: 'Data Pasien', icon: 'groups', path: '/dashboard/patients' },
     { label: 'Konsultasi Dokter', icon: 'stethoscope', path: '/dashboard/consultations' },
     { label: 'Tagihan Kasir', icon: 'payments', path: '/dashboard/invoices' },
     { label: 'Farmasi & Obat', icon: 'medication', path: '/dashboard/medicines' },

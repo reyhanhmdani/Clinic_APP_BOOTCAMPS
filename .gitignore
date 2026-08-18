@@ -51,7 +51,8 @@ Thumbs.db
 *.local
 .localstorage*
 
-# 8. Markdown Notes & Documentation Backlogs
-NOTE_*.md
-NOTE*.md
-*.tmp.md
+# 8. Markdown Files & Documentation
+*.md
+**/*.md
+
+/clinic_mobile/

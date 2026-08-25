@@ -1,600 +1,443 @@
-import React, { useState, useEffect } from 'react';
-import type { Medicine } from '../types/clinic';
+﻿import React, { useState, useEffect } from "react";
+import type { Medicine } from "../types/clinic";
+import { useMedicineStore } from "../stores/medicineStore";
 import {
-  getMedicineService,
   createMedicineService,
   updateMedicineService,
   deleteMedicineService,
-} from '../services/medicineService';
+} from "../services/medicineService";
+import { formatRupiah } from "../utils/formatRupiah";
 
 export const MedicinePage: React.FC = () => {
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { medicines, loading: isLoading, fetchMedicines } = useMedicineStore();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'SAFE' | 'LOW' | 'OUT'>('ALL');
-  const [sortBy, setSortBy] = useState<'NAME_ASC' | 'NAME_DESC' | 'STOCK_ASC' | 'STOCK_DESC' | 'PRICE_DESC'>(
-    'NAME_ASC',
-  );
-  const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [stockFilter, setStockFilter] = useState<"ALL" | "LOW_STOCK" | "IN_STOCK">("ALL");
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
+  const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
 
   // Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    price: 0,
-    stock: 0,
-    unit: 'Strip',
-  });
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [unit, setUnit] = useState("Tablet");
 
-  // Fetch Data Obat dari Backend
-  const fetchMedicines = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getMedicineService();
-      setMedicines(data || []);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal memuat data obat dari server');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const commonUnits = ["Tablet", "Kapsul", "Sirup", "Botol", "Salep", "Pcs", "Strip"];
 
   useEffect(() => {
     fetchMedicines();
   }, []);
 
+  const openCreateModal = () => {
+    setModalMode("CREATE");
+    setSelectedMedicine(null);
+    setName("");
+    setPrice("");
+    setStock("");
+    setUnit("Tablet");
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (med: Medicine) => {
+    setModalMode("EDIT");
+    setSelectedMedicine(med);
+    setName(med.name);
+    setPrice(new Intl.NumberFormat("id-ID").format(Number(med.price)));
+    setStock(String(med.stock));
+    setUnit(med.unit);
+    setIsModalOpen(true);
+  };
+
+  // Live Currency Formatting Handler
+  const handlePriceChange = (text: string) => {
+    const cleanNumber = text.replace(/\D/g, "");
+    if (!cleanNumber) {
+      setPrice("");
+      return;
+    }
+    const formatted = new Intl.NumberFormat("id-ID").format(Number(cleanNumber));
+    setPrice(formatted);
+  };
+
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || formData.price < 0 || formData.stock < 0) {
-      return alert('Mohon lengkapi data obat dengan benar!');
+    if (!name.trim()) {
+      alert("Nama obat wajib diisi!");
+      return;
     }
 
-    try {
-      if (modalMode === 'CREATE') {
-        await createMedicineService(formData);
-        alert('Obat baru berhasil di tambahkan');
-      } else if (modalMode === 'EDIT' && selectedMedicine) {
-        await updateMedicineService(selectedMedicine.id, formData);
-        alert('Data obat berhasil di perbarui');
-      }
+    const cleanPrice = Number(price.replace(/\D/g, ""));
+    if (!price.trim() || isNaN(cleanPrice) || cleanPrice <= 0) {
+      alert("Harga jual obat harus berupa nominal angka valid!");
+      return;
+    }
 
-      // tutup modal dan refresh data tabel dari db
+    const numStock = Number(stock);
+    if (!stock.trim() || isNaN(numStock) || numStock < 0) {
+      alert("Jumlah stok obat harus berupa angka valid!");
+      return;
+    }
+
+    const payload = {
+      name: name.trim(),
+      price: cleanPrice,
+      stock: numStock,
+      unit: unit,
+    };
+
+    try {
+      if (modalMode === "CREATE") {
+        await createMedicineService(payload);
+        alert("Obat baru berhasil ditambahkan!");
+      } else if (modalMode === "EDIT" && selectedMedicine) {
+        await updateMedicineService(selectedMedicine.id, payload);
+        alert("Data obat berhasil diperbarui!");
+      }
       setIsModalOpen(false);
-      await fetchMedicines();
-    } catch (error: any) {
-      alert(`Gagal menyimpan obat ${error?.response?.data?.message || error.message}`);
+      fetchMedicines();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || "Gagal menyimpan data obat";
+      alert(message);
     }
   };
 
   const handleDeleteMedicine = async (id: number, name: string) => {
-    if (!window.confirm(`Apakah kamu yakin ingin menghapus obat ${name}`)) {
-      return;
+    if (confirm(`Apakah Anda yakin ingin menghapus data obat ${name}?`)) {
+      try {
+        await deleteMedicineService(id);
+        alert(`Data obat ${name} berhasil dihapus`);
+        fetchMedicines();
+      } catch (err: any) {
+        const message = err?.response?.data?.message || err.message || "Gagal menghapus obat";
+        alert(message);
+      }
     }
-    try {
-      await deleteMedicineService(id);
-      alert(`Obat ${name} berhasil di hapus`);
-      await fetchMedicines();
-    } catch (error: any) {
-      alert(`Gagal menghapus obat: ${error?.response?.data?.message || error.message}`);
+  };
+
+  // Critical Low Stock Medicines (<= 5)
+  const lowStockMedicines = medicines.filter((m) => m.stock <= 5);
+
+  // Filter Logic
+  const filteredMedicines = medicines.filter((med) => {
+    if (stockFilter === "LOW_STOCK" && med.stock > 5) return false;
+    if (stockFilter === "IN_STOCK" && med.stock <= 5) return false;
+
+    if (searchTerm.trim() !== "") {
+      const q = searchTerm.toLowerCase();
+      return (
+        med.name.toLowerCase().includes(q) ||
+        med.code.toLowerCase().includes(q) ||
+        med.unit.toLowerCase().includes(q)
+      );
     }
-  };
-
-  const handleOpenCreateModal = () => {
-    setModalMode('CREATE');
-    setSelectedMedicine(null);
-    setFormData({ name: '', price: 0, stock: 0, unit: 'Strip' });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (med: Medicine) => {
-    setModalMode('EDIT');
-    setSelectedMedicine(med);
-    setFormData({
-      name: med.name,
-      price: med.price,
-      stock: med.stock,
-      unit: med.unit,
-    });
-    setIsModalOpen(true);
-  };
-
-  // Filter & Sort Logic
-  const filteredAndSortedMedicines = medicines
-    .filter((item) => {
-      const matchSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.code.toLowerCase().includes(searchTerm.toLowerCase());
-
-      if (!matchSearch) return false;
-      if (selectedFilter === 'SAFE') return item.stock >= 20;
-      if (selectedFilter === 'LOW') return item.stock > 0 && item.stock < 20;
-      if (selectedFilter === 'OUT') return item.stock === 0;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'NAME_ASC') return a.name.localeCompare(b.name);
-      if (sortBy === 'NAME_DESC') return b.name.localeCompare(a.name);
-      if (sortBy === 'STOCK_ASC') return a.stock - b.stock;
-      if (sortBy === 'STOCK_DESC') return b.stock - a.stock;
-      if (sortBy === 'PRICE_DESC') return b.price - a.price;
-      return 0;
-    });
-
-  // KPI Stats
-  const totalItems = medicines.length;
-  const totalStockUnits = medicines.reduce((sum, m) => sum + m.stock, 0);
-  const lowStockCount = medicines.filter((m) => m.stock > 0 && m.stock < 20).length;
-  const outOfStockCount = medicines.filter((m) => m.stock === 0).length;
+    return true;
+  });
 
   return (
-    <div className="space-y-6 w-full text-[#18181b] font-sans antialiased pb-12">
-      {/* 1. Top Header Banner Ala PZN */}
-      <div className="space-y-2">
-        <div className="inline-block bg-[#a3e635] text-[#18181b] font-black text-xs px-3 py-1 border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] uppercase tracking-wider">
-          KATALOG FARMASI
+    <div className="space-y-6 w-full pb-10">
+      {/* Header & Primary Action */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-5">
+        <div>
+          <div className="inline-block bg-[#a3e635] text-[#18181b] text-[10px] font-black tracking-wider px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase mb-1">
+            FARMASI & APOTEK
+          </div>
+          <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
+            KATALOG OBAT & TARIF
+          </h1>
+          <p className="text-xs md:text-sm text-[#52525b] font-bold">
+            Total {medicines.length} produk obat & persediaan apotek klinik
+          </p>
         </div>
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#18181b] uppercase">
-          DATA MASTER OBAT & STOK APOTEK
-        </h1>
-        <p className="text-xs sm:text-sm font-bold text-[#52525b] max-w-3xl">
-          Kelola inventaris obat klinik, monitor batas stok minimum, dan tetapkan harga resmi dengan akurat.
-        </p>
+
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="neubrutal-btn-primary px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer uppercase tracking-wider text-xs font-black"
+        >
+          <span className="material-symbols-outlined text-[18px]">add_box</span>
+          <span>+ Tambah Obat Baru</span>
+        </button>
       </div>
-      {/* 2. Main Two-Column Layout (PZN Catalog Style) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        {/* Kolom Kiri: Search & Filter Stacked Menu (4 Cols) */}
-        <div className="md:col-span-4 space-y-4">
-          {/* Action Button: Tambah Obat */}
-          <button
-            type="button"
-            onClick={handleOpenCreateModal}
-            className="w-full py-3.5 bg-[#a3e635] text-[#18181b] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] hover:scale-[1.01] active:translate-y-0.5 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition-all"
-          >
-            <span className="material-symbols-outlined text-[20px]">add_circle</span>
-            <span>+ Tambah Obat Baru</span>
-          </button>
 
-          {/* Search Box */}
-          <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-3">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#71717a]">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Cari obat..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] transition-all"
-              />
+      {/* Critical Low Stock Alert Banner */}
+      {lowStockMedicines.length > 0 && (
+        <div className="bg-[#fef2f2] border-3 border-[#f43f5e] shadow-[4px_4px_0px_#f43f5e] rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#f43f5e] text-white rounded-xl flex items-center justify-center border-2 border-[#18181b] shrink-0">
+              <span className="material-symbols-outlined text-[24px]">warning</span>
             </div>
-
-            {/* Sort Dropdown */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-[#71717a] tracking-wider block">
-                Urutkan Berdasarkan:
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full p-2 border-2 border-[#18181b] bg-white text-xs font-black text-[#18181b] focus:outline-none cursor-pointer"
-              >
-                <option value="NAME_ASC">Nama Obat (A - Z)</option>
-                <option value="NAME_DESC">Nama Obat (Z - A)</option>
-                <option value="STOCK_ASC">Stok Paling Sedikit</option>
-                <option value="STOCK_DESC">Stok Terbanyak</option>
-                <option value="PRICE_DESC">Harga Tertinggi</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Stacked Categories List (Identik Style PZN) */}
-          <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-wider text-[#71717a] border-b-2 border-[#18181b]/10 pb-2">
-              Kategori & Status Stok
-            </p>
-
-            <div className="space-y-1.5 pt-1">
-              {[
-                { id: 'ALL', label: 'SEMUA OBAT', count: totalItems },
-                { id: 'SAFE', label: 'STOK AMAN (≥20)', count: medicines.filter((m) => m.stock >= 20).length },
-                { id: 'LOW', label: 'STOK MENIPIS (<20)', count: lowStockCount },
-                { id: 'OUT', label: 'STOK HABIS (0)', count: outOfStockCount },
-              ].map((filter) => {
-                const isActive = selectedFilter === filter.id;
-
-                return (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    onClick={() => setSelectedFilter(filter.id as any)}
-                    className={`w-full px-3 py-2.5 text-left text-xs font-black border-2 border-[#18181b] transition-all flex items-center justify-between cursor-pointer ${
-                      isActive
-                        ? 'bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]'
-                        : 'bg-white text-[#18181b] hover:bg-[#fde047]'
-                    }`}
-                  >
-                    <span>{filter.label}</span>
-                    <span
-                      className={`text-[10px] px-2 py-0.5 font-black border border-[#18181b] rounded ${
-                        isActive ? 'bg-white text-[#18181b]' : 'bg-[#f4f4f5] text-[#18181b]'
-                      }`}
-                    >
-                      {filter.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Quick Stock Summary Box */}
-          <div className="p-4 bg-[#fef08a] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-2 text-xs">
-            <p className="font-black uppercase tracking-wider text-[#18181b] flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[18px]">inventory</span>
-              <span>Ringkasan Inventaris</span>
-            </p>
-            <div className="flex justify-between border-b border-[#18181b]/20 pb-1 font-bold">
-              <span>Total Jenis:</span>
-              <span className="font-black">{totalItems} Obat</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>Total Fisik Stok:</span>
-              <span className="font-black">{totalStockUnits} Unit</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Kolom Kanan: Grid Kartu Obat PZN Style & Table Toggle (8 Cols) */}
-        <div className="md:col-span-8 space-y-4">
-          {/* Bar Kontrol Atas (Mode View & Hasil Pencarian) */}
-          <div className="p-3.5 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex justify-between items-center">
-            <div className="text-xs font-black text-[#18181b]">
-              Menampilkan <span className="text-emerald-700 font-black">{filteredAndSortedMedicines.length}</span> dari{' '}
-              {totalItems} Obat
-            </div>
-
-            {/* View Mode Toggle: Grid vs Table */}
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setViewMode('GRID')}
-                title="Tampilan Grid Kartu"
-                className={`p-1.5 border-2 border-[#18181b] text-xs font-black flex items-center gap-1 cursor-pointer transition-all ${
-                  viewMode === 'GRID' ? 'bg-[#a3e635] shadow-[2px_2px_0px_#18181b]' : 'bg-white hover:bg-zinc-100'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">grid_view</span>
-                <span className="hidden sm:inline">Grid</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('TABLE')}
-                title="Tampilan Tabel Data"
-                className={`p-1.5 border-2 border-[#18181b] text-xs font-black flex items-center gap-1 cursor-pointer transition-all ${
-                  viewMode === 'TABLE' ? 'bg-[#a3e635] shadow-[2px_2px_0px_#18181b]' : 'bg-white hover:bg-zinc-100'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">table_rows</span>
-                <span className="hidden sm:inline">Tabel</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {isLoading ? (
-            <div className="p-12 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-3">
-              <div className="w-10 h-10 border-4 border-[#18181b] border-t-[#a3e635] rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-black text-[#18181b] uppercase tracking-wider">
-                Mengambil data katalog obat dari database...
+            <div>
+              <h3 className="text-xs font-black text-[#991b1b] uppercase">
+                Peringatan: {lowStockMedicines.length} Obat Stok Kritis!
+              </h3>
+              <p className="text-[11px] font-bold text-[#b91c1c]">
+                {lowStockMedicines.map((m) => `${m.name} (sisa ${m.stock} ${m.unit})`).join(", ")}
               </p>
             </div>
-          ) : error ? (
-            <div className="p-6 bg-[#fecdd3] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] text-xs font-bold text-[#9f1239] space-y-3 text-center">
-              <span className="material-symbols-outlined text-[32px]">error</span>
-              <p className="font-black">{error}</p>
-              <button
-                type="button"
-                onClick={fetchMedicines}
-                className="px-4 py-2 bg-white text-[#18181b] border-2 border-[#18181b] font-black shadow-[2px_2px_0px_#18181b] cursor-pointer"
-              >
-                Coba Lagi
-              </button>
-            </div>
-          ) : filteredAndSortedMedicines.length === 0 ? (
-            <div className="p-12 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-2">
-              <span className="material-symbols-outlined text-[36px] text-[#71717a]">search_off</span>
-              <p className="text-sm font-black text-[#18181b]">Tidak ada obat yang cocok dengan pencarian.</p>
-              <p className="text-xs font-bold text-[#71717a]">Coba reset filter atau kata kunci pencarian Anda.</p>
-            </div>
-          ) : viewMode === 'GRID' ? (
-            /* Mode 1: GRID CARDS (Style Identik Kartu PZN) */
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredAndSortedMedicines.map((med) => {
-                const isOut = med.stock === 0;
-                const isLow = med.stock > 0 && med.stock < 20;
+          </div>
+          <button
+            type="button"
+            onClick={() => setStockFilter("LOW_STOCK")}
+            className="hidden sm:block px-3 py-1 bg-white border-2 border-[#f43f5e] text-[#991b1b] font-black text-xs uppercase rounded-lg hover:bg-rose-100 cursor-pointer"
+          >
+            Lihat Obat
+          </button>
+        </div>
+      )}
 
-                return (
-                  <div
-                    key={med.id}
-                    className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex flex-col justify-between hover:-translate-y-1 transition-transform"
-                  >
-                    <div>
-                      {/* Top Header Card Box (Black Header Box ala PZN) */}
-                      <div className="bg-[#18181b] text-white p-3.5 flex items-center justify-between relative border-b-3 border-[#18181b]">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#a3e635] text-[20px]">pill</span>
-                          <span className="font-mono text-xs font-black text-white tracking-wider">{med.code}</span>
-                        </div>
-
-                        {/* Status Badge di Pojok Kanan Atas */}
-                        {isOut ? (
-                          <span className="bg-rose-500 text-white font-black text-[10px] px-2 py-0.5 border border-white tracking-wider uppercase">
-                            HABIS
-                          </span>
-                        ) : isLow ? (
-                          <span className="bg-[#fde047] text-[#18181b] font-black text-[10px] px-2 py-0.5 border border-[#18181b] tracking-wider uppercase">
-                            MENIPIS
-                          </span>
-                        ) : (
-                          <span className="bg-[#a3e635] text-[#18181b] font-black text-[10px] px-2 py-0.5 border border-[#18181b] tracking-wider uppercase">
-                            READY
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="p-4 space-y-3">
-                        <div>
-                          <h3 className="font-black text-sm text-[#18181b] tracking-tight line-clamp-1 uppercase">
-                            {med.name}
-                          </h3>
-                          <span className="inline-block bg-[#f4f4f5] text-[#52525b] text-[10px] font-black px-2 py-0.5 border border-[#18181b] mt-1">
-                            Kemasan: {med.unit}
-                          </span>
-                        </div>
-
-                        {/* Info Stok & Bar Indikator */}
-                        <div className="space-y-1 bg-[#f9fafb] p-2.5 border-2 border-[#18181b]/10 text-xs">
-                          <div className="flex justify-between items-center font-black">
-                            <span className="text-[#71717a]">Sisa Stok:</span>
-                            <span
-                              className={`text-sm ${isOut ? 'text-rose-600' : isLow ? 'text-amber-600' : 'text-[#18181b]'}`}
-                            >
-                              {med.stock} <span className="text-xs font-bold text-[#71717a]">{med.unit}</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Harga Satuan Box */}
-                        <div className="pt-2 border-t-2 border-[#18181b]/10 flex justify-between items-baseline">
-                          <span className="text-[11px] font-bold text-[#71717a]">Harga Resmi:</span>
-                          <span className="text-base font-black text-emerald-800">
-                            Rp {Number(med.price).toLocaleString('id-ID')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Action Buttons (Ala PZN Button Detail/Lihat) */}
-                    <div className="p-3 bg-[#f8fafc] border-t-3 border-[#18181b] grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEditModal(med)}
-                        className="py-2 px-3 bg-white text-[#18181b] border-2 border-[#18181b] text-xs font-black hover:bg-[#fde047] shadow-[2px_2px_0px_#18181b] flex items-center justify-center gap-1 cursor-pointer transition-all"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
-                        <span>EDIT</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMedicine(med.id, med.name)}
-                        className="py-2 px-3 bg-white text-rose-600 border-2 border-[#18181b] text-xs font-black hover:bg-rose-100 shadow-[2px_2px_0px_#18181b] flex items-center justify-center gap-1 cursor-pointer transition-all"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                        <span>HAPUS</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* Mode 2: TABLE VIEW */
-            <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[650px]">
-                <thead>
-                  <tr className="border-b-3 border-[#18181b] text-[11px] font-black uppercase tracking-wider text-[#71717a]">
-                    <th className="pb-3 px-2">No</th>
-                    <th className="pb-3 px-2">Kode</th>
-                    <th className="pb-3 px-2">Nama Obat</th>
-                    <th className="pb-3 px-2">Satuan</th>
-                    <th className="pb-3 px-2">Harga</th>
-                    <th className="pb-3 px-2 text-center">Stok</th>
-                    <th className="pb-3 px-2 text-center">Status</th>
-                    <th className="pb-3 px-2 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#18181b]/10 text-xs font-bold text-[#18181b]">
-                  {filteredAndSortedMedicines.map((item, index) => {
-                    const isOutOfStock = item.stock === 0;
-                    const isLowStock = item.stock > 0 && item.stock < 20;
-
-                    return (
-                      <tr key={item.id} className="hover:bg-[#fef9c3]/30 transition-colors">
-                        <td className="py-3 px-2 font-black text-[#71717a]">{index + 1}</td>
-                        <td className="py-3 px-2">
-                          <span className="font-mono bg-[#f4f4f5] px-1.5 py-0.5 rounded border border-[#18181b] font-black text-[11px]">
-                            {item.code}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 font-black uppercase text-sm">{item.name}</td>
-                        <td className="py-3 px-2">
-                          <span className="bg-[#fef08a] px-1.5 py-0.5 border border-[#18181b] text-[10px] font-black">
-                            {item.unit}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 font-black text-emerald-800">
-                          Rp {Number(item.price).toLocaleString('id-ID')}
-                        </td>
-                        <td className="py-3 px-2 text-center font-black">{item.stock}</td>
-                        <td className="py-3 px-2 text-center">
-                          {isOutOfStock ? (
-                            <span className="bg-rose-500 text-white border border-[#18181b] font-black text-[9px] px-2 py-0.5">
-                              HABIS
-                            </span>
-                          ) : isLowStock ? (
-                            <span className="bg-[#fde047] text-[#18181b] border border-[#18181b] font-black text-[9px] px-2 py-0.5">
-                              MENIPIS
-                            </span>
-                          ) : (
-                            <span className="bg-[#a3e635] text-[#18181b] border border-[#18181b] font-black text-[9px] px-2 py-0.5">
-                              AMAN
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-2 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditModal(item)}
-                              className="p-1 border border-[#18181b] bg-white hover:bg-[#fde047] cursor-pointer"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">edit</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteMedicine(item.id, item.name)}
-                              className="p-1 border border-[#18181b] bg-white text-rose-600 hover:bg-rose-100 cursor-pointer"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">delete</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+      {/* Filter & Search Bar */}
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-white border-3 border-[#18181b] shadow-[3px_3px_0px_#18181b] rounded-2xl p-4">
+        {/* Search Bar */}
+        <div className="flex-1 flex items-center bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2">
+          <span className="material-symbols-outlined text-[18px] text-[#71717a] mr-2">search</span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Cari berdasarkan nama obat, kode, atau satuan..."
+            className="w-full bg-transparent text-xs font-bold text-[#18181b] outline-none placeholder:text-[#a1a1aa]"
+          />
+          {searchTerm.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="text-[#71717a] hover:text-[#18181b]"
+            >
+              <span className="material-symbols-outlined text-[18px]">cancel</span>
+            </button>
           )}
         </div>
+
+        {/* Stock Filter Pills */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {[
+            { id: "ALL", label: "Semua" },
+            { id: "LOW_STOCK", label: "Stok Kritis" },
+            { id: "IN_STOCK", label: "Stok Cukup" },
+          ].map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setStockFilter(s.id as any)}
+              className={`px-3 py-1.5 rounded-xl border-2 border-[#18181b] text-xs font-black uppercase transition-all ${
+                stockFilter === s.id
+                  ? "bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]"
+                  : "bg-white text-[#18181b] hover:bg-[#fef08a]"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
-      {/* 3. Modal Form Tambah / Edit Obat (Pop-up Modal Neubrutalism) */}
+
+      {/* Medicines Table */}
+      {isLoading ? (
+        <div className="py-20 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6">
+          <span className="material-symbols-outlined text-[36px] text-[#18181b] animate-spin mb-2">
+            sync
+          </span>
+          <p className="font-black text-sm uppercase">Memuat Katalog Obat...</p>
+        </div>
+      ) : filteredMedicines.length === 0 ? (
+        <div className="py-16 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6 space-y-2">
+          <span className="material-symbols-outlined text-[48px] text-[#71717a]">
+            medication_liquid
+          </span>
+          <h3 className="text-base font-black uppercase text-[#18181b]">Tidak Ada Data Obat</h3>
+          <p className="text-xs text-[#71717a] font-medium max-w-sm mx-auto">
+            {searchTerm
+              ? `Tidak ada obat yang cocok dengan pencarian "${searchTerm}"`
+              : "Belum ada obat yang didaftarkan ke apotek klinik."}
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#18181b] text-white uppercase font-black text-[11px] tracking-wider border-b-3 border-[#18181b]">
+                  <th className="p-3.5">Kode</th>
+                  <th className="p-3.5">Nama Obat</th>
+                  <th className="p-3.5">Satuan</th>
+                  <th className="p-3.5">Harga Jual</th>
+                  <th className="p-3.5">Sisa Stok</th>
+                  <th className="p-3.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y-2 divide-zinc-200 font-bold text-[#18181b]">
+                {filteredMedicines.map((medicine) => {
+                  const isLow = medicine.stock <= 5;
+
+                  return (
+                    <tr key={medicine.id} className="hover:bg-[#f4f3ed] transition-colors">
+                      <td className="p-3.5">
+                        <span className="bg-[#fef08a] border border-[#18181b] px-2 py-0.5 rounded text-[11px] font-black">
+                          {medicine.code}
+                        </span>
+                      </td>
+                      <td className="p-3.5 font-black text-sm uppercase">{medicine.name}</td>
+                      <td className="p-3.5">
+                        <span className="bg-[#f4f3ed] border border-[#18181b] px-2.5 py-0.5 rounded text-xs font-black">
+                          {medicine.unit}
+                        </span>
+                      </td>
+                      <td className="p-3.5 font-black text-sm text-[#059669]">
+                        {formatRupiah(medicine.price)}
+                      </td>
+                      <td className="p-3.5">
+                        <span
+                          className={`px-2.5 py-1 rounded-lg border-2 border-[#18181b] text-xs font-black ${
+                            isLow
+                              ? "bg-[#fecdd3] text-[#991b1b]"
+                              : "bg-[#d9f99d] text-[#166534]"
+                          }`}
+                        >
+                          {medicine.stock} {medicine.unit} {isLow && "⚠️"}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(medicine)}
+                            className="bg-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-zinc-100 transition-all cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMedicine(medicine.id, medicine.name)}
+                            className="bg-[#f43f5e] text-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-rose-600 transition-all cursor-pointer"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Form Tambah / Edit Obat */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border-4 border-[#18181b] shadow-[8px_8px_0px_#18181b] p-6 space-y-5">
-            {/* Header Modal */}
-            <div className="flex items-center justify-between border-b-3 border-[#18181b] pb-3">
-              <h3 className="text-base font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
-                <span className="material-symbols-outlined text-[22px] text-emerald-700">
-                  {modalMode === 'CREATE' ? 'add_circle' : 'edit_square'}
-                </span>
-                <span>{modalMode === 'CREATE' ? 'TAMBAH OBAT BARU' : 'EDIT DATA OBAT'}</span>
-              </h3>
+          <div className="w-full max-w-md bg-white border-4 border-[#18181b] shadow-[8px_8px_0px_#18181b] rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#18181b]">
+              <div>
+                <h3 className="text-xl font-black text-[#18181b] uppercase tracking-tight">
+                  {modalMode === "CREATE" ? "Tambah Obat Baru" : "Edit Data Obat"}
+                </h3>
+                <p className="text-xs font-bold text-[#71717a]">
+                  Formulir katalog obat & tarif apotek
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 bg-white border-2 border-[#18181b] hover:bg-rose-500 hover:text-white cursor-pointer font-black"
+                className="w-8 h-8 rounded-full bg-[#f4f3ed] border-2 border-[#18181b] flex items-center justify-center hover:bg-rose-100 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            {/* Form Fields */}
-            <form onSubmit={handleSubmitForm} className="space-y-4">
+            <form onSubmit={handleSubmitForm} className="space-y-3">
               {/* Nama Obat */}
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                  Nama Obat & Dosis
+              <div>
+                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  Nama Obat *
                 </label>
                 <input
                   type="text"
                   required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Contoh: Paracetamol 500mg"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                 />
               </div>
 
-              {/* Satuan / Unit & Stok */}
+              {/* Harga Jual (Live Rupiah Formatting) & Stok */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                    Satuan / Unit
+                <div>
+                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                    Harga Jual (Rp) *
                   </label>
-                  <select
-                    value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
-                  >
-                    <option value="Strip">Strip</option>
-                    <option value="Tablet">Tablet</option>
-                    <option value="Botol">Botol</option>
-                    <option value="Kapsul">Kapsul</option>
-                    <option value="Ampul">Ampul</option>
-                    <option value="Pcs">Pcs</option>
-                    <option value="Box">Box</option>
-                  </select>
+                  <div className="flex items-center bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3 py-2.5">
+                    <span className="text-xs font-black text-[#71717a] mr-1">Rp</span>
+                    <input
+                      type="text"
+                      required
+                      value={price}
+                      onChange={(e) => handlePriceChange(e.target.value)}
+                      placeholder="15.000"
+                      className="w-full bg-transparent text-xs font-bold text-[#18181b] outline-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                    Jumlah Stok
+                <div>
+                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                    Stok Saat Ini *
                   </label>
                   <input
                     type="number"
-                    min="0"
                     required
-                    placeholder="0"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                    min="0"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    placeholder="50"
+                    className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                   />
                 </div>
               </div>
 
-              {/* Harga Jual Satuan */}
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                  Harga Satuan (Rp)
+              {/* Satuan Obat (Common Units Pills) */}
+              <div>
+                <label className="block text-xs font-black text-[#18181b] uppercase mb-1.5">
+                  Satuan Kemasan *
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="500"
-                  required
-                  placeholder="15000"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                  className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
-                />
+                <div className="flex flex-wrap gap-1.5">
+                  {commonUnits.map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setUnit(u)}
+                      className={`px-3 py-1 rounded-lg border-2 border-[#18181b] text-xs font-black uppercase transition-all cursor-pointer ${
+                        unit === u
+                          ? "bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]"
+                          : "bg-[#f4f3ed] text-[#18181b] hover:bg-white"
+                      }`}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Modal Actions */}
-              <div className="pt-3 border-t-2 border-[#18181b]/10 flex items-center justify-end gap-2.5">
+              {/* Form Buttons */}
+              <div className="flex gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 border-2 border-[#18181b] bg-white text-xs font-black text-[#18181b] hover:bg-zinc-100 shadow-[2px_2px_0px_#18181b] cursor-pointer uppercase"
+                  className="flex-1 py-2.5 bg-white border-2 border-[#18181b] rounded-xl text-xs font-black uppercase hover:bg-zinc-100 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] text-xs font-black shadow-[2px_2px_0px_#18181b] hover:scale-102 cursor-pointer uppercase tracking-wider"
+                  className="flex-1 py-2.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] rounded-xl text-xs font-black uppercase hover:bg-lime-400 cursor-pointer"
                 >
-                  {modalMode === 'CREATE' ? 'Simpan Obat Baru' : 'Simpan Perubahan'}
+                  {modalMode === "CREATE" ? "Simpan Obat" : "Update Obat"}
                 </button>
               </div>
             </form>

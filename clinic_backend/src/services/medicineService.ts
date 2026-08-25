@@ -1,13 +1,15 @@
-import prisma from '../config/prisma.js';
-import { ApiError } from '../utils/apiError.js';
-import { createMedicineInput, updateMedicineInput } from '../validation/medicineSchema.js';
-import { Prisma } from '@prisma/client';
+import prisma from "../config/prisma.js";
+import { ApiError } from "../utils/apiError.js";
+import { createMedicineInput, updateMedicineInput } from "../validation/medicineSchema.js";
+import { Prisma } from "@prisma/client";
 
 export const getAllMedicineService = async () => {
-  const medicines = await prisma.medicine.findMany();
+  const medicines = await prisma.medicine.findMany({
+    orderBy: { updatedAt: "desc" },
+  });
 
   if (medicines.length === 0) {
-    throw new ApiError(404, 'Medicine nya Kosong');
+    throw new ApiError(404, "Medicine nya Kosong");
   }
 
   return medicines;
@@ -15,7 +17,7 @@ export const getAllMedicineService = async () => {
 
 export const createMedicineService = async (input: createMedicineInput) => {
   const count = await prisma.medicine.count();
-  const code = `MED-${String(count + 1).padStart(3, '0')}`;
+  const code = `MED-${String(count + 1).padStart(3, "0")}`;
 
   const medicine = await prisma.medicine.create({
     data: {
@@ -38,7 +40,7 @@ export const getMedicineByIdService = async (id: number) => {
   });
 
   if (!getMedicine) {
-    throw new ApiError(404, 'Medicine yang di cari ga ada');
+    throw new ApiError(404, "Medicine yang di cari ga ada");
   }
 
   return getMedicine;
@@ -58,17 +60,20 @@ export const updateMedicineService = async (id: number, input: updateMedicineInp
 export const deleteMedicineService = async (id: number) => {
   await getMedicineByIdService(id);
 
-  try {
-    const deleteMedicine = await prisma.medicine.delete({
-      where: {
-        id: id,
-      },
-    });
-    return deleteMedicine;
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
-      throw new ApiError(400, 'Medicine tidak dapat dihapus karna memiliki riwayat rekam medis');
-    }
-    throw error;
+  // Cek apakah obat pernah diresepkan dalam riwayat konsultasi
+  const hasConsultations = await prisma.consultationMedicine.findFirst({
+    where: { medicineId: id },
+  });
+
+  if (hasConsultations) {
+    throw new ApiError(
+      400,
+      "Obat tidak dapat dihapus karena memiliki riwayat resep / rekam medis pasien"
+    );
   }
+
+  // Eksekusi hapus jika tidak ada relasi resep
+  return await prisma.medicine.delete({
+    where: { id },
+  });
 };

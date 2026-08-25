@@ -1,610 +1,534 @@
-import React, { useState, useEffect } from 'react';
-import type { Patient } from '../types/clinic';
+﻿import React, { useState, useEffect } from "react";
+import type { Patient } from "../types/clinic";
+import { usePatientStore } from "../stores/patientStore";
 import {
-  getPatientService,
   createPatientService,
   updatePatientService,
   deletePatientService,
-} from '../services/patientService';
+} from "../services/patientService";
+import { PatientHistoryModal } from "../components/patients/PatientHistoryModal";
 
 export const PatientPage: React.FC = () => {
-  // data state
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { patients, loading: isLoading, fetchPatients } = usePatientStore();
 
-  // filter dan search state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGender, setSelectedGender] = useState<'ALL' | 'MALE' | 'FEMALE'>('ALL');
-  const [sortBy, setSortBy] = useState<'RECENT' | 'NAME_ASC' | 'NAME_DESC' | 'AGE_ASC' | 'AGE_DESC'>('RECENT');
-  const [viewMode, setViewMode] = useState<'TABLE' | 'GRID'>('TABLE');
+  // Filter & Search State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGender, setSelectedGender] = useState<"ALL" | "MALE" | "FEMALE">("ALL");
+  const [viewMode, setViewMode] = useState<"TABLE" | "GRID">("TABLE");
 
-  // modal state
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
+  const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
-  // form state
-  const [formData, setFormData] = useState({
-    name: '',
-    gender: 'MALE' as 'MALE' | 'FEMALE',
-    age: 0,
-    phone: '',
-    address: '',
-  });
+  // Rekam Medis Modal State
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [patientForHistory, setPatientForHistory] = useState<Patient | null>(null);
 
-  // fetch data pasien
-  const fetchPatients = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getPatientService();
-      setPatients(data || []);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Gagal memuat data pasien dari server');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    gender: "MALE" as "MALE" | "FEMALE",
+    age: "",
+    phone: "",
+    address: "",
+  });
 
   useEffect(() => {
     fetchPatients();
   }, []);
 
-  // submit form create dan update
+  const openCreateModal = () => {
+    setModalMode("CREATE");
+    setSelectedPatient(null);
+    setFormData({
+      name: "",
+      gender: "MALE",
+      age: "",
+      phone: "",
+      address: "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (patient: Patient) => {
+    setModalMode("EDIT");
+    setSelectedPatient(patient);
+    setFormData({
+      name: patient.name,
+      gender: patient.gender,
+      age: String(patient.age),
+      phone: patient.phone || "",
+      address: patient.address || "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const openHistoryModal = (patient: Patient) => {
+    setPatientForHistory(patient);
+    setIsHistoryModalOpen(true);
+  };
+
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || formData.age < 0) {
-      return alert('Mohon isi nama dan usia pasien dengan benar');
+    if (!formData.name.trim()) {
+      alert("Nama pasien wajib diisi!");
+      return;
     }
-
-    try {
-      if (modalMode === 'CREATE') {
-        // create data
-        await createPatientService({
-          name: formData.name,
-          gender: formData.gender,
-          age: Number(formData.age),
-          phone: formData.phone || undefined,
-          address: formData.address || undefined,
-        });
-        alert('Pasien baru berhasil didaftarkan');
-      } else if (modalMode === 'EDIT' && selectedPatient) {
-        // update data
-        await updatePatientService(selectedPatient.id, {
-          name: formData.name,
-          gender: formData.gender,
-          age: Number(formData.age),
-          phone: formData.phone || undefined,
-          address: formData.address || undefined,
-        });
-        alert('Data pasien berhasil diperbarui');
-      }
-
-      setIsModalOpen(false);
-      await fetchPatients();
-    } catch (err: any) {
-      alert(`Gagal menyimpan data pasien: ${err?.response?.data?.message || err.message}`);
-    }
-  };
-
-  // delete data pasien
-  const handleDeletePatient = async (id: number, name: string) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus data pasien "${name}"?`)) {
+    const numAge = Number(formData.age);
+    if (!formData.age || isNaN(numAge) || numAge <= 0) {
+      alert("Usia pasien harus berupa angka valid!");
       return;
     }
 
     try {
-      await deletePatientService(id);
-      alert(`Data pasien "${name}" berhasil dihapus`);
-      await fetchPatients();
+      if (modalMode === "CREATE") {
+        await createPatientService({
+          name: formData.name.trim(),
+          gender: formData.gender,
+          age: numAge,
+          phone: formData.phone.trim() || undefined,
+          address: formData.address.trim() || undefined,
+        });
+        alert("Pasien baru berhasil didaftarkan!");
+      } else if (modalMode === "EDIT" && selectedPatient) {
+        await updatePatientService(selectedPatient.id, {
+          name: formData.name.trim(),
+          gender: formData.gender,
+          age: numAge,
+          phone: formData.phone.trim() || undefined,
+          address: formData.address.trim() || undefined,
+        });
+        alert("Data pasien berhasil diperbarui!");
+      }
+      setIsModalOpen(false);
+      fetchPatients();
     } catch (err: any) {
-      alert(`Gagal menghapus pasien: ${err?.response?.data?.message || err.message}`);
+      const message = err?.response?.data?.message || err.message || "Gagal menyimpan data pasien";
+      alert(message);
     }
   };
 
-  // buka modal create
-  const handleOpenCreateModal = () => {
-    setModalMode('CREATE');
-    setSelectedPatient(null);
-    setFormData({ name: '', gender: 'MALE', age: 0, phone: '', address: '' });
-    setIsModalOpen(true);
+  const handleDeletePatient = async (id: number, name: string) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus data pasien ${name}?`)) {
+      try {
+        await deletePatientService(id);
+        alert(`Data pasien ${name} berhasil dihapus`);
+        fetchPatients();
+      } catch (err: any) {
+        const message = err?.response?.data?.message || err.message || "Gagal menghapus pasien";
+        alert(message);
+      }
+    }
   };
 
-  // buka modal edit
-  const handleOpenEditModal = (item: Patient) => {
-    setModalMode('EDIT');
-    setSelectedPatient(item);
-    setFormData({
-      name: item.name,
-      gender: item.gender,
-      age: item.age,
-      phone: item.phone || '',
-      address: item.address || '',
-    });
-    setIsModalOpen(true);
-  };
-
-  // filter dan search logic
-  const filteredAndSortedPatients = patients
-    .filter((item) => {
-      const matchSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.noRm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.phone && item.phone.includes(searchTerm));
-
-      if (!matchSearch) return false;
-      if (selectedGender === 'MALE') return item.gender === 'MALE';
-      if (selectedGender === 'FEMALE') return item.gender === 'FEMALE';
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'NAME_ASC') return a.name.localeCompare(b.name);
-      if (sortBy === 'NAME_DESC') return b.name.localeCompare(a.name);
-      if (sortBy === 'AGE_ASC') return a.age - b.age;
-      if (sortBy === 'AGE_DESC') return b.age - a.age;
-      return b.id - a.id;
-    });
-
-  // hitung data kpi
-  const totalPatients = patients.length;
-  const maleCount = patients.filter((p) => p.gender === 'MALE').length;
-  const femaleCount = patients.filter((p) => p.gender === 'FEMALE').length;
+  // Filter Logic
+  const filteredPatients = patients.filter((patient) => {
+    if (selectedGender !== "ALL" && patient.gender !== selectedGender) return false;
+    if (searchTerm.trim() !== "") {
+      const q = searchTerm.toLowerCase();
+      return (
+        patient.name.toLowerCase().includes(q) ||
+        patient.noRm.toLowerCase().includes(q) ||
+        (patient.phone && patient.phone.includes(q))
+      );
+    }
+    return true;
+  });
 
   return (
-    <div className="space-y-6 w-full text-[#18181b] font-sans antialiased pb-12">
-      {/* 1. Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border-4 border-[#18181b] p-6 shadow-[6px_6px_0px_#18181b]">
-        <div className="space-y-1">
-          <div className="inline-block bg-[#38bdf8] text-[#18181b] font-black text-xs px-3 py-1 border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] uppercase tracking-wider">
-            DATABASE REKAM MEDIS
+    <div className="space-y-6 w-full pb-10">
+      {/* Header & Primary Action */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-5">
+        <div>
+          <div className="inline-block bg-[#fde047] text-[#18181b] text-[10px] font-black tracking-wider px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase mb-1">
+            MASTER DATA
           </div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-[#18181b] uppercase">
-            MASTER DATA PASIEN KLINIK
+          <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
+            DATA PASIEN
           </h1>
-          <p className="text-xs sm:text-sm font-bold text-[#52525b]">
-            Pusat database seluruh pasien terdaftar, manajemen biodata, dan nomor rekam medis resmi klinik.
+          <p className="text-xs md:text-sm text-[#52525b] font-bold">
+            Total {patients.length} pasien terdaftar dalam database klinik
           </p>
         </div>
 
         <button
           type="button"
-          onClick={handleOpenCreateModal}
-          className="px-5 py-3.5 bg-[#a3e635] text-[#18181b] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] hover:bg-[#bef264] active:translate-y-0.5 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition-all shrink-0"
+          onClick={openCreateModal}
+          className="neubrutal-btn-primary px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer uppercase tracking-wider text-xs font-black"
         >
-          <span className="material-symbols-outlined text-[20px]">person_add</span>
-          <span>+ Registrasi Pasien Baru</span>
+          <span className="material-symbols-outlined text-[18px]">person_add</span>
+          <span>+ Tambah Pasien Baru</span>
         </button>
       </div>
 
-      {/* 2. KPI Summary Grid Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-[#fef08a] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#18181b]">TOTAL PASIEN</span>
-            <div className="text-3xl font-black">{totalPatients}</div>
-          </div>
-          <span className="material-symbols-outlined text-4xl text-[#18181b]">groups</span>
+      {/* Filter & View Switcher Bar */}
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-white border-3 border-[#18181b] shadow-[3px_3px_0px_#18181b] rounded-2xl p-4">
+        {/* Search Bar */}
+        <div className="flex-1 flex items-center bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2">
+          <span className="material-symbols-outlined text-[18px] text-[#71717a] mr-2">search</span>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Cari berdasarkan nama, No. RM, atau nomor HP..."
+            className="w-full bg-transparent text-xs font-bold text-[#18181b] outline-none placeholder:text-[#a1a1aa]"
+          />
+          {searchTerm.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="text-[#71717a] hover:text-[#18181b]"
+            >
+              <span className="material-symbols-outlined text-[18px]">cancel</span>
+            </button>
+          )}
         </div>
 
-        <div className="p-4 bg-[#38bdf8] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#18181b]">PASIEN LAKI-LAKI</span>
-            <div className="text-3xl font-black">{maleCount}</div>
-          </div>
-          <span className="material-symbols-outlined text-4xl text-[#18181b]">man</span>
+        {/* Gender Filter Pills */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {[
+            { id: "ALL", label: "Semua" },
+            { id: "MALE", label: "Laki-laki" },
+            { id: "FEMALE", label: "Perempuan" },
+          ].map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              onClick={() => setSelectedGender(g.id as any)}
+              className={`px-3 py-1.5 rounded-xl border-2 border-[#18181b] text-xs font-black uppercase transition-all ${
+                selectedGender === g.id
+                  ? "bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]"
+                  : "bg-white text-[#18181b] hover:bg-[#fef08a]"
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
         </div>
 
-        <div className="p-4 bg-[#f472b6] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#18181b]">PASIEN PEREMPUAN</span>
-            <div className="text-3xl font-black">{femaleCount}</div>
-          </div>
-          <span className="material-symbols-outlined text-4xl text-[#18181b]">woman</span>
+        {/* View Mode Toggle (Table / Grid) */}
+        <div className="flex items-center gap-1 bg-[#f4f3ed] p-1 border-2 border-[#18181b] rounded-xl shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode("TABLE")}
+            className={`p-1.5 rounded-lg border border-transparent transition-all ${
+              viewMode === "TABLE" ? "bg-white border-[#18181b] shadow-xs" : "text-[#71717a]"
+            }`}
+            title="Tampilan Tabel"
+          >
+            <span className="material-symbols-outlined text-[18px]">table_rows</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("GRID")}
+            className={`p-1.5 rounded-lg border border-transparent transition-all ${
+              viewMode === "GRID" ? "bg-white border-[#18181b] shadow-xs" : "text-[#71717a]"
+            }`}
+            title="Tampilan Grid Kartu"
+          >
+            <span className="material-symbols-outlined text-[18px]">grid_view</span>
+          </button>
         </div>
       </div>
 
-      {/* 3. Main Two-Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        {/* Kolom Kiri: Search & Filter Stacked Menu */}
-        <div className="md:col-span-4 space-y-4">
-          <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-3">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#71717a]">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Cari nama, No. RM, No. HP..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] transition-all"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-[#71717a] tracking-wider block">
-                Urutkan Berdasarkan:
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full p-2 border-2 border-[#18181b] bg-white text-xs font-black text-[#18181b] focus:outline-none cursor-pointer"
-              >
-                <option value="RECENT">Pendaftaran Terbaru</option>
-                <option value="NAME_ASC">Nama Pasien (A - Z)</option>
-                <option value="NAME_DESC">Nama Pasien (Z - A)</option>
-                <option value="AGE_ASC">Usia (Termuda)</option>
-                <option value="AGE_DESC">Usia (Tertua)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-2">
-            <div className="text-[11px] font-black uppercase tracking-wider text-[#71717a] pb-2 border-b-2 border-[#18181b]/10 flex justify-between items-center">
-              <span>FILTER JENIS KELAMIN</span>
-              <span className="material-symbols-outlined text-[16px]">filter_list</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSelectedGender('ALL')}
-              className={`w-full text-left p-2.5 font-black text-xs border-2 border-[#18181b] flex items-center justify-between transition-all cursor-pointer ${
-                selectedGender === 'ALL'
-                  ? 'bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]'
-                  : 'bg-white hover:bg-[#fef9c3] text-[#18181b]'
-              }`}
-            >
-              <span>SEMUA PASIEN</span>
-              <span className="px-2 py-0.5 text-[10px] bg-white text-[#18181b] border border-[#18181b] font-black">
-                {totalPatients}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedGender('MALE')}
-              className={`w-full text-left p-2.5 font-black text-xs border-2 border-[#18181b] flex items-center justify-between transition-all cursor-pointer ${
-                selectedGender === 'MALE'
-                  ? 'bg-[#18181b] text-white shadow-[2px_2px_0px_#38bdf8]'
-                  : 'bg-white hover:bg-[#fef9c3] text-[#18181b]'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#38bdf8] border border-[#18181b]" />
-                <span>LAKI-LAKI</span>
-              </div>
-              <span className="px-2 py-0.5 text-[10px] bg-[#38bdf8] text-[#18181b] border border-[#18181b] font-black">
-                {maleCount}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedGender('FEMALE')}
-              className={`w-full text-left p-2.5 font-black text-xs border-2 border-[#18181b] flex items-center justify-between transition-all cursor-pointer ${
-                selectedGender === 'FEMALE'
-                  ? 'bg-[#18181b] text-white shadow-[2px_2px_0px_#f472b6]'
-                  : 'bg-white hover:bg-[#fef9c3] text-[#18181b]'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#f472b6] border border-[#18181b]" />
-                <span>PEREMPUAN</span>
-              </div>
-              <span className="px-2 py-0.5 text-[10px] bg-[#f472b6] text-white border border-[#18181b] font-black">
-                {femaleCount}
-              </span>
-            </button>
-          </div>
+      {/* Main Content Area */}
+      {isLoading ? (
+        <div className="py-20 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6">
+          <span className="material-symbols-outlined text-[36px] text-[#18181b] animate-spin mb-2">
+            sync
+          </span>
+          <p className="font-black text-sm uppercase">Memuat Data Pasien...</p>
         </div>
-
-        {/* Kolom Kanan: Main Table / Grid Area */}
-        <div className="md:col-span-8 space-y-4">
-          <div className="flex items-center justify-between bg-white border-3 border-[#18181b] p-3 shadow-[4px_4px_0px_#18181b]">
-            <div className="text-xs font-black uppercase text-[#18181b] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">list_alt</span>
-              <span>Daftar Pasien ({filteredAndSortedPatients.length})</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setViewMode('TABLE')}
-                className={`p-1.5 border-2 border-[#18181b] cursor-pointer transition-all ${
-                  viewMode === 'TABLE' ? 'bg-[#18181b] text-white' : 'bg-white text-[#18181b] hover:bg-[#fde047]'
-                }`}
-                title="Mode Tabel"
-              >
-                <span className="material-symbols-outlined text-[18px]">table_rows</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('GRID')}
-                className={`p-1.5 border-2 border-[#18181b] cursor-pointer transition-all ${
-                  viewMode === 'GRID' ? 'bg-[#18181b] text-white' : 'bg-white text-[#18181b] hover:bg-[#fde047]'
-                }`}
-                title="Mode Grid Kartu"
-              >
-                <span className="material-symbols-outlined text-[18px]">grid_view</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="p-12 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b]">
-              <span className="material-symbols-outlined text-4xl animate-spin text-[#18181b]">progress_activity</span>
-              <p className="mt-2 text-xs font-black uppercase tracking-wider">MENGAMBIL DATA PASIEN DARI SERVER...</p>
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && !isLoading && (
-            <div className="p-4 bg-rose-100 border-3 border-rose-600 text-rose-900 font-bold text-xs shadow-[4px_4px_0px_#e11d48]">
-              {error}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && !error && filteredAndSortedPatients.length === 0 && (
-            <div className="p-12 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] space-y-3">
-              <span className="material-symbols-outlined text-5xl text-[#a1a1aa]">folder_open</span>
-              <h3 className="text-base font-black uppercase">DATA PASIEN KOSONG / TIDAK DITEMUKAN</h3>
-              <p className="text-xs font-bold text-[#71717a]">
-                Belum ada pasien yang terdaftar atau hasil pencarian tidak sesuai.
-              </p>
-              <button
-                type="button"
-                onClick={handleOpenCreateModal}
-                className="px-4 py-2 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] font-black text-xs shadow-[2px_2px_0px_#18181b] hover:bg-[#bef264] cursor-pointer"
-              >
-                + Registrasi Pasien Baru
-              </button>
-            </div>
-          )}
-
-          {/* Data List: TABLE VIEW */}
-          {!isLoading && !error && filteredAndSortedPatients.length > 0 && viewMode === 'TABLE' && (
-            <div className="p-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[700px]">
-                <thead>
-                  <tr className="border-b-3 border-[#18181b] text-[11px] font-black uppercase tracking-wider text-[#71717a]">
-                    <th className="pb-3 px-2">No</th>
-                    <th className="pb-3 px-2">No. RM</th>
-                    <th className="pb-3 px-2">Nama Pasien</th>
-                    <th className="pb-3 px-2">Gender</th>
-                    <th className="pb-3 px-2">Usia</th>
-                    <th className="pb-3 px-2">No. HP</th>
-                    <th className="pb-3 px-2">Alamat</th>
-                    <th className="pb-3 px-2 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#18181b]/10 text-xs font-bold text-[#18181b]">
-                  {filteredAndSortedPatients.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-[#fef9c3]/30 transition-colors">
-                      <td className="py-3 px-2 font-black text-[#71717a]">{index + 1}</td>
-                      <td className="py-3 px-2">
-                        <span className="font-mono bg-[#f4f4f5] px-1.5 py-0.5 rounded border border-[#18181b] font-black text-[11px]">
-                          {item.noRm}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2 font-black uppercase text-sm">{item.name}</td>
-                      <td className="py-3 px-2">
+      ) : filteredPatients.length === 0 ? (
+        <div className="py-16 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6 space-y-2">
+          <span className="material-symbols-outlined text-[48px] text-[#71717a]">
+            person_off
+          </span>
+          <h3 className="text-base font-black uppercase text-[#18181b]">
+            Tidak Ada Data Pasien
+          </h3>
+          <p className="text-xs text-[#71717a] font-medium max-w-sm mx-auto">
+            {searchTerm
+              ? `Tidak ada pasien yang cocok dengan pencarian "${searchTerm}"`
+              : "Belum ada pasien yang didaftarkan ke sistem."}
+          </p>
+        </div>
+      ) : viewMode === "TABLE" ? (
+        /* TABLE VIEW */
+        <div className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#18181b] text-white uppercase font-black text-[11px] tracking-wider border-b-3 border-[#18181b]">
+                  <th className="p-3.5">No. RM</th>
+                  <th className="p-3.5">Nama Pasien</th>
+                  <th className="p-3.5">Gender / Usia</th>
+                  <th className="p-3.5">Kontak & Alamat</th>
+                  <th className="p-3.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y-2 divide-zinc-200 font-bold text-[#18181b]">
+                {filteredPatients.map((patient) => (
+                  <tr key={patient.id} className="hover:bg-[#f4f3ed] transition-colors">
+                    <td className="p-3.5">
+                      <span className="bg-[#a3e635] border border-[#18181b] px-2 py-0.5 rounded text-[11px] font-black">
+                        {patient.noRm}
+                      </span>
+                    </td>
+                    <td className="p-3.5 font-black text-sm uppercase">{patient.name}</td>
+                    <td className="p-3.5">
+                      <div className="flex items-center gap-1.5">
                         <span
-                          className={`px-1.5 py-0.5 border border-[#18181b] text-[10px] font-black ${
-                            item.gender === 'MALE' ? 'bg-[#38bdf8]' : 'bg-[#f472b6] text-white'
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border border-[#18181b] ${
+                            patient.gender === "MALE" ? "bg-[#bae6fd]" : "bg-[#fbcfe8]"
                           }`}
                         >
-                          {item.gender === 'MALE' ? 'LAKI-LAKI' : 'PEREMPUAN'}
+                          {patient.gender === "MALE" ? "L" : "P"}
                         </span>
-                      </td>
-                      <td className="py-3 px-2 font-black">{item.age} Th</td>
-                      <td className="py-3 px-2 font-mono text-[11px]">{item.phone || '-'}</td>
-                      <td className="py-3 px-2 text-[11px] text-[#71717a] max-w-[180px] truncate">
-                        {item.address || '-'}
-                      </td>
-                      <td className="py-3 px-2 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(item)}
-                            className="p-1 border border-[#18181b] bg-white hover:bg-[#fde047] cursor-pointer"
-                            title="Edit Pasien"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">edit</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeletePatient(item.id, item.name)}
-                            className="p-1 border border-[#18181b] bg-white text-rose-600 hover:bg-rose-100 cursor-pointer"
-                            title="Hapus Pasien"
-                          >
-                            <span className="material-symbols-outlined text-[15px]">delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Data List: GRID VIEW */}
-          {!isLoading && !error && filteredAndSortedPatients.length > 0 && viewMode === 'GRID' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredAndSortedPatients.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] flex flex-col justify-between"
-                >
-                  <div className="p-4 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <span className="font-mono bg-[#f4f4f5] px-2 py-0.5 border border-[#18181b] font-black text-xs">
-                        {item.noRm}
-                      </span>
-                      <span
-                        className={`px-1.5 py-0.5 border border-[#18181b] text-[9px] font-black ${
-                          item.gender === 'MALE' ? 'bg-[#38bdf8]' : 'bg-[#f472b6] text-white'
-                        }`}
-                      >
-                        {item.gender === 'MALE' ? 'LAKI-LAKI' : 'PEREMPUAN'} ({item.age} TH)
-                      </span>
-                    </div>
-
-                    <div>
-                      <h3 className="font-black uppercase text-base text-[#18181b]">{item.name}</h3>
-                      <p className="text-xs font-bold text-[#71717a] flex items-center gap-1 mt-0.5">
-                        <span className="material-symbols-outlined text-[14px]">call</span>
-                        <span>{item.phone || 'Tidak ada kontak'}</span>
+                        <span>{patient.age} Th</span>
+                      </div>
+                    </td>
+                    <td className="p-3.5">
+                      <p className="font-bold">{patient.phone || "-"}</p>
+                      <p className="text-[10px] text-[#71717a] truncate max-w-xs">
+                        {patient.address || "Belum ada alamat"}
                       </p>
-                      <p className="text-xs text-[#71717a] truncate mt-1">
-                        <span className="font-bold">Alamat:</span> {item.address || '-'}
-                      </p>
-                    </div>
-                  </div>
+                    </td>
+                    <td className="p-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Tombol Rekam Medis */}
+                        <button
+                          type="button"
+                          onClick={() => openHistoryModal(patient)}
+                          className="bg-[#bae6fd] border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-sky-300 transition-all flex items-center gap-1 cursor-pointer"
+                          title="Lihat Riwayat Rekam Medis"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">
+                            description
+                          </span>
+                          <span>Rekam Medis</span>
+                        </button>
 
-                  {/* Bottom Action Buttons */}
-                  <div className="p-3 bg-[#f8fafc] border-t-3 border-[#18181b] grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditModal(item)}
-                      className="py-1.5 px-3 bg-white text-[#18181b] border-2 border-[#18181b] text-xs font-black hover:bg-[#fde047] shadow-[2px_2px_0px_#18181b] flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">edit</span>
-                      <span>EDIT</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePatient(item.id, item.name)}
-                      className="py-1.5 px-3 bg-white text-rose-600 border-2 border-[#18181b] text-xs font-black hover:bg-rose-100 shadow-[2px_2px_0px_#18181b] flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">delete</span>
-                      <span>HAPUS</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                        {/* Edit */}
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(patient)}
+                          className="bg-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-zinc-100 transition-all cursor-pointer"
+                        >
+                          Edit
+                        </button>
+
+                        {/* Hapus */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePatient(patient.id, patient.name)}
+                          className="bg-[#f43f5e] text-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-rose-600 transition-all cursor-pointer"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* GRID VIEW */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredPatients.map((patient) => (
+            <div
+              key={patient.id}
+              className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-4 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="bg-[#a3e635] border-2 border-[#18181b] px-2 py-0.5 rounded text-xs font-black">
+                    {patient.noRm}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-black border border-[#18181b] ${
+                      patient.gender === "MALE" ? "bg-[#bae6fd]" : "bg-[#fbcfe8]"
+                    }`}
+                  >
+                    {patient.gender === "MALE" ? "Laki-laki" : "Perempuan"} • {patient.age} Th
+                  </span>
+                </div>
+                <h3 className="text-base font-black text-[#18181b] uppercase mb-2">
+                  {patient.name}
+                </h3>
+                <div className="bg-[#f4f3ed] p-2.5 rounded-xl border border-zinc-200 text-xs space-y-1 mb-4">
+                  <p className="font-bold text-[#18181b] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px]">call</span>
+                    {patient.phone || "Tidak ada nomor HP"}
+                  </p>
+                  <p className="text-[11px] text-[#52525b] flex items-start gap-1.5">
+                    <span className="material-symbols-outlined text-[14px] shrink-0 mt-0.5">
+                      location_on
+                    </span>
+                    <span className="truncate">{patient.address || "Alamat belum diisi"}</span>
+                  </p>
+                </div>
+              </div>
 
-      {/* 4. Modal Form Tambah / Edit Pasien */}
+              <div className="flex items-center justify-between gap-1.5 pt-3 border-t-2 border-zinc-200">
+                <button
+                  type="button"
+                  onClick={() => openHistoryModal(patient)}
+                  className="flex-1 bg-[#bae6fd] border-2 border-[#18181b] py-1.5 rounded-lg text-xs font-black uppercase hover:bg-sky-300 flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">description</span>
+                  <span>Rekam Medis</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEditModal(patient)}
+                  className="bg-white border-2 border-[#18181b] px-3 py-1.5 rounded-lg text-xs font-black uppercase hover:bg-zinc-100 cursor-pointer"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeletePatient(patient.id, patient.name)}
+                  className="bg-[#f43f5e] text-white border-2 border-[#18181b] px-3 py-1.5 rounded-lg text-xs font-black uppercase hover:bg-rose-600 cursor-pointer"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Form Tambah / Edit Pasien */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border-4 border-[#18181b] shadow-[8px_8px_0px_#18181b] p-6 space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b-3 border-[#18181b]">
+          <div className="w-full max-w-md bg-white border-4 border-[#18181b] shadow-[8px_8px_0px_#18181b] rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#18181b]">
               <div>
-                <span className="text-[10px] font-black uppercase text-[#a3e635] bg-[#18181b] px-2 py-0.5">
-                  {modalMode === 'CREATE' ? 'REGISTRASI BARU' : 'PERBARUI BIODATA'}
-                </span>
-                <h3 className="text-lg font-black uppercase text-[#18181b] mt-1">
-                  {modalMode === 'CREATE' ? 'Formulir Pasien Baru' : `Edit: ${selectedPatient?.name}`}
+                <h3 className="text-xl font-black text-[#18181b] uppercase tracking-tight">
+                  {modalMode === "CREATE" ? "Tambah Pasien Baru" : "Edit Data Pasien"}
                 </h3>
+                <p className="text-xs font-bold text-[#71717a]">
+                  Formulir pendaftaran rekam medis klinik
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 bg-white border-2 border-[#18181b] hover:bg-rose-500 hover:text-white cursor-pointer font-black"
+                className="w-8 h-8 rounded-full bg-[#f4f3ed] border-2 border-[#18181b] flex items-center justify-center hover:bg-rose-100 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSubmitForm} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                  Nama Lengkap Pasien
+            <form onSubmit={handleSubmitForm} className="space-y-3">
+              {/* Nama Pasien */}
+              <div>
+                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  Nama Lengkap Pasien *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: Reyhan Hamdani"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                  placeholder="Contoh: Budi Santoso"
+                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                 />
               </div>
 
+              {/* Gender & Usia */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                    Jenis Kelamin
+                <div>
+                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                    Jenis Kelamin *
                   </label>
                   <select
                     value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                    className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
+                    onChange={(e) =>
+                      setFormData({ ...formData, gender: e.target.value as any })
+                    }
+                    className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                   >
-                    <option value="MALE">LAKI-LAKI</option>
-                    <option value="FEMALE">PEREMPUAN</option>
+                    <option value="MALE">Laki-laki</option>
+                    <option value="FEMALE">Perempuan</option>
                   </select>
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                    Usia (Tahun)
+                <div>
+                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                    Usia (Tahun) *
                   </label>
                   <input
                     type="number"
-                    min="0"
                     required
-                    placeholder="25"
-                    value={formData.age || ''}
-                    onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                    className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                    min="1"
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                    placeholder="Contoh: 30"
+                    className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                  No. Telepon / WhatsApp
+              {/* Nomor HP */}
+              <div>
+                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  Nomor HP / WhatsApp
                 </label>
                 <input
-                  type="text"
-                  placeholder="08123456789"
+                  type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                  placeholder="Contoh: 0812-3456-7890"
+                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                  Alamat Lengkap
+              {/* Alamat */}
+              <div>
+                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  Alamat Tinggal
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Jl. Sudirman No. 123..."
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full p-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b]"
+                  placeholder="Contoh: Jl. Sudirman No. 10, Jakarta Pusat"
+                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2 text-xs font-bold text-[#18181b] outline-none"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              {/* Form Buttons */}
+              <div className="flex gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 bg-white text-[#18181b] border-2 border-[#18181b] text-xs font-black hover:bg-zinc-100 shadow-[2px_2px_0px_#18181b] cursor-pointer"
+                  className="flex-1 py-2.5 bg-white border-2 border-[#18181b] rounded-xl text-xs font-black uppercase hover:bg-zinc-100 cursor-pointer"
                 >
-                  BATAL
+                  Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] text-xs font-black hover:bg-[#bef264] shadow-[2px_2px_0px_#18181b] cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] rounded-xl text-xs font-black uppercase hover:bg-lime-400 cursor-pointer"
                 >
-                  {modalMode === 'CREATE' ? 'SIMPAN PASIEN' : 'UPDATE BIODATA'}
+                  {modalMode === "CREATE" ? "Simpan Pasien" : "Update Pasien"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Modal Riwayat Rekam Medis Pasien */}
+      <PatientHistoryModal
+        isOpen={isHistoryModalOpen}
+        patient={patientForHistory}
+        onClose={() => setIsHistoryModalOpen(false)}
+      />
     </div>
   );
 };

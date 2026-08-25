@@ -1,94 +1,42 @@
-import React from 'react';
+﻿import React from "react";
 
-interface WorkflowGuideProps {
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
-}
-
-export const WorkflowGuide: React.FC<WorkflowGuideProps> = ({ activeTab = 'ALL', onTabChange }) => {
+export const WorkflowGuide: React.FC = () => {
   const steps = [
-    {
-      id: 'WAITING',
-      step: '1',
-      title: '1. Antrean Masuk',
-      desc: 'Pasien Terdaftar & Menunggu',
-      color: 'bg-[#fde047]',
-      icon: 'hourglass_empty',
-    },
-    {
-      id: 'IN_KONSULTASI',
-      step: '2',
-      title: '2. Konsultasi Dokter',
-      desc: 'Pemeriksaan & Resep Obat',
-      color: 'bg-[#38bdf8]',
-      icon: 'stethoscope',
-    },
-    {
-      id: 'UNPAID',
-      step: '3',
-      title: '3. Tagihan Kasir',
-      desc: 'Proses Nota & Pembayaran',
-      color: 'bg-[#f472b6]',
-      icon: 'payments',
-    },
-    {
-      id: 'COMPLETED',
-      step: '4',
-      title: '4. Selesai & Lunas',
-      desc: 'Pelayanan Klinik Selesai',
-      color: 'bg-[#4ade80]',
-      icon: 'task_alt',
-    },
+    { num: "1", title: "Antrean Masuk", color: "bg-[#fde047]" },
+    { num: "2", title: "Konsultasi Dokter", color: "bg-[#38bdf8]" },
+    { num: "3", title: "Tagihan Kasir", color: "bg-[#f472b6]" },
+    { num: "4", title: "Selesai & Lunas", color: "bg-[#4ade80]" },
   ];
 
   return (
-    <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] mb-6 space-y-4">
-      {/* Banner Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b-2 border-[#18181b]/10">
-        <div>
-          <div className="inline-block bg-[#a3e635] text-[#18181b] text-[10px] font-black tracking-wider px-2.5 py-0.5 border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] uppercase mb-1">
-            ALUR RAWAT JALAN
-          </div>
-          <h2 className="text-xl md:text-2xl font-black tracking-tight text-[#18181b] uppercase">
-            PANDUAN ALUR PASIEN DARI PENDAFTARAN HINGGA KASIR
-          </h2>
-        </div>
-        <div className="text-xs text-[#18181b] font-black flex items-center gap-1.5 shrink-0 bg-[#fef08a] px-3 py-1.5 border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] uppercase">
-          <span className="material-symbols-outlined text-[16px]">touch_app</span>
-          <span>Klik alur untuk beralih filter</span>
-        </div>
+    <div className="bg-white border-2 border-[#18181b] shadow-[3px_3px_0px_#18181b] rounded-xl px-4 py-2.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+      <div className="flex items-center gap-2">
+        <span className="bg-[#18181b] text-[#a3e635] text-[10px] font-black px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+          ALUR RAWAT JALAN
+        </span>
+        <span className="text-xs font-bold text-[#52525b]">
+          Standar Operasional Pelayanan Pasien
+        </span>
       </div>
 
-      {/* Workflow Step Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {steps.map((item) => {
-          const isActive = activeTab === item.id;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onTabChange && onTabChange(item.id)}
-              className={`p-3.5 border-2 border-[#18181b] text-left transition-all flex items-center gap-3 cursor-pointer ${
-                isActive
-                  ? `${item.color} text-[#18181b] shadow-[4px_4px_0px_#18181b] scale-[1.02]`
-                  : 'bg-[#fefcf8] text-[#18181b] hover:bg-[#fef08a]/40 shadow-[2px_2px_0px_#18181b]'
-              }`}
-            >
-              <div
-                className={`w-9 h-9 border-2 border-[#18181b] flex items-center justify-center shrink-0 shadow-[1px_1px_0px_#18181b] ${
-                  isActive ? 'bg-[#18181b] text-white' : `${item.color} text-[#18181b]`
-                }`}
+      <div className="flex flex-wrap items-center gap-2">
+        {steps.map((s, idx) => (
+          <React.Fragment key={s.num}>
+            <div className="flex items-center gap-1.5 bg-[#f4f3ed] border border-[#18181b] px-2.5 py-1 rounded-lg">
+              <span
+                className={`w-4 h-4 rounded-full ${s.color} border border-[#18181b] text-[10px] font-black flex items-center justify-center text-[#18181b]`}
               >
-                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              </div>
-              <div className="overflow-hidden">
-                <h3 className="text-xs font-black truncate text-[#18181b] uppercase">{item.title}</h3>
-                <p className="text-[11px] font-bold truncate text-[#52525b]">{item.desc}</p>
-              </div>
-            </button>
-          );
-        })}
+                {s.num}
+              </span>
+              <span className="text-[11px] font-black text-[#18181b] uppercase">
+                {s.title}
+              </span>
+            </div>
+            {idx < steps.length - 1 && (
+              <span className="text-[#a1a1aa] font-black text-xs">➔</span>
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import prisma from '../config/prisma.js';
+﻿import prisma from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { CreateInvoiceInput, payInvoiceInput } from '../validation/invoiceSchema.js';
 import { getVisitByIdService } from './visitService.js';

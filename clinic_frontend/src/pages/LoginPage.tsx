@@ -1,29 +1,29 @@
-﻿import React, { useState } from "react";
-import { useNavigate } from "react-router";
-import { loginService } from "../services/authService";
-import { useAuthStore } from "../stores/authStore";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { loginService } from '../services/authService';
+import { useAuthStore } from '../stores/authStore';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const loginStore = useAuthStore((state) => state.login);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessages, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessage("");
+    setErrorMessage('');
 
     try {
       const authData = await loginService({ email, password });
       loginStore(authData.user as any, authData.token);
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Email atau kata sandi tidak sesuai!";
+      const msg = error?.response?.data?.message || 'Email atau kata sandi tidak sesuai!';
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);
@@ -38,12 +38,8 @@ export const LoginPage: React.FC = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[#a3e635] border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] mb-1">
             <span className="material-symbols-outlined text-[32px]">local_hospital</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-[#18181b] uppercase">
-            ReyClinic System
-          </h1>
-          <p className="text-xs font-bold text-[#52525b]">
-            Portal Autentikasi Staf Medis & Administrasi Klinik
-          </p>
+          <h1 className="text-3xl font-black tracking-tight text-[#18181b] uppercase">ReyClinic System</h1>
+          <p className="text-xs font-bold text-[#52525b]">Portal Autentikasi Staf Medis & Administrasi Klinik</p>
         </div>
 
         {/* Login Card */}
@@ -68,13 +64,9 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Input Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                Email Pengguna
-              </label>
+              <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">Email Pengguna</label>
               <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3 text-[20px] text-[#71717a]">
-                  mail
-                </span>
+                <span className="material-symbols-outlined absolute left-3 text-[20px] text-[#71717a]">mail</span>
                 <input
                   type="email"
                   required
@@ -88,15 +80,11 @@ export const LoginPage: React.FC = () => {
 
             {/* Input Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">
-                Kata Sandi
-              </label>
+              <label className="text-xs font-black uppercase text-[#18181b] tracking-wider block">Kata Sandi</label>
               <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3 text-[20px] text-[#71717a]">
-                  lock
-                </span>
+                <span className="material-symbols-outlined absolute left-3 text-[20px] text-[#71717a]">lock</span>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••"
                   value={password}
@@ -109,7 +97,7 @@ export const LoginPage: React.FC = () => {
                   className="absolute right-3 text-[#71717a] hover:text-[#18181b] flex items-center cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? "visibility_off" : "visibility"}
+                    {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
               </div>
@@ -122,7 +110,7 @@ export const LoginPage: React.FC = () => {
               className="w-full py-3.5 rounded-xl bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] text-xs font-black cursor-pointer shadow-[3px_3px_0px_#18181b] hover:bg-lime-400 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50 uppercase tracking-wider"
             >
               <span className="material-symbols-outlined text-[18px]">login</span>
-              <span>{isLoading ? "Memproses Masuk..." : "Masuk ke Sistem Klinik"}</span>
+              <span>{isLoading ? 'Memproses Masuk...' : 'Masuk ke Sistem Klinik'}</span>
             </button>
           </form>
         </div>

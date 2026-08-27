@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox } from 'lucide-react';
 import type { Visit } from '../../types/clinic';
 
 interface HomeDashboardProps {
@@ -78,45 +79,47 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const countCompleted = visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length;
 
   return (
-    <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] flex flex-col space-y-5">
+    <div id="antrean-table" className="p-5 sm:p-7 bg-white border border-slate-100 shadow-sm rounded-[24px] flex flex-col space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b-2 border-[#18181b]/10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 pb-2">
         <div>
-          <div className="inline-block bg-[#a3e635] text-[#18181b] text-[9px] font-black tracking-wider px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase mb-1">
-            ANTREAN KLINIK
-          </div>
-          <h2 className="text-xl md:text-2xl font-black text-[#18181b] tracking-tight uppercase">
-            DAFTAR ANTREAN PASIEN HARI INI
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+            Daftar Antrean Pasien
           </h2>
-          <p className="text-xs text-[#52525b] font-bold">
-            Kelola dan pantau status alur pemeriksaan pasien secara real-time
+          <p className="text-xs text-slate-400 font-normal mt-0.5">
+            Pantau dan kelola alur pemeriksaan pasien secara real-time
           </p>
         </div>
 
         <div className="relative w-full sm:w-64 shrink-0">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-[#71717a]">
-            search
-          </span>
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Cari pasien / RM / dokter..."
-            className="w-full pl-9 pr-3.5 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] transition-all placeholder:text-[#747872]"
+            className="w-full pl-10 pr-8 py-2 border border-slate-200/80 rounded-full bg-slate-50/50 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white focus:border-[#061e15] transition-all placeholder:text-slate-400"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
+            onChange={(e) => setSearch(e.target.value)}
           />
+          {search.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Filter Tabs (Neubrutalism Tabs) */}
-      <div className="flex flex-wrap items-center gap-2 pb-2">
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-2">
         {[
-          { id: 'ALL', label: 'SEMUA', count: visits.length },
-          { id: 'WAITING', label: 'MENUNGGU', count: countWaiting },
-          { id: 'IN_KONSULTASI', label: 'DIPERIKSA', count: countConsulting },
-          { id: 'UNPAID', label: 'BELUM BAYAR', count: countUnpaid },
-          { id: 'COMPLETED', label: 'SELESAI', count: countCompleted },
+          { id: 'ALL', label: 'Semua', count: visits.length },
+          { id: 'WAITING', label: 'Menunggu', count: countWaiting },
+          { id: 'IN_KONSULTASI', label: 'Diperiksa', count: countConsulting },
+          { id: 'UNPAID', label: 'Belum Bayar', count: countUnpaid },
+          { id: 'COMPLETED', label: 'Selesai', count: countCompleted },
         ].map((tab) => {
           const isActive = currentFilter === tab.id;
 
@@ -124,16 +127,16 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`px-3 py-1.5 text-xs font-black border-2 border-[#18181b] transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold rounded-full transition-all flex items-center gap-2 cursor-pointer ${
                 isActive
-                  ? 'bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]'
-                  : 'bg-white text-[#18181b] hover:bg-[#fde047]'
+                  ? 'bg-[#061e15] text-white shadow-xs font-bold'
+                  : 'bg-slate-100/70 hover:bg-slate-200/60 text-slate-600'
               }`}
             >
               <span>{tab.label}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 font-black border border-[#18181b] ${
-                  isActive ? 'bg-white text-[#18181b]' : 'bg-[#f4f4f5] text-[#18181b]'
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  isActive ? 'bg-[#b4f105] text-[#061e15]' : 'bg-white text-slate-500'
                 }`}
               >
                 {tab.count}
@@ -144,25 +147,25 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       </div>
 
       {/* Main Table */}
-      <div className="overflow-x-auto border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b]">
+      <div className="overflow-x-auto rounded-2xl border border-slate-100">
         {displayedVisits.length === 0 ? (
-          <div className="py-12 text-center text-xs font-black text-[#71717a] space-y-2 bg-white">
-            <span className="material-symbols-outlined text-[36px]">hourglass_empty</span>
+          <div className="py-14 text-center text-xs font-medium text-slate-400 space-y-2 bg-white flex flex-col items-center justify-center">
+            <Inbox size={32} className="text-slate-300 stroke-[1.5]" />
             <p>Tidak ada antrian yang cocok dengan filter atau kata kunci pencarian.</p>
           </div>
         ) : (
           <table className="w-full text-left border-collapse min-w-[700px] bg-white">
             <thead>
-              <tr className="border-b-2 border-[#18181b] bg-[#f8fafc] text-[11px] font-black uppercase tracking-wider text-[#18181b]">
-                <th className="py-3 px-3">Antrean</th>
-                <th className="py-3 px-3">Pasien</th>
-                <th className="py-3 px-3">Dokter Bertugas</th>
-                <th className="py-3 px-3">Waktu Masuk</th>
-                <th className="py-3 px-3 text-center">Status Alur</th>
-                <th className="py-3 px-3 text-right">Aksi</th>
+              <tr className="bg-slate-50/60 text-[11px] font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-100">
+                <th className="py-3 px-4">Antrean</th>
+                <th className="py-3 px-4">Pasien</th>
+                <th className="py-3 px-4">Dokter Bertugas</th>
+                <th className="py-3 px-4">Waktu Masuk</th>
+                <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#18181b]/10 text-xs font-bold text-[#18181b]">
+            <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-700">
               {displayedVisits.map((item, index) => {
                 const isWaiting = item.status === 'WAITING';
                 const isCancelled = item.status === 'CANCELLED';
@@ -173,31 +176,31 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 const formattedQueue = `A-${String(sequentialQueueNumber).padStart(3, '0')}`;
 
                 return (
-                  <tr key={item.id} className="hover:bg-[#fef9c3]/30 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                     {/* Nomor Antrian */}
-                    <td className="py-3.5 px-3">
-                      <span className="font-mono bg-[#f4f4f5] px-2 py-1 border border-[#18181b] font-black text-xs">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono bg-slate-100 text-slate-800 px-3 py-1 rounded-full font-bold text-xs">
                         {formattedQueue}
                       </span>
                     </td>
 
                     {/* Info Pasien */}
-                    <td className="py-3.5 px-3">
-                      <div className="font-black text-sm uppercase">{item.patient?.name}</div>
-                      <div className="text-[11px] text-[#52525b] font-mono font-bold">
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">
                         {item.patient?.noRm} • {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
                       </div>
                     </td>
 
                     {/* Dokter */}
-                    <td className="py-3.5 px-3">
-                      <div className="font-black uppercase">{item.doctor?.name}</div>
-                      <div className="text-[11px] text-[#52525b] font-semibold">{item.doctor?.spesialis}</div>
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-slate-800">{item.doctor?.name}</div>
+                      <div className="text-[11px] text-slate-400">{item.doctor?.spesialis}</div>
                     </td>
 
                     {/* Waktu Masuk */}
-                    <td className="py-3.5 px-3">
-                      <span className="font-mono font-bold text-[#52525b]">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-medium text-slate-500">
                         {item.checkInTime
                           ? new Date(item.checkInTime).toLocaleTimeString('id-ID', {
                               hour: '2-digit',
@@ -208,37 +211,37 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     </td>
 
                     {/* Status Badge */}
-                    <td className="py-3.5 px-3 text-center">
+                    <td className="py-3.5 px-4 text-center">
                       {isWaiting ? (
-                        <span className="bg-[#fde047] text-[#18181b] border-2 border-[#18181b] font-black text-[10px] px-2.5 py-0.5 shadow-[1px_1px_0px_#18181b] uppercase">
+                        <span className="bg-amber-50 text-amber-800 border border-amber-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
                           Menunggu
                         </span>
                       ) : item.status === 'IN_KONSULTASI' ? (
-                        <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-[10px] px-2.5 py-0.5 shadow-[1px_1px_0px_#18181b] uppercase">
+                        <span className="bg-sky-50 text-sky-800 border border-sky-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
                           Diperiksa
                         </span>
                       ) : isUnpaid ? (
-                        <span className="bg-[#f472b6] text-[#18181b] border-2 border-[#18181b] font-black text-[10px] px-2.5 py-0.5 shadow-[1px_1px_0px_#18181b] uppercase">
+                        <span className="bg-rose-50 text-rose-800 border border-rose-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
                           Belum Bayar
                         </span>
                       ) : isCancelled ? (
-                        <span className="bg-zinc-200 text-[#52525b] border-2 border-[#18181b] font-black text-[10px] px-2.5 py-0.5 uppercase">
+                        <span className="bg-slate-100 text-slate-500 border border-slate-200 font-medium text-[10px] px-3 py-0.5 rounded-full">
                           Dibatalkan
                         </span>
                       ) : (
-                        <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-[10px] px-2.5 py-0.5 shadow-[1px_1px_0px_#18181b] uppercase">
+                        <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
                           Selesai
                         </span>
                       )}
                     </td>
 
                     {/* Action Button */}
-                    <td className="py-3.5 px-3 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       {isUnpaid ? (
                         <button
                           type="button"
                           onClick={() => onActionClick && onActionClick(item, 'PROCESS_PAYMENT')}
-                          className="bg-[#f43f5e] text-white border-2 border-[#18181b] font-black text-xs px-3.5 py-1.5 shadow-[2px_2px_0px_#18181b] hover:bg-rose-600 transition-all cursor-pointer uppercase tracking-wider"
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
                         >
                           Proses Bayar
                         </button>
@@ -246,7 +249,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                         <button
                           type="button"
                           onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
-                          className="bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3.5 py-1.5 shadow-[2px_2px_0px_#18181b] hover:scale-102 transition-all cursor-pointer uppercase tracking-wider"
+                          className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
                         >
                           Panggil Pasien
                         </button>
@@ -254,26 +257,26 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                         <button
                           type="button"
                           onClick={() => onActionClick && onActionClick(item, 'CONSULTATION')}
-                          className="bg-[#38bdf8] text-[#18181b] font-black text-xs px-3.5 py-1.5 border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] hover:bg-[#0284c7] hover:text-white transition-all cursor-pointer uppercase tracking-wider"
+                          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
                         >
                           Periksa Dokter
                         </button>
                       ) : isCancelled ? (
-                        <span className="bg-[#cbd5e1] text-[#52525b] border border-[#18181b] font-extrabold text-xs px-3 py-1 inline-block uppercase">
+                        <span className="bg-slate-100 text-slate-500 font-medium text-xs px-3 py-1 rounded-full inline-block">
                           Batal
                         </span>
                       ) : (
                         <div className="flex items-center justify-end gap-1.5">
-                          <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-2.5 py-1 inline-block shadow-[1px_1px_0px_#18181b] uppercase">
+                          <span className="bg-emerald-100 text-emerald-800 font-semibold text-xs px-3 py-1 rounded-full inline-block">
                             Lunas
                           </span>
                           <button
                             type="button"
                             onClick={() => onActionClick && onActionClick(item, 'PRINT_RECEIPT')}
-                            className="p-1 border-2 border-[#18181b] bg-[#fde047] text-[#18181b] hover:bg-[#facc15] shadow-[2px_2px_0px_#18181b] active:translate-y-0.5 cursor-pointer font-black flex items-center justify-center transition-all"
+                            className="p-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full shadow-xs cursor-pointer font-bold flex items-center justify-center transition-all"
                             title="Lihat & Cetak Struk Nota"
                           >
-                            <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                            <Receipt size={15} />
                           </button>
                         </div>
                       )}
@@ -288,11 +291,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
       {/* Pagination Footer */}
       {filteredVisits.length > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 text-xs font-bold text-[#18181b]">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-1 text-xs font-medium text-slate-500">
           <div>
-            Menampilkan <span className="font-black">{startIndex + 1}</span> -{' '}
-            <span className="font-black">{endIndex}</span> dari{' '}
-            <span className="font-black">{filteredVisits.length}</span> antrian
+            Menampilkan <span className="font-bold text-slate-800">{startIndex + 1}</span> -{' '}
+            <span className="font-bold text-slate-800">{endIndex}</span> dari{' '}
+            <span className="font-bold text-slate-800">{filteredVisits.length}</span> antrian
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -300,12 +303,12 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               type="button"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={validCurrentPage === 1}
-              className="p-1.5 border-2 border-[#18181b] bg-white text-[#18181b] hover:bg-[#fde047] disabled:opacity-40 disabled:hover:bg-white shadow-[2px_2px_0px_#18181b] cursor-pointer flex items-center justify-center"
+              className="p-1.5 border border-slate-200 rounded-full bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white shadow-xs cursor-pointer flex items-center justify-center"
             >
-              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              <ChevronLeft size={16} />
             </button>
 
-            <span className="px-3 py-1 border-2 border-[#18181b] bg-[#18181b] text-white font-black text-xs shadow-[2px_2px_0px_#a3e635]">
+            <span className="px-3.5 py-1 bg-[#061e15] text-white font-bold text-xs rounded-full shadow-xs">
               {validCurrentPage} / {totalPages}
             </span>
 
@@ -313,9 +316,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               type="button"
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={validCurrentPage === totalPages}
-              className="p-1.5 border-2 border-[#18181b] bg-white text-[#18181b] hover:bg-[#fde047] disabled:opacity-40 disabled:hover:bg-white shadow-[2px_2px_0px_#18181b] cursor-pointer flex items-center justify-center"
+              className="p-1.5 border border-slate-200 rounded-full bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white shadow-xs cursor-pointer flex items-center justify-center"
             >
-              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>

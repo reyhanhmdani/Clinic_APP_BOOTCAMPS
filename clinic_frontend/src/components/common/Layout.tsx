@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Outlet } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { TopAppBar } from "./TopAppBar";
@@ -19,7 +19,7 @@ export function Layout() {
   }, []);
 
   return (
-    <div className="bg-[#f4f3ed] min-h-screen w-full flex text-[#18181b] font-sans antialiased">
+    <div className="bg-[#f8f9fa] min-h-screen w-full flex text-[#191c1d] font-sans antialiased">
       {/* 1. Global Sidebar Navigation */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 

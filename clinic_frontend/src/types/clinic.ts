@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'CUSTOMERS';
+export type Role = 'ADMIN' | 'CUSTOMER';
 export type Gender = 'MALE' | 'FEMALE';
 export type VisitStatus = 'WAITING' | 'IN_KONSULTASI' | 'COMPLETED' | 'CANCELLED';
 export type InvoiceStatus = 'PAID' | 'UNPAID' | 'CANCELLED';
@@ -8,8 +8,8 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  password: string;
   role: Role;
+  createdAt?: string;
 }
 
 export interface Patient {

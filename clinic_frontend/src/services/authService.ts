@@ -1,24 +1,22 @@
+import type { User } from '../types/clinic';
 import { api } from './api';
 
-export interface loginInput {
+export interface LoginInput {
   email: string;
   password: string;
 }
 
-export interface AuthUser {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-}
 export interface AuthResponse {
   token: string;
-  user: AuthUser;
+  user: User;
 }
 
-export const loginService = async (input: loginInput): Promise<AuthResponse> => {
+export const loginService = async (input: LoginInput): Promise<AuthResponse> => {
   const response = await api.post<{ data: AuthResponse }>('/auth/login', input);
   const authData = response.data.data;
+  if (!authData) {
+    throw new Error('Format respons server tidak valid');
+  }
 
   if (authData.token) {
     localStorage.setItem('token', authData.token);
@@ -27,12 +25,20 @@ export const loginService = async (input: loginInput): Promise<AuthResponse> => 
   return authData;
 };
 
-export const logoutService =  (): void => {
+export const logoutService = (): void => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
 };
 
-export const getCurrentUser = (): AuthUser | null => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
+// Refactor : try catch safeguard agar tidak crash jika localstorage korup
+export const getCurrentUser = (): User | null => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  try {
+    return JSON.parse(userStr) as User;
+  } catch (error) {
+    console.error('Gagal parsing data user dari localStorage:', error);
+    localStorage.removeItem('user'); // Clean up data korup
+    return null;
+  }
 };

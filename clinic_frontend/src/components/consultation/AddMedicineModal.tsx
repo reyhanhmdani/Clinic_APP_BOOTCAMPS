@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Pill, X, AlertCircle, Check } from 'lucide-react';
 import type { Medicine } from '../../types/clinic';
 import type { PrescriptionItem } from './Prescription';
 
@@ -69,35 +70,35 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="neubrutal-card w-full max-w-md bg-white border-2 border-[#18181b] shadow-[8px_8px_0px_#18181b] rounded-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header Modal */}
-        <div className="bg-[#a3e635] p-4 border-b-2 border-[#18181b] flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[22px] text-[#18181b]">medication_liquid</span>
-            <h3 className="text-base font-black text-[#18181b]">Pilih Resep Obat</h3>
+        <div className="bg-[#051c12] p-5 text-white flex justify-between items-center">
+          <div className="flex items-center gap-2.5">
+            <Pill size={20} className="text-[#b4f105]" />
+            <h3 className="text-base font-bold text-white">Pilih Resep Obat</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white border-2 border-[#18181b] flex items-center justify-center text-[#18181b] hover:bg-rose-100 shadow-[1px_1px_0px_#18181b] cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-[#072f1f] text-slate-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <X size={16} />
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border-2 border-rose-600 text-rose-700 text-xs font-bold flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">error</span>
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* 1. Pilih Obat dari Database */}
           <div>
-            <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Daftar Obat Apotek <span className="text-rose-500">*</span>
             </label>
             <select
@@ -106,7 +107,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
                 setSelectedMedicineId(e.target.value);
                 setError(null);
               }}
-              className="w-full p-3 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b] cursor-pointer"
+              className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] cursor-pointer"
             >
               <option value="">-- Pilih Obat Tersedia --</option>
               {medicines.map((med) => {
@@ -114,7 +115,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
                 const isOutOfStock = med.stock <= 0;
                 return (
                   <option key={med.id} value={med.id} disabled={isOutOfStock || isAlready}>
-                    {med.name} (Stok: {med.stock} {med.unit}) - Rp {med.price.toLocaleString('id-ID')}
+                    {med.name} (Stok: {med.stock}) - Rp {med.price.toLocaleString('id-ID')}
                     {isOutOfStock ? ' [HABIS]' : isAlready ? ' [SUDAH DITAMBAHKAN]' : ''}
                   </option>
                 );
@@ -124,15 +125,15 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
 
           {/* Sisa Stok & Harga Info */}
           {selectedMed && (
-            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-300 text-xs font-semibold text-[#52525b] flex justify-between items-center">
-              <span>Sisa Stok: <b className="text-[#18181b]">{selectedMed.stock} {selectedMed.unit}</b></span>
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs font-medium text-slate-600 flex justify-between items-center">
+              <span>Sisa Stok: <b className="text-slate-900">{selectedMed.stock} unit</b></span>
               <span>Harga Satuan: <b className="text-emerald-700">Rp {selectedMed.price.toLocaleString('id-ID')}</b></span>
             </div>
           )}
 
           {/* 2. Jumlah / Qty */}
           <div>
-            <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Jumlah (Qty) <span className="text-rose-500">*</span>
             </label>
             <input
@@ -142,13 +143,13 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               placeholder="Contoh: 10"
-              className="w-full p-3 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+              className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12]"
             />
           </div>
 
           {/* 3. Dosis / Aturan Pakai */}
           <div>
-            <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Instruksi / Dosis Aturan Pakai <span className="text-rose-500">*</span>
             </label>
             <input
@@ -156,7 +157,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
               value={dose}
               onChange={(e) => setDose(e.target.value)}
               placeholder="Contoh: 3x1 tablet sesudah makan"
-              className="w-full p-3 rounded-xl border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[2px_2px_0px_#18181b]"
+              className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12]"
             />
           </div>
 
@@ -165,15 +166,15 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border-2 border-[#18181b] bg-white text-xs font-black text-[#18181b] hover:bg-zinc-100 shadow-[2px_2px_0px_#18181b] cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="neubrutal-btn-primary px-5 py-2.5 rounded-xl text-xs font-black text-[#18181b] shadow-[3px_3px_0px_#18181b] cursor-pointer flex items-center gap-1.5"
+              className="btn-lime px-5 py-2.5 text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[16px]">check</span>
+              <Check size={16} strokeWidth={2.5} />
               <span>Tambahkan Resep</span>
             </button>
           </div>

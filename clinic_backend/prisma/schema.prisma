@@ -13,7 +13,7 @@ datasource db {
 
 enum Role {
   ADMIN
-  CUSTOMERS
+  CUSTOMER
 }
 
 enum Gender {

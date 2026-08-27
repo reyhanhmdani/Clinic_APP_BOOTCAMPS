@@ -1,86 +1,70 @@
-import React from 'react';
-import type { Doctor } from '../../types/clinic';
+import React from "react";
+import { Stethoscope, MoreHorizontal } from "lucide-react";
+import type { Doctor } from "../../types/clinic";
 
 interface DoctorAvailabilityProps {
   doctors: Doctor[];
 }
 
 export const DoctorAvailability: React.FC<DoctorAvailabilityProps> = ({ doctors }) => {
-  // Limit 5 dokter untuk tampilan Dashboard
-  const displayedDoctors = doctors.slice(0, 5);
+  const activeDoctors = doctors.filter((doc) => doc.isActive);
+  const inactiveDoctors = doctors.filter((doc) => !doc.isActive);
 
   return (
-    <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] flex-1 space-y-5">
+    <div className="bg-white border border-slate-200/80 shadow-sm rounded-2xl p-5 space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-start border-b-2 border-[#18181b]/10 pb-3">
-        <div>
-          <div className="inline-block bg-[#fde047] text-[#18181b] text-[9px] font-black tracking-wider px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase mb-1">
-            DOKTER JAGA
-          </div>
-          <h2 className="text-xl font-black text-[#18181b] tracking-tight uppercase">Status Dokter Aktif</h2>
-          <p className="text-xs text-[#52525b] font-bold">
-            Jadwal praktik dokter aktif bertugas hari ini
-          </p>
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2">
+          <Stethoscope size={18} className="text-emerald-700" />
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+            Status Praktek Dokter
+          </h3>
         </div>
-        <span className="material-symbols-outlined text-[#18181b] cursor-pointer hover:text-[#50604f]">more_horiz</span>
+        <MoreHorizontal size={18} className="text-slate-400 cursor-pointer hover:text-slate-700" />
       </div>
 
-      {/* Doctor Cards */}
-      <div className="space-y-3">
-        {displayedDoctors.map((doctor) => {
-          const isActive = doctor.isActive ?? true;
-          const initials = doctor.name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 3);
+      {/* Summary Counts */}
+      <div className="grid grid-cols-2 gap-2 text-center text-xs">
+        <div className="bg-emerald-50 border border-emerald-200/80 p-2.5 rounded-xl">
+          <p className="text-[10px] font-bold text-emerald-800 uppercase">Aktif Bertugas</p>
+          <p className="text-lg font-black text-emerald-900">{activeDoctors.length}</p>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+          <p className="text-[10px] font-bold text-slate-500 uppercase">Libur / Off</p>
+          <p className="text-lg font-black text-slate-700">{inactiveDoctors.length}</p>
+        </div>
+      </div>
 
-          return (
-            <div
-              key={doctor.id}
-              className="flex items-center justify-between p-3 border-2 border-[#18181b] bg-white shadow-[2px_2px_0px_#18181b] hover:bg-[#fef08a]/20 transition-all cursor-pointer group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  <div className="w-10 h-10 bg-[#a3e635] border-2 border-[#18181b] text-[#18181b] font-black text-xs flex items-center justify-center shadow-[1px_1px_0px_#18181b]">
-                    {initials}
-                  </div>
-                  {/* Status Dot */}
-                  <div
-                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-[#18181b] ${
-                      isActive ? 'bg-[#4ade80]' : 'bg-zinc-400'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-black uppercase text-[#18181b]">{doctor.name}</p>
-                  <p className="text-[11px] font-bold text-[#52525b]">{doctor.spesialis}</p>
-                </div>
+      {/* List of Active Doctors */}
+      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+        {doctors.map((doc) => (
+          <div
+            key={doc.id}
+            className="flex items-center justify-between p-2.5 bg-slate-50/50 rounded-xl border border-slate-100 text-xs"
+          >
+            <div className="flex items-center gap-2.5">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  doc.isActive ? "bg-emerald-500 animate-pulse" : "bg-slate-300"
+                }`}
+              />
+              <div>
+                <p className="font-bold text-slate-800">{doc.name}</p>
+                <p className="text-[10px] text-slate-400">{doc.spesialis} • {doc.room || "Poli 1"}</p>
               </div>
-
-              {/* Status Badge */}
-              {isActive ? (
-                <span className="bg-[#4ade80] text-[#18181b] border-2 border-[#18181b] font-black text-[10px] px-2 py-0.5 shadow-[1px_1px_0px_#18181b] uppercase">
-                  READY
-                </span>
-              ) : (
-                <span className="bg-zinc-200 text-[#52525b] border-2 border-[#18181b] font-black text-[10px] px-2 py-0.5 uppercase">
-                  OFFLINE
-                </span>
-              )}
             </div>
-          );
-        })}
+            <span
+              className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${
+                doc.isActive
+                  ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                  : "bg-slate-100 text-slate-400 border-slate-200"
+              }`}
+            >
+              {doc.isActive ? "Praktek" : "Off"}
+            </span>
+          </div>
+        ))}
       </div>
-
-      {/* Footer Schedule Button */}
-      <button
-        type="button"
-        className="w-full mt-2 py-3 bg-[#18181b] text-white text-xs font-black uppercase tracking-wider hover:bg-[#a3e635] hover:text-[#18181b] border-2 border-[#18181b] shadow-[3px_3px_0px_#18181b] transition-all cursor-pointer"
-      >
-        Lihat Semua Dokter Aktif ➔
-      </button>
     </div>
   );
 };

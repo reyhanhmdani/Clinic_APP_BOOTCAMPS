@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pill, Plus, Trash2 } from 'lucide-react';
 
 export interface PrescriptionItem {
   medicineId: number;
@@ -20,47 +21,47 @@ export const Prescription: React.FC<PrescriptionProps> = ({
   onRemovePrescription,
 }) => {
   return (
-    <div className="p-6 bg-white border-3 border-[#18181b] shadow-[5px_5px_0px_#18181b] space-y-4">
+    <div className="p-6 bg-white border border-slate-200/80 shadow-sm rounded-2xl space-y-4">
       {/* Header & Add Button */}
-      <div className="flex justify-between items-center pb-3 border-b-2 border-[#18181b]/10">
-        <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-amber-600">medication</span>
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+          <Pill size={16} className="text-amber-600" />
           <span>Resep Obat Apotek</span>
         </h3>
         <button
           type="button"
           onClick={onOpenAddModal}
-          className="px-3 py-1.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] text-xs font-black shadow-[2px_2px_0px_#18181b] hover:bg-[#bbf7d0] hover:scale-105 transition-all flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+          className="btn-lime px-3 py-1.5 text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center gap-1 cursor-pointer tracking-wider"
         >
-          <span className="material-symbols-outlined text-[16px]">add</span>
+          <Plus size={14} strokeWidth={2.5} />
           <span>+ Tambah Obat</span>
         </button>
       </div>
 
       {/* Prescription List */}
       {prescriptions.length === 0 ? (
-        <div className="p-6 border-2 border-dashed border-[#18181b]/30 text-center text-xs font-bold text-[#52525b] bg-[#fefcf8]">
-          <span className="material-symbols-outlined text-3xl text-zinc-400 block mb-1">prescriptions</span>
-          Belum ada resep obat. Klik <b className="text-[#18181b]">+ Tambah Obat</b> untuk memilih dari apotek.
+        <div className="p-6 border border-dashed border-slate-200 rounded-xl text-center text-xs font-medium text-slate-400 bg-slate-50/50 flex flex-col items-center justify-center space-y-1">
+          <Pill size={28} className="text-slate-300 stroke-[1.5] mb-1" />
+          <p>Belum ada resep obat. Klik <b className="text-slate-700">+ Tambah Obat</b> untuk memilih dari apotek.</p>
         </div>
       ) : (
         <div className="space-y-2.5">
           {prescriptions.map((item) => (
             <div
               key={item.medicineId}
-              className="p-3.5 border-2 border-[#18181b] bg-[#fefcf8] shadow-[2px_2px_0px_#18181b] flex justify-between items-center hover:bg-yellow-50 transition-colors"
+              className="p-3.5 border border-slate-200/80 rounded-xl bg-slate-50/50 flex justify-between items-center hover:bg-slate-50 transition-colors"
             >
               <div>
-                <p className="text-xs font-black text-[#18181b] flex items-center gap-1.5 uppercase">
+                <p className="text-xs font-bold text-slate-800 flex items-center gap-2 capitalize">
                   <span>{item.medicineName}</span>
                   {item.price && (
-                    <span className="text-[10px] font-bold text-zinc-600 bg-zinc-100 px-1.5 py-0.5 border border-zinc-300">
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                       @Rp {item.price.toLocaleString('id-ID')}
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] font-bold text-[#52525b] mt-0.5">
-                  Dosis: <b className="text-[#18181b]">{item.dose}</b> | Jumlah: <b className="text-[#18181b]">{item.qty}</b>
+                <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                  Dosis: <b className="text-slate-800">{item.dose}</b> | Jumlah: <b className="text-slate-800">{item.qty}</b>
                 </p>
               </div>
 
@@ -69,9 +70,9 @@ export const Prescription: React.FC<PrescriptionProps> = ({
                 type="button"
                 onClick={() => onRemovePrescription(item.medicineId)}
                 title="Hapus Resep"
-                className="w-8 h-8 border-2 border-[#18181b] bg-white flex items-center justify-center text-rose-600 hover:bg-rose-100 shadow-[1px_1px_0px_#18181b] active:translate-y-0.5 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-rose-500 hover:text-rose-700 hover:bg-rose-50 shadow-xs active:translate-y-0.5 transition-all cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">delete</span>
+                <Trash2 size={14} />
               </button>
             </div>
           ))}

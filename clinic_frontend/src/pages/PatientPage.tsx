@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2 } from "lucide-react";
 import type { Patient } from "../types/clinic";
 import { usePatientStore } from "../stores/patientStore";
 import {
@@ -140,15 +141,15 @@ export const PatientPage: React.FC = () => {
   return (
     <div className="space-y-6 w-full pb-10">
       {/* Header & Primary Action */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-100 shadow-sm rounded-[24px] p-6">
         <div>
-          <div className="inline-block bg-[#fde047] text-[#18181b] text-[10px] font-black tracking-wider px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase mb-1">
-            MASTER DATA
+          <div className="inline-block bg-lime-100 text-lime-900 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-lime-200 uppercase mb-1">
+            Master Data
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
-            DATA PASIEN
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+            Data Pasien
           </h1>
-          <p className="text-xs md:text-sm text-[#52525b] font-bold">
+          <p className="text-xs text-slate-400 font-normal mt-0.5">
             Total {patients.length} pasien terdaftar dalam database klinik
           </p>
         </div>
@@ -156,32 +157,32 @@ export const PatientPage: React.FC = () => {
         <button
           type="button"
           onClick={openCreateModal}
-          className="neubrutal-btn-primary px-4 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer uppercase tracking-wider text-xs font-black"
+          className="btn-lime px-4 py-2.5 rounded-full flex items-center gap-2 cursor-pointer text-xs font-bold shadow-xs hover:shadow-md transition-all tracking-wide"
         >
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
+          <UserPlus size={16} strokeWidth={2.5} />
           <span>+ Tambah Pasien Baru</span>
         </button>
       </div>
 
       {/* Filter & View Switcher Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-white border-3 border-[#18181b] shadow-[3px_3px_0px_#18181b] rounded-2xl p-4">
+      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-white border border-slate-100 shadow-xs rounded-[24px] p-4">
         {/* Search Bar */}
-        <div className="flex-1 flex items-center bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2">
-          <span className="material-symbols-outlined text-[18px] text-[#71717a] mr-2">search</span>
+        <div className="flex-1 flex items-center bg-slate-50/70 border border-slate-200/80 rounded-full px-4 py-2">
+          <Search size={16} className="text-slate-400 mr-2.5" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Cari berdasarkan nama, No. RM, atau nomor HP..."
-            className="w-full bg-transparent text-xs font-bold text-[#18181b] outline-none placeholder:text-[#a1a1aa]"
+            className="w-full bg-transparent text-xs font-medium text-slate-800 outline-none placeholder:text-slate-400"
           />
           {searchTerm.length > 0 && (
             <button
               type="button"
               onClick={() => setSearchTerm("")}
-              className="text-[#71717a] hover:text-[#18181b]"
+              className="text-slate-400 hover:text-slate-700"
             >
-              <span className="material-symbols-outlined text-[18px]">cancel</span>
+              <X size={14} />
             </button>
           )}
         </div>
@@ -197,10 +198,10 @@ export const PatientPage: React.FC = () => {
               key={g.id}
               type="button"
               onClick={() => setSelectedGender(g.id as any)}
-              className={`px-3 py-1.5 rounded-xl border-2 border-[#18181b] text-xs font-black uppercase transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 selectedGender === g.id
-                  ? "bg-[#18181b] text-white shadow-[2px_2px_0px_#a3e635]"
-                  : "bg-white text-[#18181b] hover:bg-[#fef08a]"
+                  ? "bg-[#061e15] text-white shadow-xs font-bold"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
               }`}
             >
               {g.label}
@@ -209,47 +210,43 @@ export const PatientPage: React.FC = () => {
         </div>
 
         {/* View Mode Toggle (Table / Grid) */}
-        <div className="flex items-center gap-1 bg-[#f4f3ed] p-1 border-2 border-[#18181b] rounded-xl shrink-0">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-full shrink-0">
           <button
             type="button"
             onClick={() => setViewMode("TABLE")}
-            className={`p-1.5 rounded-lg border border-transparent transition-all ${
-              viewMode === "TABLE" ? "bg-white border-[#18181b] shadow-xs" : "text-[#71717a]"
+            className={`p-1.5 rounded-full transition-all ${
+              viewMode === "TABLE" ? "bg-white text-slate-900 shadow-xs" : "text-slate-400 hover:text-slate-700"
             }`}
             title="Tampilan Tabel"
           >
-            <span className="material-symbols-outlined text-[18px]">table_rows</span>
+            <Table2 size={16} />
           </button>
           <button
             type="button"
             onClick={() => setViewMode("GRID")}
-            className={`p-1.5 rounded-lg border border-transparent transition-all ${
-              viewMode === "GRID" ? "bg-white border-[#18181b] shadow-xs" : "text-[#71717a]"
+            className={`p-1.5 rounded-full transition-all ${
+              viewMode === "GRID" ? "bg-white text-slate-900 shadow-xs" : "text-slate-400 hover:text-slate-700"
             }`}
             title="Tampilan Grid Kartu"
           >
-            <span className="material-symbols-outlined text-[18px]">grid_view</span>
+            <LayoutGrid size={16} />
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
       {isLoading ? (
-        <div className="py-20 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6">
-          <span className="material-symbols-outlined text-[36px] text-[#18181b] animate-spin mb-2">
-            sync
-          </span>
-          <p className="font-black text-sm uppercase">Memuat Data Pasien...</p>
+        <div className="py-20 text-center bg-white border border-slate-100 shadow-sm rounded-[24px] p-6 flex flex-col items-center justify-center">
+          <Loader2 size={32} className="text-slate-700 animate-spin mb-2" />
+          <p className="font-bold text-sm text-slate-700">Memuat Data Pasien...</p>
         </div>
       ) : filteredPatients.length === 0 ? (
-        <div className="py-16 text-center bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-6 space-y-2">
-          <span className="material-symbols-outlined text-[48px] text-[#71717a]">
-            person_off
-          </span>
-          <h3 className="text-base font-black uppercase text-[#18181b]">
+        <div className="py-16 text-center bg-white border border-slate-100 shadow-sm rounded-[24px] p-6 space-y-2 flex flex-col items-center justify-center">
+          <UserX size={44} className="text-slate-300" />
+          <h3 className="text-base font-bold text-slate-800">
             Tidak Ada Data Pasien
           </h3>
-          <p className="text-xs text-[#71717a] font-medium max-w-sm mx-auto">
+          <p className="text-xs text-slate-400 font-normal max-w-sm mx-auto">
             {searchTerm
               ? `Tidak ada pasien yang cocok dengan pencarian "${searchTerm}"`
               : "Belum ada pasien yang didaftarkan ke sistem."}
@@ -257,32 +254,34 @@ export const PatientPage: React.FC = () => {
         </div>
       ) : viewMode === "TABLE" ? (
         /* TABLE VIEW */
-        <div className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-100 shadow-sm rounded-[24px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#18181b] text-white uppercase font-black text-[11px] tracking-wider border-b-3 border-[#18181b]">
-                  <th className="p-3.5">No. RM</th>
-                  <th className="p-3.5">Nama Pasien</th>
-                  <th className="p-3.5">Gender / Usia</th>
-                  <th className="p-3.5">Kontak & Alamat</th>
-                  <th className="p-3.5 text-right">Aksi</th>
+                <tr className="bg-slate-50/60 text-slate-400 uppercase font-semibold text-[11px] tracking-wider border-b border-slate-100">
+                  <th className="p-4">No. RM</th>
+                  <th className="p-4">Nama Pasien</th>
+                  <th className="p-4">Gender / Usia</th>
+                  <th className="p-4">Kontak & Alamat</th>
+                  <th className="p-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-zinc-200 font-bold text-[#18181b]">
+              <tbody className="divide-y divide-slate-50 font-medium text-slate-700">
                 {filteredPatients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-[#f4f3ed] transition-colors">
-                    <td className="p-3.5">
-                      <span className="bg-[#a3e635] border border-[#18181b] px-2 py-0.5 rounded text-[11px] font-black">
+                  <tr key={patient.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="p-4">
+                      <span className="bg-lime-100 text-lime-900 border border-lime-200 px-2.5 py-1 rounded-full text-[11px] font-bold font-mono">
                         {patient.noRm}
                       </span>
                     </td>
-                    <td className="p-3.5 font-black text-sm uppercase">{patient.name}</td>
-                    <td className="p-3.5">
+                    <td className="p-4 font-bold text-sm text-slate-900 capitalize">{patient.name}</td>
+                    <td className="p-4">
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border border-[#18181b] ${
-                            patient.gender === "MALE" ? "bg-[#bae6fd]" : "bg-[#fbcfe8]"
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            patient.gender === "MALE"
+                              ? "bg-sky-50 text-sky-700 border-sky-200"
+                              : "bg-rose-50 text-rose-700 border-rose-200"
                           }`}
                         >
                           {patient.gender === "MALE" ? "L" : "P"}
@@ -290,24 +289,22 @@ export const PatientPage: React.FC = () => {
                         <span>{patient.age} Th</span>
                       </div>
                     </td>
-                    <td className="p-3.5">
-                      <p className="font-bold">{patient.phone || "-"}</p>
-                      <p className="text-[10px] text-[#71717a] truncate max-w-xs">
+                    <td className="p-4">
+                      <p className="font-semibold text-slate-800">{patient.phone || "-"}</p>
+                      <p className="text-[11px] text-slate-400 truncate max-w-xs">
                         {patient.address || "Belum ada alamat"}
                       </p>
                     </td>
-                    <td className="p-3.5 text-right">
+                    <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {/* Tombol Rekam Medis */}
                         <button
                           type="button"
                           onClick={() => openHistoryModal(patient)}
-                          className="bg-[#bae6fd] border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-sky-300 transition-all flex items-center gap-1 cursor-pointer"
+                          className="bg-sky-50 text-sky-800 border border-sky-200 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-sky-100 transition-all flex items-center gap-1.5 cursor-pointer"
                           title="Lihat Riwayat Rekam Medis"
                         >
-                          <span className="material-symbols-outlined text-[15px]">
-                            description
-                          </span>
+                          <FileText size={14} />
                           <span>Rekam Medis</span>
                         </button>
 
@@ -315,7 +312,7 @@ export const PatientPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openEditModal(patient)}
-                          className="bg-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-zinc-100 transition-all cursor-pointer"
+                          className="bg-white border border-slate-200/80 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
                         >
                           Edit
                         </button>
@@ -324,7 +321,7 @@ export const PatientPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeletePatient(patient.id, patient.name)}
-                          className="bg-[#f43f5e] text-white border-2 border-[#18181b] px-2.5 py-1 rounded-lg text-[11px] font-black uppercase hover:bg-rose-600 transition-all cursor-pointer"
+                          className="bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-rose-100 transition-all cursor-pointer"
                         >
                           Hapus
                         </button>
@@ -338,62 +335,62 @@ export const PatientPage: React.FC = () => {
         </div>
       ) : (
         /* GRID VIEW */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredPatients.map((patient) => (
             <div
               key={patient.id}
-              className="bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-4 flex flex-col justify-between"
+              className="bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow rounded-[24px] p-5 flex flex-col justify-between"
             >
               <div>
-                <div className="flex justify-between items-start mb-2">
-                  <span className="bg-[#a3e635] border-2 border-[#18181b] px-2 py-0.5 rounded text-xs font-black">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="bg-lime-100 text-lime-900 border border-lime-200 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">
                     {patient.noRm}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-black border border-[#18181b] ${
-                      patient.gender === "MALE" ? "bg-[#bae6fd]" : "bg-[#fbcfe8]"
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                      patient.gender === "MALE"
+                        ? "bg-sky-50 text-sky-700 border-sky-200"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
                     }`}
                   >
                     {patient.gender === "MALE" ? "Laki-laki" : "Perempuan"} • {patient.age} Th
                   </span>
                 </div>
-                <h3 className="text-base font-black text-[#18181b] uppercase mb-2">
+                <h3 className="text-base font-bold text-slate-900 capitalize mb-2">
                   {patient.name}
                 </h3>
-                <div className="bg-[#f4f3ed] p-2.5 rounded-xl border border-zinc-200 text-xs space-y-1 mb-4">
-                  <p className="font-bold text-[#18181b] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[14px]">call</span>
-                    {patient.phone || "Tidak ada nomor HP"}
+                <div className="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100 text-xs space-y-1.5 mb-4">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Phone size={14} className="text-slate-400" />
+                    <span>{patient.phone || "Tidak ada nomor HP"}</span>
                   </p>
-                  <p className="text-[11px] text-[#52525b] flex items-start gap-1.5">
-                    <span className="material-symbols-outlined text-[14px] shrink-0 mt-0.5">
-                      location_on
-                    </span>
+                  <p className="text-[11px] text-slate-400 flex items-start gap-1.5">
+                    <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
                     <span className="truncate">{patient.address || "Alamat belum diisi"}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-1.5 pt-3 border-t-2 border-zinc-200">
+              <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => openHistoryModal(patient)}
-                  className="flex-1 bg-[#bae6fd] border-2 border-[#18181b] py-1.5 rounded-lg text-xs font-black uppercase hover:bg-sky-300 flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 bg-sky-50 text-sky-800 border border-sky-200 py-2 rounded-xl text-xs font-bold hover:bg-sky-100 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">description</span>
+                  <FileText size={14} />
                   <span>Rekam Medis</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => openEditModal(patient)}
-                  className="bg-white border-2 border-[#18181b] px-3 py-1.5 rounded-lg text-xs font-black uppercase hover:bg-zinc-100 cursor-pointer"
+                  className="bg-white border border-slate-200/80 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Edit
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDeletePatient(patient.id, patient.name)}
-                  className="bg-[#f43f5e] text-white border-2 border-[#18181b] px-3 py-1.5 rounded-lg text-xs font-black uppercase hover:bg-rose-600 cursor-pointer"
+                  className="bg-rose-50 text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-rose-100 cursor-pointer"
                 >
                   Hapus
                 </button>
@@ -405,30 +402,30 @@ export const PatientPage: React.FC = () => {
 
       {/* Modal Form Tambah / Edit Pasien */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border-4 border-[#18181b] shadow-[8px_8px_0px_#18181b] rounded-3xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-[#18181b]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-3xl p-6 sm:p-7 space-y-4">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div>
-                <h3 className="text-xl font-black text-[#18181b] uppercase tracking-tight">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
                   {modalMode === "CREATE" ? "Tambah Pasien Baru" : "Edit Data Pasien"}
                 </h3>
-                <p className="text-xs font-bold text-[#71717a]">
+                <p className="text-xs text-slate-400 font-normal">
                   Formulir pendaftaran rekam medis klinik
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#f4f3ed] border-2 border-[#18181b] flex items-center justify-center hover:bg-rose-100 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmitForm} className="space-y-3">
+            <form onSubmit={handleSubmitForm} className="space-y-3.5">
               {/* Nama Pasien */}
               <div>
-                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Nama Lengkap Pasien *
                 </label>
                 <input
@@ -437,14 +434,14 @@ export const PatientPage: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Contoh: Budi Santoso"
-                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15]"
                 />
               </div>
 
               {/* Gender & Usia */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Jenis Kelamin *
                   </label>
                   <select
@@ -452,14 +449,14 @@ export const PatientPage: React.FC = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, gender: e.target.value as any })
                     }
-                    className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3 py-2.5 text-xs font-bold text-[#18181b] outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15] cursor-pointer"
                   >
                     <option value="MALE">Laki-laki</option>
                     <option value="FEMALE">Perempuan</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Usia (Tahun) *
                   </label>
                   <input
@@ -469,14 +466,14 @@ export const PatientPage: React.FC = () => {
                     value={formData.age}
                     onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                     placeholder="Contoh: 30"
-                    className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
+                    className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15]"
                   />
                 </div>
               </div>
 
               {/* Nomor HP */}
               <div>
-                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Nomor HP / WhatsApp
                 </label>
                 <input
@@ -484,13 +481,13 @@ export const PatientPage: React.FC = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="Contoh: 0812-3456-7890"
-                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#18181b] outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15]"
                 />
               </div>
 
               {/* Alamat */}
               <div>
-                <label className="block text-xs font-black text-[#18181b] uppercase mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Alamat Tinggal
                 </label>
                 <textarea
@@ -498,22 +495,22 @@ export const PatientPage: React.FC = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="Contoh: Jl. Sudirman No. 10, Jakarta Pusat"
-                  className="w-full bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl px-3.5 py-2 text-xs font-bold text-[#18181b] outline-none"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15]"
                 />
               </div>
 
               {/* Form Buttons */}
-              <div className="flex gap-2 pt-3">
+              <div className="flex gap-2.5 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 bg-white border-2 border-[#18181b] rounded-xl text-xs font-black uppercase hover:bg-zinc-100 cursor-pointer"
+                  className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#a3e635] text-[#18181b] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] rounded-xl text-xs font-black uppercase hover:bg-lime-400 cursor-pointer"
+                  className="btn-forest flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   {modalMode === "CREATE" ? "Simpan Pasien" : "Update Pasien"}
                 </button>

@@ -1,7 +1,6 @@
 import prisma from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { CreateDoctorInput, UpdateDoctorInput } from '../validation/doctorSchema.js';
-import { Prisma } from '@prisma/client';
 
 export const getAllDoctorsService = async () => {
   const doctors = await prisma.doctor.findMany({
@@ -37,7 +36,7 @@ export const getDoctorByIdService = async (id: number) => {
   });
 
   if (!doctor) {
-    throw new ApiError(404, 'doctor nya ga ada');
+    throw new ApiError(404, 'Dokter tidak ditemukan');
   }
 
   return doctor;
@@ -57,15 +56,22 @@ export const updateDoctorService = async (id: number, input: UpdateDoctorInput) 
 export const deleteDoctorService = async (id: number) => {
   await getDoctorByIdService(id);
 
-  // disini kurang baik melakukan delete, karna ada histori pasien melakukan pengecekan dengan doktor siapa
-  // const deleteDoctorById = await prisma.doctor.delete({ where: { id: id } });
-  // return deleteDoctorById;
-
-  // jadi kita lakukan aja melakukan update kalau si doktor ini udah ga aktif lagi
-  const updatedDoctor = await prisma.doctor.update({
-    where: { id },
-    data: { isActive: false },
+  // Cek apakah dokter sudah memiliki riwayat kunjungan pasien
+  const visitCount = await prisma.visit.count({
+    where: { doctorId: id },
   });
 
-  return updatedDoctor;
+  if (visitCount > 0) {
+    throw new ApiError(
+      400,
+      'Dokter tidak dapat dihapus permanen karena memiliki riwayat kunjungan pasien. Silakan nonaktifkan status dokter.'
+    );
+  }
+
+  // Jika belum ada riwayat kunjungan sama sekali, hapus permanen dari database
+  const deletedDoctor = await prisma.doctor.delete({
+    where: { id },
+  });
+
+  return deletedDoctor;
 };

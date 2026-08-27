@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router';
+import { Menu, Plus, Maximize2, Minimize2, Calendar } from 'lucide-react';
 import { getCurrentUser } from '../../services/authService';
 
 interface TopAppBarProps {
@@ -8,72 +10,155 @@ interface TopAppBarProps {
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({ onToggleSidebar, onAddPatientVisit }) => {
   const currentUser = getCurrentUser();
-  const displayName = currentUser?.username ? currentUser.username.toUpperCase() : 'REY';
+  const displayName = currentUser?.username ? currentUser.username : 'Admin';
+  const location = useLocation();
+
+  // Fullscreen State & Listener
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.warn('Fullscreen toggle failed:', err);
+    }
+  };
 
   const formattedDate = new Date().toLocaleDateString('id-ID', {
-    weekday: 'short',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 
+  // Dynamic Page Title & Subtitle based on Route
+  const getPageInfo = () => {
+    const path = location.pathname;
+    if (path.startsWith('/dashboard/patients')) {
+      return {
+        title: 'Data Pasien',
+        subtitle: 'Database rekam medis & profil pasien klinik.',
+      };
+    }
+    if (path.startsWith('/dashboard/doctors')) {
+      return {
+        title: 'Data Dokter',
+        subtitle: 'Kelola jadwal praktek & jasa tenaga medis.',
+      };
+    }
+    if (path.startsWith('/dashboard/medicines')) {
+      return {
+        title: 'Katalog Obat',
+        subtitle: 'Kelola inventori farmasi & persediaan apotek.',
+      };
+    }
+    if (path.startsWith('/dashboard/consultations')) {
+      return {
+        title: 'Pemeriksaan Medis',
+        subtitle: 'Sesi konsultasi, anamnesis, & diagnosa dokter.',
+      };
+    }
+    if (path.startsWith('/dashboard/invoices')) {
+      return {
+        title: 'Kasir & Pembayaran',
+        subtitle: 'Pelunasan faktur tagihan dan cetak nota transaksi.',
+      };
+    }
+    return {
+      title: 'Dashboard',
+      subtitle: 'Sistem manajemen rekam medis dan antrean pasien klinik secara presisi.',
+    };
+  };
+
+  const { title, subtitle } = getPageInfo();
+
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 w-full">
-      {/* Top Left: Logo + Tag + Title */}
-      <div className="flex items-center justify-between w-full md:w-auto">
-        <div className="flex items-center gap-3.5">
-          {/* Main Spa Logo Badge */}
-          <div className="w-13 h-13 rounded-2xl bg-[#a3e635] border-3 border-[#18181b] flex items-center justify-center text-[#18181b] shadow-[3px_3px_0px_#18181b] shrink-0">
-            <span
-              className="material-symbols-outlined text-[28px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              spa
-            </span>
-          </div>
-          <div>
-            <div className="inline-block bg-[#fde047] text-[#18181b] font-black text-[9px] px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase tracking-wider mb-0.5">
-              RAWAT JALAN KLINIK
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
-              HELLO, {displayName}!
+    <header className="mb-4 sm:mb-6 w-full space-y-2 sm:space-y-0">
+      <div className="flex items-center justify-between gap-3 w-full">
+        {/* Sisi Kiri: Hamburger Menu + Page Title */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="md:hidden w-9 h-9 bg-white text-slate-700 border border-slate-200/80 rounded-full shadow-xs hover:bg-slate-50 active:scale-90 active:translate-y-0.5 active:shadow-inner transition-all duration-150 ease-out cursor-pointer flex items-center justify-center shrink-0 select-none"
+            aria-label="Toggle Navigation Menu"
+          >
+            <Menu size={18} />
+          </button>
+
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight truncate">
+              {title}
             </h1>
-            <p className="text-xs md:text-sm text-[#52525b] font-bold">
-              Halaman Utama Dashboard Operasional ReyClinic
+            <p className="text-[11px] sm:text-xs text-slate-400 font-normal truncate hidden sm:block">
+              {subtitle}
             </p>
           </div>
         </div>
 
-        {/* Mobile Hamburger Navigation Button */}
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          className="md:hidden p-2.5 bg-white text-[#18181b] border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] hover:bg-[#d9f99d] transition-colors cursor-pointer"
-          aria-label="Toggle Navigation Menu"
-        >
-          <span className="material-symbols-outlined text-[20px]">menu</span>
-        </button>
-      </div>
+        {/* Sisi Kanan: Action Button + Fullscreen + Tanggal + User Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Tombol Tambah Antrean (Desktop & Tablet) */}
+          {onAddPatientVisit && (
+            <button
+              type="button"
+              onClick={onAddPatientVisit}
+              className="btn-lime hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold shadow-xs cursor-pointer select-none"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Tambah Antrean</span>
+            </button>
+          )}
 
-      {/* Top Right: Realtime Date Badge & Primary Action Button */}
-      <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-        {/* Realtime Date & Clinic Status Badge */}
-        <div className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-white border-2 border-[#18181b] shadow-[3px_3px_0px_#18181b] text-xs font-black text-[#18181b] shrink-0">
-          <span className="material-symbols-outlined text-[16px] text-[#50604f]">calendar_today</span>
-          <span>{formattedDate}</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80] border border-black animate-pulse ml-1" title="Klinik Buka (Sistem Aktif)" />
+          {/* Fullscreen Button */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="w-8 h-8 sm:w-9 sm:h-9 bg-white border border-slate-200/80 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs active:scale-88 active:translate-y-0.5 active:bg-slate-100 active:shadow-inner transition-all duration-150 ease-out cursor-pointer flex items-center justify-center select-none shrink-0"
+            title={isFullscreen ? 'Keluar Layar Penuh (Esc)' : 'Tampilan Layar Penuh (Fullscreen)'}
+            aria-label="Toggle Fullscreen"
+          >
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </button>
+
+          {/* Date Pill */}
+          <div className="hidden sm:flex items-center gap-1.5 bg-white border border-slate-200/80 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs select-none shrink-0">
+            <Calendar size={14} className="text-slate-400" />
+            <span>{formattedDate}</span>
+          </div>
+
+          {/* User Profile Pill */}
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-white border border-slate-200/80 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-xs select-none shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#061e15] text-[#b4f105] text-[10px] font-bold flex items-center justify-center shrink-0">
+              {displayName.slice(0, 2).toUpperCase()}
+            </div>
+            <span className="text-xs font-semibold text-slate-800 capitalize hidden xs:inline sm:inline">
+              {displayName}
+            </span>
+          </div>
         </div>
-
-        {/* Primary Action Button */}
-        <button
-          type="button"
-          onClick={onAddPatientVisit}
-          className="neubrutal-btn-primary px-4 py-2.5 text-xs font-black text-[#18181b] border-2 border-[#18181b] shadow-[3px_3px_0px_#18181b] hover:scale-[1.02] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto uppercase tracking-wider"
-        >
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
-          <span>+ Tambah Antrian Pasien</span>
-        </button>
       </div>
+
+      {/* Subtitle khusus mobile */}
+      <p className="text-[11px] text-slate-400 font-normal truncate sm:hidden">
+        {subtitle}
+      </p>
     </header>
   );
 };

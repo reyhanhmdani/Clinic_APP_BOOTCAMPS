@@ -1,5 +1,6 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router";
+import { LayoutGrid, Users, Stethoscope, Pill, LogOut, X } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 
 interface SidebarProps {
@@ -13,9 +14,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const activeRoute = location.pathname;
 
   const { user, logout } = useAuthStore();
-  const userInitials = user?.username ? user.username.slice(0, 2).toUpperCase() : "AD";
-  const userName = user?.username ? user.username.toUpperCase() : "ADMIN KLINIK";
-  const userRole = user?.role || "ADMIN";
+  const userName = user?.username ? user.username : "Administrator";
+  const userEmail = user?.email || "admin@reyclinic.com";
 
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari sistem?")) {
@@ -25,12 +25,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Navigasi utama persis seperti 4 Tab Utama di Mobile
-  const navItems = [
-    { label: "Dashboard Antrean", icon: "grid_view", path: "/dashboard" },
-    { label: "Data Pasien", icon: "groups", path: "/dashboard/patients" },
-    { label: "Data Dokter", icon: "badge", path: "/dashboard/doctors" },
-    { label: "Katalog Obat", icon: "medication", path: "/dashboard/medicines" },
+  const navMenuItems = [
+    { label: "Dashboard", Icon: LayoutGrid, path: "/dashboard" },
+  ];
+
+  const navMasterItems = [
+    { label: "Data Pasien", Icon: Users, path: "/dashboard/patients" },
+    { label: "Data Dokter", Icon: Stethoscope, path: "/dashboard/doctors" },
+    { label: "Katalog Obat", Icon: Pill, path: "/dashboard/medicines" },
   ];
 
   return (
@@ -43,97 +45,125 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container: Deep Forest Green (#061e15) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-64 bg-white border-r-4 border-[#18181b] shadow-[6px_0px_0px_#18181b] z-50 flex flex-col justify-between p-5 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 w-64 bg-[#061e15] text-slate-200 border-r border-[#092c1f] shadow-2xl z-50 flex flex-col justify-between p-5 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="space-y-5">
-          {/* Header Brand */}
-          <div className="flex items-center justify-between pb-4 border-b-2 border-[#18181b]">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-[#a3e635] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] shadow-[2px_2px_0px_#18181b]">
-                <span className="material-symbols-outlined text-[24px]">local_hospital</span>
-              </div>
-              <div>
-                <span className="font-black text-base text-[#18181b] uppercase tracking-tight block">
-                  ReyClinic
-                </span>
-                <span className="text-[9px] font-black text-[#71717a] uppercase tracking-wider">
-                  Rawat Jalan
-                </span>
-              </div>
-            </div>
+        <div className="space-y-6 overflow-y-auto">
+          {/* Header Brand with Electric Lime Asterisk Star */}
+          <div className="flex items-center justify-between pb-3 pt-1">
+            <Link to="/dashboard" className="flex items-center gap-2.5 group">
+              <span className="text-[#b4f105] text-2xl font-black transition-transform duration-300 group-hover:rotate-45 leading-none select-none">
+                ✱
+              </span>
+              <span className="font-extrabold text-lg text-white tracking-tight">
+                ReyClinic
+              </span>
+            </Link>
 
             <button
               type="button"
               onClick={onClose}
-              className="md:hidden p-1 bg-[#f4f3ed] border-2 border-[#18181b] rounded-lg text-[#18181b] hover:bg-rose-100"
+              className="md:hidden p-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-300 hover:text-white"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <X size={18} />
             </button>
           </div>
 
-          {/* User Profile Card */}
-          <div className="flex items-center gap-2.5 p-2.5 bg-[#f4f3ed] border-2 border-[#18181b] rounded-xl shadow-[2px_2px_0px_#18181b]">
-            <div className="w-9 h-9 bg-[#a3e635] text-[#18181b] font-black text-xs flex items-center justify-center border-2 border-[#18181b] rounded-lg shrink-0">
-              {userInitials}
-            </div>
-            <div className="overflow-hidden flex-1">
-              <p className="text-xs font-black text-[#18181b] truncate">{userName}</p>
-              <p className="text-[9px] font-bold text-[#71717a] uppercase tracking-wider">
-                {userRole}
-              </p>
-            </div>
-          </div>
+          {/* Section: MENU */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-slate-400/70 tracking-widest uppercase px-3 block">
+              Menu
+            </span>
+            <nav className="space-y-1">
+              {navMenuItems.map((item) => {
+                const isActive =
+                  item.path === "/dashboard"
+                    ? activeRoute === "/dashboard" || activeRoute === "/dashboard/"
+                    : activeRoute.startsWith(item.path);
 
-          {/* Navigation Links */}
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const isActive =
-                item.path === "/dashboard"
-                  ? activeRoute === "/dashboard" || activeRoute === "/dashboard/"
-                  : activeRoute.startsWith(item.path);
+                const ItemIcon = item.Icon;
 
-              return (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  onClick={onClose}
-                  className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border-2 border-[#18181b] text-xs font-black uppercase tracking-wider transition-all ${
-                    isActive
-                      ? "bg-[#18181b] text-white shadow-[3px_3px_0px_#a3e635] translate-x-1"
-                      : "bg-white text-[#18181b] hover:bg-[#fef08a] hover:shadow-[2px_2px_0px_#18181b]"
-                  }`}
-                >
-                  <span
-                    className={`material-symbols-outlined text-[20px] ${
-                      isActive ? "text-[#a3e635]" : "text-[#18181b]"
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold tracking-wide transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#092c1f] text-white shadow-sm font-bold"
+                        : "text-slate-300 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    {item.icon}
-                  </span>
-                  <span className="flex-1">{item.label}</span>
-                  {isActive && (
-                    <span className="w-2 h-2 rounded-full bg-[#a3e635] border border-black" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+                    <ItemIcon
+                      size={18}
+                      className={isActive ? "text-[#b4f105]" : "text-slate-400"}
+                      strokeWidth={isActive ? 2.2 : 1.8}
+                    />
+                    <span className="flex-1">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Section: MASTER DATA */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold text-slate-400/70 tracking-widest uppercase px-3 block">
+              Master Data & Layanan
+            </span>
+            <nav className="space-y-1">
+              {navMasterItems.map((item) => {
+                const isActive = activeRoute.startsWith(item.path);
+                const ItemIcon = item.Icon;
+
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold tracking-wide transition-all duration-200 ${
+                      isActive
+                        ? "bg-[#092c1f] text-white shadow-sm font-bold"
+                        : "text-slate-300 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <ItemIcon
+                      size={18}
+                      className={isActive ? "text-[#b4f105]" : "text-slate-400"}
+                      strokeWidth={isActive ? 2.2 : 1.8}
+                    />
+                    <span className="flex-1">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </div>
 
-        {/* Bottom Actions */}
-        <div className="pt-3 border-t-2 border-[#18181b]">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-black text-white bg-[#f43f5e] border-2 border-[#18181b] rounded-xl hover:bg-rose-600 active:translate-y-0.5 shadow-[2px_2px_0px_#18181b] uppercase tracking-wider cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[18px]">logout</span>
-            <span>Keluar (Logout)</span>
-          </button>
+        {/* Bottom User Card */}
+        <div className="pt-3 border-t border-[#092c1f]">
+          <div className="flex items-center justify-between p-2.5 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-[#b4f105] text-[#061e15] font-black text-xs flex items-center justify-center shrink-0">
+                {userName.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold text-white truncate capitalize">{userName}</p>
+                <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Keluar"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-white/5 transition-colors cursor-pointer"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </aside>
     </>

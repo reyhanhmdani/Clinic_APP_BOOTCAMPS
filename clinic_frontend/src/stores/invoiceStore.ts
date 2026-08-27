@@ -1,26 +1,26 @@
-﻿import { create } from "zustand";
-import type { Invoice } from "../types/clinic";
-import { getInvoiceService } from "../services/invoiceService";
+import { create } from 'zustand';
+import { getInvoiceService } from '../services/invoiceService';
+import type { Invoice } from '../types/clinic';
 
 interface InvoiceState {
   invoices: Invoice[];
   loading: boolean;
-  error: string | null;
   fetchInvoices: () => Promise<void>;
 }
 
 export const useInvoiceStore = create<InvoiceState>((set) => ({
   invoices: [],
   loading: false,
-  error: null,
+
   fetchInvoices: async () => {
-    set({ loading: true, error: null });
+    set({ loading: true });
     try {
       const data = await getInvoiceService();
-      set({ invoices: data || [], loading: false });
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Gagal mengambil data tagihan kasir";
-      set({ error: message, loading: false });
+      set({ invoices: data || [] });
+    } catch (error) {
+      console.error('Gagal memuat data tagihan kasir:', error);
+    } finally {
+      set({ loading: false });
     }
   },
 }));

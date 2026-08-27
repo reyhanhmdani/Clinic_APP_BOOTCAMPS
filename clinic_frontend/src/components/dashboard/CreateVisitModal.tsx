@@ -1,292 +1,297 @@
 import React, { useState } from 'react';
-import type { Patient, Doctor, Gender } from '../../types/clinic';
-import { createPatientService } from '../../services/patientService';
+import { X, UserPlus, Users, Phone, MapPin } from 'lucide-react';
+import type { Patient, Doctor } from '../../types/clinic';
+import { useVisitStore } from '../../stores/visitStore';
+import { usePatientStore } from '../../stores/patientStore';
 import { createVisitService } from '../../services/visitService';
+import { createPatientService } from '../../services/patientService';
 
 interface CreateVisitModalProps {
   isOpen: boolean;
   onClose: () => void;
-  patients?: Patient[];
-  doctors?: Doctor[];
-  onSubmit?: (data: any) => void;
+  patients: Patient[];
+  doctors: Doctor[];
 }
 
-export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({ isOpen, onClose, patients = [], doctors = [] }) => {
+export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({
+  isOpen,
+  onClose,
+  patients,
+  doctors,
+}) => {
+  const { fetchVisits } = useVisitStore();
+  const { fetchPatients } = usePatientStore();
+
   const [patientMode, setPatientMode] = useState<'EXISTING' | 'NEW'>('EXISTING');
   const [selectedPatientId, setSelectedPatientId] = useState<string>('');
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Form Pasien Baru
+  const [newName, setNewName] = useState('');
+  const [newGender, setNewGender] = useState<'MALE' | 'FEMALE'>('MALE');
+  const [newAge, setNewAge] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newAddress, setNewAddress] = useState('');
 
-  // Filter hanya dokter yang status praktiknya aktif
-  const activeDoctors = doctors.filter((d) => d.isActive !== false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 1. Form State DULU
-  const [newPatient, setNewPatient] = useState({
-    name: '',
-    gender: 'MALE',
-    age: '',
-    phone: '',
-    address: '',
-  });
-
-  // 2. BARU Handler Function
-  const handleCreatePatient = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    try {
-      await createPatientService({ ...newPatient, gender: newPatient.gender as Gender, age: Number(newPatient.age) });
-      setNewPatient({
-        name: '',
-        gender: 'MALE',
-        age: '',
-        phone: '',
-        address: '',
-      });
-      onClose();
-      window.location.reload();
-    } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message || 'Gagal meregistrasi pasien baru.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCreateVisit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    try {
-      await createVisitService({
-        patientId: Number(selectedPatientId),
-        doctorId: Number(selectedDoctorId),
-      });
-      onClose();
-      window.location.reload();
-    } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message || 'Gagal mendaftarkan antrian pasien.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Hanya dokter yang bertatus aktif
+  const activeDoctors = doctors.filter((doc) => doc.isActive);
 
   if (!isOpen) return null;
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedDoctorId) {
+      alert('Pilih dokter terlebih dahulu!');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let patientIdToUse: number;
+
+      if (patientMode === 'NEW') {
+        if (!newName.trim() || !newAge) {
+          alert('Nama dan Usia pasien wajib diisi!');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const createdPatient = await createPatientService({
+          name: newName.trim(),
+          gender: newGender,
+          age: Number(newAge),
+          phone: newPhone.trim() || undefined,
+          address: newAddress.trim() || undefined,
+        });
+
+        await fetchPatients();
+        patientIdToUse = createdPatient.id;
+      } else {
+        if (!selectedPatientId) {
+          alert('Pilih pasien terdaftar terlebih dahulu!');
+          setIsSubmitting(false);
+          return;
+        }
+        patientIdToUse = Number(selectedPatientId);
+      }
+
+      await createVisitService({
+        patientId: patientIdToUse,
+        doctorId: Number(selectedDoctorId),
+      });
+
+      await fetchVisits();
+      alert('Antrian pasien berhasil ditambahkan!');
+
+      // Reset form
+      setNewName('');
+      setNewAge('');
+      setNewPhone('');
+      setNewAddress('');
+      setSelectedPatientId('');
+      setSelectedDoctorId('');
+      onClose();
+    } catch (error: any) {
+      alert(`Gagal menambah antrean: ${error?.response?.data?.message || error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white w-full max-w-xl p-6 border-3 border-[#18181b] shadow-[8px_8px_0px_#18181b] max-h-[90vh] overflow-y-auto space-y-5">
-        {/* Header Modal ala PZN */}
-        <div className="flex justify-between items-start pb-4 border-b-2 border-[#18181b]">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-[#a3e635] border-2 border-[#18181b] flex items-center justify-center text-[#18181b] shadow-[2px_2px_0px_#18181b] shrink-0">
-              <span className="material-symbols-outlined text-[22px]">person_add</span>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white border border-slate-200 shadow-2xl rounded-3xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto">
+        {/* Header Modal */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-5">
+          <div>
+            <div className="inline-block bg-lime-100 text-lime-900 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-lime-200 uppercase mb-1">
+              PENDAFTARAN ANTREAN
             </div>
-            <div>
-              <div className="inline-block bg-[#fde047] text-[#18181b] font-black text-[9px] px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase tracking-wider mb-0.5">
-                PENDAFTARAN RAWAT JALAN
-              </div>
-              <h2 className="text-lg md:text-xl font-black text-[#18181b] tracking-tight uppercase">
-                ANTREAN PASIEN BARU
-              </h2>
-              <p className="text-xs text-[#52525b] font-bold">
-                Masukkan pasien ke dalam alur pemeriksaan klinik hari ini
-              </p>
-            </div>
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+              Pendaftaran Antrean Pasien
+            </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] flex items-center justify-center text-[#18181b] hover:bg-rose-500 hover:text-white transition-all cursor-pointer font-black"
+            className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <X size={16} />
           </button>
         </div>
 
-        {/* Error Alert Message */}
-        {errorMessage && (
-          <div className="p-3 bg-[#fecdd3] border-2 border-[#18181b] text-xs font-black text-[#9f1239] shadow-[2px_2px_0px_#18181b] flex items-center justify-between">
-            <span>⚠️ {errorMessage}</span>
-            <button
-              type="button"
-              onClick={() => setErrorMessage(null)}
-              className="text-xs text-[#9f1239] underline font-black cursor-pointer uppercase"
-            >
-              Tutup
-            </button>
-          </div>
-        )}
-
-        {/* Tab Pilihan: Pasien Terdaftar vs Pasien Baru */}
-        <div className="flex gap-2">
+        {/* Tab Switcher: Pasien Lama vs Pasien Baru */}
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-2xl mb-5">
           <button
             type="button"
             onClick={() => setPatientMode('EXISTING')}
-            className={`flex-1 py-2.5 px-3 border-2 border-[#18181b] text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               patientMode === 'EXISTING'
-                ? 'bg-[#a3e635] text-[#18181b] shadow-[3px_3px_0px_#18181b]'
-                : 'bg-white text-[#18181b] hover:bg-[#fde047]/40'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            🔍 Pasien Terdaftar (Lama)
+            <Users size={15} />
+            <span>Pasien Terdaftar</span>
           </button>
           <button
             type="button"
             onClick={() => setPatientMode('NEW')}
-            className={`flex-1 py-2.5 px-3 border-2 border-[#18181b] text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               patientMode === 'NEW'
-                ? 'bg-[#fde047] text-[#18181b] shadow-[3px_3px_0px_#18181b]'
-                : 'bg-white text-[#18181b] hover:bg-[#fde047]/40'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            ✨ Registrasi Pasien Baru
+            <UserPlus size={15} />
+            <span>Pasien Baru (+RM)</span>
           </button>
         </div>
 
-        <form onSubmit={patientMode === 'EXISTING' ? handleCreateVisit : handleCreatePatient} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* SECTION PASIEN LAMA */}
           {patientMode === 'EXISTING' ? (
-            /* Mode 1: Pilih Pasien Terdaftar & Dokter Tujuan */
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                  Pilih Pasien Terdaftar <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={selectedPatientId}
-                  onChange={(e) => setSelectedPatientId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
-                  required
-                >
-                  <option value="">-- Pilih Pasien --</option>
-                  {patients.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.noRm || `RM-${p.id}`})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Pilih Dokter Tujuan */}
-              <div className="space-y-1">
-                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                  Pilih Dokter Tujuan <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={selectedDoctorId}
-                  onChange={(e) => setSelectedDoctorId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[2px_2px_0px_#18181b] cursor-pointer"
-                  required
-                >
-                  <option value="">-- Pilih Dokter Spesialis --</option>
-                  {activeDoctors.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} ({d.spesialis})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Cari & Pilih Pasien Terdaftar *
+              </label>
+              <select
+                required
+                value={selectedPatientId}
+                onChange={(e) => setSelectedPatientId(e.target.value)}
+                className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15] cursor-pointer"
+              >
+                <option value="">-- Pilih Rekam Medis Pasien --</option>
+                {patients.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.noRm} - {p.name} ({p.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'}, {p.age} th)
+                  </option>
+                ))}
+              </select>
             </div>
           ) : (
-            /* Mode 2: Form Input Pasien Baru */
-            <div className="space-y-3.5 p-4 border-2 border-[#18181b] bg-[#fefcf8] shadow-[3px_3px_0px_#18181b]">
-              {/* Auto-Generated No RM Badge Info */}
-              <div className="p-2.5 bg-[#a3e635]/20 border-2 border-[#18181b] flex items-center justify-between text-xs font-bold text-[#18181b]">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px]">pin</span>
-                  <span>No. Rekam Medis (No RM)</span>
-                </span>
-                <span className="bg-[#a3e635] px-2 py-0.5 border border-[#18181b] font-black text-[10px] uppercase">
-                  Auto-Generated
-                </span>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                  Nama Lengkap Pasien <span className="text-rose-500">*</span>
+            /* SECTION PASIEN BARU */
+            <div className="space-y-3 p-4 bg-slate-50/70 rounded-2xl border border-slate-100">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nama Lengkap Pasien *
                 </label>
                 <input
                   type="text"
+                  required
                   placeholder="Contoh: Budi Santoso"
-                  value={newPatient.name}
-                  onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
-                  required={patientMode === 'NEW'}
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#061e15]"
                 />
               </div>
 
-              {/* Grid 2 Kolom: Umur Pasien & Jenis Kelamin */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                    Umur (Tahun) <span className="text-rose-500">*</span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Jenis Kelamin *
+                  </label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value as any)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#061e15] cursor-pointer"
+                  >
+                    <option value="MALE">Laki-laki</option>
+                    <option value="FEMALE">Perempuan</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Usia (Tahun) *
                   </label>
                   <input
                     type="number"
-                    placeholder="Contoh: 30"
-                    value={newPatient.age}
-                    onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
-                    className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
-                    required={patientMode === 'NEW'}
+                    required
+                    min="1"
+                    placeholder="30"
+                    value={newAge}
+                    onChange={(e) => setNewAge(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#061e15]"
                   />
                 </div>
+              </div>
 
-                <div className="space-y-1">
-                  <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                    Jenis Kelamin <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={newPatient.gender}
-                    onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value as Gender })}
-                    className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none shadow-[1px_1px_0px_#18181b] cursor-pointer"
-                  >
-                    <option value="MALE">Laki-Laki (MALE)</option>
-                    <option value="FEMALE">Perempuan (FEMALE)</option>
-                  </select>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nomor HP / WhatsApp
+                </label>
+                <div className="relative flex items-center">
+                  <Phone size={14} className="absolute left-3 text-slate-400" />
+                  <input
+                    type="tel"
+                    placeholder="0812-3456-7890"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-[#061e15]"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                  No. Telepon / WA (Phone)
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Alamat Pasien
                 </label>
-                <input
-                  type="text"
-                  placeholder="08123456789"
-                  value={newPatient.phone}
-                  onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })}
-                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-bold text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-black text-[#18181b] uppercase tracking-wider">
-                  Alamat Lengkap (Address)
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Jl. Merdeka No. 45, Jakarta..."
-                  value={newPatient.address}
-                  onChange={(e) => setNewPatient({ ...newPatient, address: e.target.value })}
-                  className="w-full px-3 py-2 border-2 border-[#18181b] bg-white text-xs font-medium text-[#18181b] focus:outline-none focus:bg-[#fef9c3] shadow-[1px_1px_0px_#18181b]"
-                />
+                <div className="relative flex items-center">
+                  <MapPin size={14} className="absolute left-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Jl. Sudirman No. 12"
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-[#061e15]"
+                  />
+                </div>
               </div>
             </div>
           )}
 
+          {/* DOKTER JAGA PEMERIKSA */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Pilih Dokter Jaga & Poli *
+            </label>
+            {activeDoctors.length === 0 ? (
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium">
+                ⚠️ Tidak ada dokter yang berstatus AKTIF saat ini. Silakan aktifkan jadwal dokter di menu Data Dokter.
+              </div>
+            ) : (
+              <select
+                required
+                value={selectedDoctorId}
+                onChange={(e) => setSelectedDoctorId(e.target.value)}
+                className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15] cursor-pointer"
+              >
+                <option value="">-- Pilih Dokter Bertugas --</option>
+                {activeDoctors.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.name} - {doc.spesialis} ({doc.room || 'Poli 1'})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           {/* Footer Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t-2 border-[#18181b]/10 mt-6">
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 mt-5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 border-2 border-[#18181b] bg-white text-xs font-black uppercase text-[#18181b] hover:bg-zinc-100 transition-all cursor-pointer shadow-[2px_2px_0px_#18181b]"
+              className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="neubrutal-btn-primary px-5 py-2.5 text-xs font-black text-[#18181b] border-2 border-[#18181b] cursor-pointer shadow-[3px_3px_0px_#18181b] uppercase tracking-wider disabled:opacity-50"
+              disabled={isSubmitting || activeDoctors.length === 0}
+              className="btn-forest px-5 py-2.5 text-xs font-bold cursor-pointer disabled:opacity-50"
             >
               {patientMode === 'EXISTING' ? '+ Simpan & Masukkan Antrian' : '+ Simpan Data Pasien Baru'}
             </button>

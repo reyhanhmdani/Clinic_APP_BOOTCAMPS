@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router";
+import { ArrowLeft, ArrowRight, FileText, Edit3, Stethoscope } from "lucide-react";
 import { useVisitStore } from "../stores/visitStore";
 import { useMedicineStore } from "../stores/medicineStore";
 import { createConsultationService } from "../services/consulService";
@@ -97,29 +98,29 @@ export const ConsultationPage: React.FC = () => {
   return (
     <div className="space-y-6 w-full pb-10">
       {/* Header & Status Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl p-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200/80 shadow-sm rounded-2xl p-5">
         <div className="flex items-center gap-3.5">
           <Link
             to="/dashboard"
-            className="w-10 h-10 bg-white border-2 border-[#18181b] shadow-[2px_2px_0px_#18181b] rounded-xl flex items-center justify-center text-[#18181b] hover:bg-[#fef08a] active:translate-y-0.5 transition-all"
+            className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+            <ArrowLeft size={18} />
           </Link>
           <div>
-            <div className="inline-block bg-[#a3e635] text-[#18181b] font-black text-[9px] px-2 py-0.5 border-2 border-[#18181b] shadow-[1px_1px_0px_#18181b] uppercase tracking-wider mb-0.5">
-              EXAMINATION SUITE
+            <div className="inline-block bg-lime-100 text-lime-900 font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-lime-200 uppercase tracking-wider mb-1">
+              Examination Suite
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#18181b] tracking-tight uppercase">
-              FORM PEMERIKSAAN DOKTER
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+              Pemeriksaan Dokter
             </h1>
-            <p className="text-xs font-bold text-[#52525b]">
+            <p className="text-xs text-slate-500 font-medium">
               Input Anamnesis, Diagnosis Medis, dan Resep Obat Pasien (Kunjungan #{visitId})
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="bg-[#38bdf8] text-[#18181b] border-2 border-[#18181b] font-black text-xs px-3.5 py-1.5 rounded-xl shadow-[3px_3px_0px_#18181b] uppercase tracking-wider">
+          <span className="bg-sky-50 text-sky-800 border border-sky-200 font-bold text-xs px-3.5 py-1.5 rounded-full uppercase tracking-wider">
             Status: Sedang Diperiksa
           </span>
         </div>
@@ -133,9 +134,9 @@ export const ConsultationPage: React.FC = () => {
         {/* Left Column: Keluhan Utama & Catatan Dokter (7 Cols) */}
         <div className="lg:col-span-7 space-y-6 flex flex-col">
           {/* Keluhan Utama Pasien */}
-          <div className="p-6 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl flex-1 flex flex-col space-y-3">
-            <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-blue-600">notes</span>
+          <div className="p-6 bg-white border border-slate-200/80 shadow-sm rounded-2xl flex-1 flex flex-col space-y-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <FileText size={16} className="text-blue-600" />
               <span>
                 Keluhan Utama Pasien (Anamnesis) <span className="text-rose-500">*</span>
               </span>
@@ -146,16 +147,14 @@ export const ConsultationPage: React.FC = () => {
               value={complaint}
               onChange={(e) => setComplaint(e.target.value)}
               placeholder="Tuliskan keluhan pasien, riwayat penyakit, gejala, dan hasil pemeriksaan fisik..."
-              className="w-full flex-1 p-3.5 border-2 border-[#18181b] rounded-xl bg-[#f4f3ed] text-xs font-bold text-[#18181b] focus:outline-none focus:bg-white shadow-[2px_2px_0px_#18181b] min-h-[140px] transition-all"
+              className="w-full flex-1 p-3.5 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] min-h-[140px] transition-all"
             />
           </div>
 
           {/* Catatan / Saran Medis Dokter */}
-          <div className="p-6 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl space-y-3">
-            <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-purple-600">
-                edit_note
-              </span>
+          <div className="p-6 bg-white border border-slate-200/80 shadow-sm rounded-2xl space-y-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <Edit3 size={16} className="text-purple-600" />
               <span>Catatan & Instruksi Khusus (Opsional)</span>
             </h3>
 
@@ -164,7 +163,7 @@ export const ConsultationPage: React.FC = () => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Istirahat cukup, hindari makanan pedas, kontrol ulang 3 hari..."
-              className="w-full p-3 border-2 border-[#18181b] rounded-xl bg-[#f4f3ed] text-xs font-bold text-[#18181b] focus:outline-none focus:bg-white shadow-[2px_2px_0px_#18181b] transition-all"
+              className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] transition-all"
             />
           </div>
         </div>
@@ -172,11 +171,9 @@ export const ConsultationPage: React.FC = () => {
         {/* Right Column: Diagnosis ICD-10 & Resep Obat (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Diagnosis */}
-          <div className="p-6 bg-white border-3 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-2xl space-y-3">
-            <h3 className="text-xs font-black text-[#18181b] uppercase tracking-wider flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-emerald-600">
-                medical_services
-              </span>
+          <div className="p-6 bg-white border border-slate-200/80 shadow-sm rounded-2xl space-y-3">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <Stethoscope size={16} className="text-emerald-600" />
               <span>
                 Diagnosis Medis (ICD-10) <span className="text-rose-500">*</span>
               </span>
@@ -186,7 +183,7 @@ export const ConsultationPage: React.FC = () => {
               value={diagnosis}
               onChange={(e) => setDiagnosis(e.target.value)}
               placeholder="Contoh: J00 - Acute Common Cold (ISPA)"
-              className="w-full p-3 border-2 border-[#18181b] rounded-xl bg-[#f4f3ed] text-xs font-black text-[#18181b] focus:outline-none focus:bg-white shadow-[2px_2px_0px_#18181b] transition-all"
+              className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] transition-all"
             />
           </div>
 
@@ -205,14 +202,14 @@ export const ConsultationPage: React.FC = () => {
           type="button"
           disabled={isSubmitting}
           onClick={handleSubmitConsultation}
-          className="neubrutal-btn-primary px-8 py-3.5 text-xs font-black text-[#18181b] border-2 border-[#18181b] shadow-[4px_4px_0px_#18181b] rounded-xl hover:scale-102 active:translate-y-1 transition-all w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-wider cursor-pointer"
+          className="btn-forest px-8 py-3.5 text-xs font-bold rounded-full hover:shadow-lg transition-all w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 tracking-wide cursor-pointer"
         >
           <span>
             {isSubmitting
               ? "Menyimpan Konsultasi..."
               : "Selesai Konsultasi & Buat Tagihan Kasir"}
           </span>
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          <ArrowRight size={16} />
         </button>
       </div>
 

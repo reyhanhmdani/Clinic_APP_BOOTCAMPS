@@ -1,26 +1,26 @@
-﻿import { create } from "zustand";
-import type { Medicine } from "../types/clinic";
-import { getMedicineService } from "../services/medicineService";
+import { create } from 'zustand';
+import { getMedicineService } from '../services/medicineService';
+import type { Medicine } from '../types/clinic';
 
 interface MedicineState {
   medicines: Medicine[];
   loading: boolean;
-  error: string | null;
   fetchMedicines: () => Promise<void>;
 }
 
 export const useMedicineStore = create<MedicineState>((set) => ({
   medicines: [],
   loading: false,
-  error: null,
+
   fetchMedicines: async () => {
-    set({ loading: true, error: null });
+    set({ loading: true });
     try {
       const data = await getMedicineService();
-      set({ medicines: data || [], loading: false });
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Gagal mengambil data obat";
-      set({ error: message, loading: false });
+      set({ medicines: data || [] });
+    } catch (error) {
+      console.error('Gagal memuat data obat:', error);
+    } finally {
+      set({ loading: false });
     }
   },
 }));

@@ -17,11 +17,7 @@ export const loginService = async (input: LoginInput): Promise<AuthResponse> => 
   if (!authData) {
     throw new Error('Format respons server tidak valid');
   }
-
-  if (authData.token) {
-    localStorage.setItem('token', authData.token);
-    localStorage.setItem('user', JSON.stringify(authData.user));
-  }
+  // btw untuk set item token user nya ada di login ya
   return authData;
 };
 

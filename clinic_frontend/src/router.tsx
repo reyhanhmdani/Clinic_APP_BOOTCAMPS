@@ -1,12 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { Layout } from './components/common/Layout';
-import { DashboardPage } from './pages/DashboardPage';
-import { ConsultationPage } from './pages/ConsultationPage';
-import { InvoicePage } from './pages/InvoicePage';
-import { LoginPage } from './pages/LoginPage';
-import { MedicinePage } from './pages/MedicinePage';
-import { PatientPage } from './pages/PatientPage';
-import { DoctorPage } from './pages/DoctorPage';
+import { DashboardPage } from './pages/admin/DashboardPage';
+import { ConsultationPage } from './pages/admin/ConsultationPage';
+import { InvoicePage } from './pages/admin/InvoicePage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { MedicinePage } from './pages/admin/MedicinePage';
+import { PatientPage } from './pages/admin/PatientPage';
+import { DoctorPage } from './pages/admin/DoctorPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 export const router = createBrowserRouter([

@@ -1,17 +1,17 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router';
 import { ArrowLeft, ArrowRight, FileText, Edit3, Stethoscope } from 'lucide-react';
-import { useVisitStore } from '../stores/visitStore';
-import { useMedicineStore } from '../stores/medicineStore';
-import { createConsultationService } from '../services/consulService';
-import { createInvoiceService } from '../services/invoiceService';
+import { useVisitStore } from '../../stores/visitStore';
+import { useMedicineStore } from '../../stores/medicineStore';
+import { createConsultationService } from '../../services/consulService';
+import { createInvoiceService } from '../../services/invoiceService';
 import { X } from 'lucide-react';
-import { cancelVisitService } from '../services/visitService';
+import { cancelVisitService } from '../../services/visitService';
 
 // Sub-components
-import { PatientBannerCard } from '../components/consultation/PatientBannerCard';
-import { Prescription, type PrescriptionItem } from '../components/consultation/Prescription';
-import { AddMedicineModal } from '../components/consultation/AddMedicineModal';
+import { PatientBannerCard } from '../../components/consultation/PatientBannerCard';
+import { Prescription, type PrescriptionItem } from '../../components/consultation/Prescription';
+import { AddMedicineModal } from '../../components/consultation/AddMedicineModal';
 
 export const ConsultationPage: React.FC = () => {
   const [searchParams] = useSearchParams();

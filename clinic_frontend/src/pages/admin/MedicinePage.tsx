@@ -1,31 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Search, X, AlertTriangle, Pill, Loader2 } from "lucide-react";
-import type { Medicine } from "../types/clinic";
-import { useMedicineStore } from "../stores/medicineStore";
-import {
-  createMedicineService,
-  updateMedicineService,
-  deleteMedicineService,
-} from "../services/medicineService";
-import { formatRupiah } from "../utils/formatRupiah";
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, X, AlertTriangle, Pill, Loader2 } from 'lucide-react';
+import type { Medicine } from '../../types/clinic';
+import { useMedicineStore } from '../../stores/medicineStore';
+import { createMedicineService, updateMedicineService, deleteMedicineService } from '../../services/medicineService';
+import { formatRupiah } from '../../utils/formatRupiah';
 
 export const MedicinePage: React.FC = () => {
   const { medicines, loading: isLoading, fetchMedicines } = useMedicineStore();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [stockFilter, setStockFilter] = useState<"ALL" | "LOW_STOCK" | "IN_STOCK">("ALL");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stockFilter, setStockFilter] = useState<'ALL' | 'LOW_STOCK' | 'IN_STOCK'>('ALL');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
+  const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    stock: "",
-    unit: "Tablet",
+    name: '',
+    price: '',
+    stock: '',
+    unit: 'Tablet',
   });
 
   useEffect(() => {
@@ -33,25 +29,25 @@ export const MedicinePage: React.FC = () => {
   }, []);
 
   const openCreateModal = () => {
-    setModalMode("CREATE");
+    setModalMode('CREATE');
     setSelectedMedicine(null);
     setFormData({
-      name: "",
-      price: "",
-      stock: "",
-      unit: "Tablet",
+      name: '',
+      price: '',
+      stock: '',
+      unit: 'Tablet',
     });
     setIsModalOpen(true);
   };
 
   const openEditModal = (medicine: Medicine) => {
-    setModalMode("EDIT");
+    setModalMode('EDIT');
     setSelectedMedicine(medicine);
     setFormData({
       name: medicine.name,
       price: String(medicine.price),
       stock: String(medicine.stock),
-      unit: medicine.unit || "Tablet",
+      unit: medicine.unit || 'Tablet',
     });
     setIsModalOpen(true);
   };
@@ -60,43 +56,43 @@ export const MedicinePage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Nama obat wajib diisi!");
+      alert('Nama obat wajib diisi!');
       return;
     }
     const numPrice = Number(formData.price);
     const numStock = Number(formData.stock);
 
     if (!formData.price || isNaN(numPrice) || numPrice < 0) {
-      alert("Harga satuan obat harus berupa angka valid!");
+      alert('Harga satuan obat harus berupa angka valid!');
       return;
     }
     if (!formData.stock || isNaN(numStock) || numStock < 0) {
-      alert("Jumlah stok obat harus berupa angka valid!");
+      alert('Jumlah stok obat harus berupa angka valid!');
       return;
     }
 
     try {
-      if (modalMode === "CREATE") {
+      if (modalMode === 'CREATE') {
         await createMedicineService({
           name: formData.name.trim(),
           price: numPrice,
           stock: numStock,
-          unit: formData.unit.trim() || "Tablet",
+          unit: formData.unit.trim() || 'Tablet',
         });
-        alert("Obat baru berhasil ditambahkan ke apotek!");
-      } else if (modalMode === "EDIT" && selectedMedicine) {
+        alert('Obat baru berhasil ditambahkan ke apotek!');
+      } else if (modalMode === 'EDIT' && selectedMedicine) {
         await updateMedicineService(selectedMedicine.id, {
           name: formData.name.trim(),
           price: numPrice,
           stock: numStock,
-          unit: formData.unit.trim() || "Tablet",
+          unit: formData.unit.trim() || 'Tablet',
         });
-        alert("Data obat berhasil diperbarui!");
+        alert('Data obat berhasil diperbarui!');
       }
       setIsModalOpen(false);
       fetchMedicines();
     } catch (err: any) {
-      const message = err?.response?.data?.message || err.message || "Gagal menyimpan data obat";
+      const message = err?.response?.data?.message || err.message || 'Gagal menyimpan data obat';
       alert(message);
     }
   };
@@ -108,7 +104,7 @@ export const MedicinePage: React.FC = () => {
         alert(`Obat ${name} berhasil dihapus.`);
         fetchMedicines();
       } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || "Gagal menghapus obat";
+        const message = err?.response?.data?.message || err.message || 'Gagal menghapus obat';
         alert(message);
       }
     }
@@ -116,10 +112,10 @@ export const MedicinePage: React.FC = () => {
 
   // Filter Logic
   const filteredMedicines = medicines.filter((medicine) => {
-    if (stockFilter === "LOW_STOCK" && medicine.stock > 5) return false;
-    if (stockFilter === "IN_STOCK" && medicine.stock === 0) return false;
+    if (stockFilter === 'LOW_STOCK' && medicine.stock > 5) return false;
+    if (stockFilter === 'IN_STOCK' && medicine.stock === 0) return false;
 
-    if (searchTerm.trim() !== "") {
+    if (searchTerm.trim() !== '') {
       return medicine.name.toLowerCase().includes(searchTerm.toLowerCase());
     }
     return true;
@@ -135,9 +131,7 @@ export const MedicinePage: React.FC = () => {
           <div className="inline-block bg-lime-100 text-lime-900 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-lime-200 uppercase mb-1">
             Farmasi & Apotek
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
-            Katalog Obat & Inventori
-          </h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Katalog Obat & Inventori</h1>
           <p className="text-xs text-slate-400 font-normal mt-0.5">
             Total {medicines.length} jenis obat terdaftar di apotek klinik
           </p>
@@ -159,15 +153,16 @@ export const MedicinePage: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <AlertTriangle size={18} className="text-amber-700 shrink-0" />
             <span>
-              <strong>Peringatan Stok Obat:</strong> Terdapat <strong>{lowStockCount} obat</strong> dengan persediaan kritis (≤ 5 unit). Segera lakukan restok.
+              <strong>Peringatan Stok Obat:</strong> Terdapat <strong>{lowStockCount} obat</strong> dengan persediaan
+              kritis (≤ 5 unit). Segera lakukan restok.
             </span>
           </div>
           <button
             type="button"
-            onClick={() => setStockFilter(stockFilter === "LOW_STOCK" ? "ALL" : "LOW_STOCK")}
+            onClick={() => setStockFilter(stockFilter === 'LOW_STOCK' ? 'ALL' : 'LOW_STOCK')}
             className="px-3 py-1 bg-amber-200/80 hover:bg-amber-300 text-amber-900 rounded-full font-bold text-[11px] transition-all cursor-pointer shrink-0"
           >
-            {stockFilter === "LOW_STOCK" ? "Tampilkan Semua" : "Filter Stok Kritis"}
+            {stockFilter === 'LOW_STOCK' ? 'Tampilkan Semua' : 'Filter Stok Kritis'}
           </button>
         </div>
       )}
@@ -185,11 +180,7 @@ export const MedicinePage: React.FC = () => {
             className="w-full bg-transparent text-xs font-medium text-slate-800 outline-none placeholder:text-slate-400"
           />
           {searchTerm.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm("")}
-              className="text-slate-400 hover:text-slate-700"
-            >
+            <button type="button" onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-700">
               <X size={14} />
             </button>
           )}
@@ -198,9 +189,9 @@ export const MedicinePage: React.FC = () => {
         {/* Stock Filter Pills */}
         <div className="flex items-center gap-1.5 shrink-0">
           {[
-            { id: "ALL", label: "Semua Obat" },
-            { id: "LOW_STOCK", label: `Kritis (≤5)` },
-            { id: "IN_STOCK", label: "Tersedia" },
+            { id: 'ALL', label: 'Semua Obat' },
+            { id: 'LOW_STOCK', label: `Kritis (≤5)` },
+            { id: 'IN_STOCK', label: 'Tersedia' },
           ].map((f) => (
             <button
               key={f.id}
@@ -208,8 +199,8 @@ export const MedicinePage: React.FC = () => {
               onClick={() => setStockFilter(f.id as any)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 stockFilter === f.id
-                  ? "bg-[#061e15] text-white shadow-xs font-bold"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
+                  ? 'bg-[#061e15] text-white shadow-xs font-bold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
               }`}
             >
               {f.label}
@@ -227,13 +218,11 @@ export const MedicinePage: React.FC = () => {
       ) : filteredMedicines.length === 0 ? (
         <div className="py-16 text-center bg-white border border-slate-100 shadow-sm rounded-[24px] p-6 space-y-2 flex flex-col items-center justify-center">
           <Pill size={44} className="text-slate-300" />
-          <h3 className="text-base font-bold text-slate-800">
-            Tidak Ada Data Obat
-          </h3>
+          <h3 className="text-base font-bold text-slate-800">Tidak Ada Data Obat</h3>
           <p className="text-xs text-slate-400 font-normal max-w-sm mx-auto">
             {searchTerm
               ? `Tidak ada obat yang cocok dengan pencarian "${searchTerm}"`
-              : "Belum ada obat yang didaftarkan ke inventori apotek."}
+              : 'Belum ada obat yang didaftarkan ke inventori apotek.'}
           </p>
         </div>
       ) : (
@@ -257,26 +246,20 @@ export const MedicinePage: React.FC = () => {
                   return (
                     <tr key={medicine.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-sm text-slate-900 capitalize">
-                          {medicine.name}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          ID: #{medicine.id}
-                        </div>
+                        <div className="font-bold text-sm text-slate-900 capitalize">{medicine.name}</div>
+                        <div className="text-[10px] text-slate-400 font-mono">ID: #{medicine.id}</div>
                       </td>
 
-                      <td className="p-4 font-mono font-bold text-slate-800 text-sm">
-                        {formatRupiah(medicine.price)}
-                      </td>
+                      <td className="p-4 font-mono font-bold text-slate-800 text-sm">{formatRupiah(medicine.price)}</td>
 
                       <td className="p-4">
                         <span
                           className={`font-bold font-mono px-3 py-1 rounded-full text-xs border ${
                             isOutOfStock
-                              ? "bg-rose-50 text-rose-800 border-rose-200"
+                              ? 'bg-rose-50 text-rose-800 border-rose-200'
                               : isCritical
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : "bg-slate-100 text-slate-800 border-slate-200"
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-slate-100 text-slate-800 border-slate-200'
                           }`}
                         >
                           {medicine.stock} {medicine.unit || 'unit'}
@@ -333,7 +316,7 @@ export const MedicinePage: React.FC = () => {
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                  {modalMode === "CREATE" ? "Tambah Obat Baru" : "Edit Data Obat"}
+                  {modalMode === 'CREATE' ? 'Tambah Obat Baru' : 'Edit Data Obat'}
                 </h3>
                 <p className="text-xs text-slate-400 font-normal">
                   Kelola nama obat, harga satuan, dan persediaan unit
@@ -351,9 +334,7 @@ export const MedicinePage: React.FC = () => {
             <form onSubmit={handleSubmitForm} className="space-y-3.5">
               {/* Nama Obat */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nama Obat & Sediaan *
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Nama Obat & Sediaan *</label>
                 <input
                   type="text"
                   required
@@ -367,9 +348,7 @@ export const MedicinePage: React.FC = () => {
               {/* Harga & Stok */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Harga Satuan (Rp) *
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Harga Satuan (Rp) *</label>
                   <input
                     type="number"
                     required
@@ -382,9 +361,7 @@ export const MedicinePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Jumlah Stok (Unit) *
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Jumlah Stok (Unit) *</label>
                   <input
                     type="number"
                     required
@@ -399,9 +376,7 @@ export const MedicinePage: React.FC = () => {
 
               {/* Satuan Unit */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Satuan Kemasan (Unit)
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Satuan Kemasan (Unit)</label>
                 <input
                   type="text"
                   value={formData.unit}
@@ -420,11 +395,8 @@ export const MedicinePage: React.FC = () => {
                 >
                   Batal
                 </button>
-                <button
-                  type="submit"
-                  className="btn-forest flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  {modalMode === "CREATE" ? "Simpan Obat" : "Update Obat"}
+                <button type="submit" className="btn-forest flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer">
+                  {modalMode === 'CREATE' ? 'Simpan Obat' : 'Update Obat'}
                 </button>
               </div>
             </form>

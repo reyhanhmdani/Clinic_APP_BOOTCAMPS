@@ -13,8 +13,8 @@ import {
   Stethoscope,
   Clock,
 } from 'lucide-react';
-import { loginService } from '../services/authService';
-import { useAuthStore } from '../stores/authStore';
+import { loginService } from '../../services/authService';
+import { useAuthStore } from '../../stores/authStore';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();

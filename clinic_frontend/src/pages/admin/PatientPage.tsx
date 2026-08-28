@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2 } from 'lucide-react';
-import type { Patient } from '../types/clinic';
-import { usePatientStore } from '../stores/patientStore';
-import { createPatientService, updatePatientService, deletePatientService } from '../services/patientService';
-import { PatientHistoryModal } from '../components/patients/PatientHistoryModal';
+import type { Patient } from '../../types/clinic';
+import { usePatientStore } from '../../stores/patientStore';
+import { createPatientService, updatePatientService, deletePatientService } from '../../services/patientService';
+import { PatientHistoryModal } from '../../components/patients/PatientHistoryModal';
 
 export const PatientPage: React.FC = () => {
   const { patients, loading: isLoading, fetchPatients } = usePatientStore();

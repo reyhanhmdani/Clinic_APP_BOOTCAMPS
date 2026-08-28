@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { Visit } from '../types/clinic';
-import { useVisitStore } from '../stores/visitStore';
-import { useInvoiceStore } from '../stores/invoiceStore';
-import { useDoctorStore } from '../stores/doctorStore';
-import { usePatientStore } from '../stores/patientStore';
-import { cancelVisitService } from '../services/visitService';
+import type { Visit } from '../../types/clinic';
+import { useVisitStore } from '../../stores/visitStore';
+import { useInvoiceStore } from '../../stores/invoiceStore';
+import { useDoctorStore } from '../../stores/doctorStore';
+import { usePatientStore } from '../../stores/patientStore';
+import { cancelVisitService } from '../../services/visitService';
 
 // Components
-import { StatsGrid } from '../components/dashboard/StatsGrid';
-import { WorkflowGuide } from '../components/common/WorkflowGuide';
-import { HomeDashboard } from '../components/dashboard/HomeDashboard';
+import { StatsGrid } from '../../components/dashboard/StatsGrid';
+import { WorkflowGuide } from '../../components/common/WorkflowGuide';
+import { HomeDashboard } from '../../components/dashboard/HomeDashboard';
 
 export const DashboardPage: React.FC = () => {
   const [selectedReceiptVisit, setSelectedReceiptVisit] = useState<Visit | null>(null);

@@ -38,3 +38,18 @@ export const getCurrentUser = (): User | null => {
     return null;
   }
 };
+
+export interface RegisterInput {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export const registerService = async (input: RegisterInput): Promise<AuthResponse> => {
+  const response = await api.post<{ data: AuthResponse; message: string }>('auth/register', input);
+  const authData = response.data.data;
+  if (!authData) {
+    throw new Error('Format respons server tidak valid');
+  }
+  return authData;
+};

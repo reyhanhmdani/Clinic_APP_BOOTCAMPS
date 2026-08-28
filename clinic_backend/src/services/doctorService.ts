@@ -4,7 +4,7 @@ import { CreateDoctorInput, UpdateDoctorInput } from '../validation/doctorSchema
 
 export const getAllDoctorsService = async () => {
   const doctors = await prisma.doctor.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { updatedAt: 'desc' },
   });
 
   if (doctors.length === 0) {
@@ -64,7 +64,7 @@ export const deleteDoctorService = async (id: number) => {
   if (visitCount > 0) {
     throw new ApiError(
       400,
-      'Dokter tidak dapat dihapus permanen karena memiliki riwayat kunjungan pasien. Silakan nonaktifkan status dokter.'
+      'Dokter tidak dapat dihapus permanen karena memiliki riwayat kunjungan pasien. Silakan nonaktifkan status dokter.',
     );
   }
 
@@ -74,4 +74,17 @@ export const deleteDoctorService = async (id: number) => {
   });
 
   return deletedDoctor;
+};
+
+export const getActiveDoctorsService = async () => {
+  return await prisma.doctor.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      spesialis: true,
+      fee: true,
+    },
+    orderBy: { name: 'asc' },
+  });
 };

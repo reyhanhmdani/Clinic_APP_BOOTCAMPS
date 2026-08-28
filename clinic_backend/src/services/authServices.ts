@@ -1,8 +1,31 @@
-import { LoginInput } from '../validation/userSchema.js';
+import { LoginInput, RegisterInput } from '../validation/userSchema.js';
 import prisma from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import bcrypt from 'bcryptjs';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+
+export const getUserService = async () => {
+  const user = await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      patient: {
+        select: {
+          userId: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (user.length === 0) {
+    return [];
+  }
+
+  return user;
+};
 
 export const loginService = async ({ email, password }: LoginInput) => {
   const existingUser = await prisma.user.findUnique({
@@ -28,6 +51,32 @@ export const loginService = async ({ email, password }: LoginInput) => {
 
   return {
     token,
+    user: userWithoutPassword,
+  };
+};
+
+export const registerService = async ({ username, email, password }: RegisterInput) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    throw new ApiError(400, 'Email sudah terdaftar');
+  }
+
+  const hashPassword = await bcrypt.hash(password, 10);
+
+  const newUser = await prisma.user.create({
+    data: {
+      username,
+      email,
+      password: hashPassword,
+      role: 'CUSTOMER',
+    },
+  });
+
+  const { password: _, ...userWithoutPassword } = newUser;
+  return {
     user: userWithoutPassword,
   };
 };

@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import type { Visit } from "../types/clinic";
-import { useVisitStore } from "../stores/visitStore";
-import { useInvoiceStore } from "../stores/invoiceStore";
-import { useDoctorStore } from "../stores/doctorStore";
-import { usePatientStore } from "../stores/patientStore";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import type { Visit } from '../types/clinic';
+import { useVisitStore } from '../stores/visitStore';
+import { useInvoiceStore } from '../stores/invoiceStore';
+import { useDoctorStore } from '../stores/doctorStore';
+import { usePatientStore } from '../stores/patientStore';
+import { cancelVisitService } from '../services/visitService';
 
 // Components
-import { StatsGrid } from "../components/dashboard/StatsGrid";
-import { WorkflowGuide } from "../components/common/WorkflowGuide";
-import { HomeDashboard } from "../components/dashboard/HomeDashboard";
+import { StatsGrid } from '../components/dashboard/StatsGrid';
+import { WorkflowGuide } from '../components/common/WorkflowGuide';
+import { HomeDashboard } from '../components/dashboard/HomeDashboard';
 
 export const DashboardPage: React.FC = () => {
   const [selectedReceiptVisit, setSelectedReceiptVisit] = useState<Visit | null>(null);
@@ -31,29 +32,38 @@ export const DashboardPage: React.FC = () => {
   // Operational Stats Computation
   const stats = {
     totalCheckedIn: visits.length,
-    currentlyWaiting: visits.filter((v) => v.status === "WAITING" && v.invoice?.status !== "UNPAID").length,
+    currentlyWaiting: visits.filter((v) => v.status === 'WAITING' && v.invoice?.status !== 'UNPAID').length,
     awaitingPayment: visits.filter(
-      (v) => v.invoice?.status === "UNPAID" || (v.status === "COMPLETED" && v.invoice?.status !== "PAID")
+      (v) => v.invoice?.status === 'UNPAID' || (v.status === 'COMPLETED' && v.invoice?.status !== 'PAID'),
     ).length,
     todayEstimatedRevenue: invoices
-      .filter((inv) => inv.status === "PAID")
+      .filter((inv) => inv.status === 'PAID')
       .reduce((sum, inv) => sum + Number(inv.totalAmount), 0),
-    completedVisits: visits.filter((v) => v.status === "COMPLETED" && v.invoice?.status === "PAID").length,
+    completedVisits: visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length,
   };
 
   const handleActionClick = async (visit: Visit, actionType: string) => {
-    if (actionType === "CALL_PATIENT") {
+    if (actionType === 'CALL_PATIENT') {
       try {
         await callPatient(visit.id);
       } catch (err: any) {
-        alert(err.message || "Gagal memanggil pasien");
+        alert(err.message || 'Gagal memanggil pasien');
       }
-    } else if (actionType === "CONSULTATION") {
+    } else if (actionType === 'CONSULTATION') {
       navigate(`/dashboard/consultations?visitId=${visit.id}`);
-    } else if (actionType === "PROCESS_PAYMENT") {
+    } else if (actionType === 'PROCESS_PAYMENT') {
       navigate(`/dashboard/invoices?visitId=${visit.id}`);
-    } else if (actionType === "PRINT_RECEIPT") {
+    } else if (actionType === 'PRINT_RECEIPT') {
       setSelectedReceiptVisit(visit);
+    } else if (actionType === 'CANCEL_VISIT') {
+      if (confirm(`Apakah anda yakin ingin membatalkan andrean pasien ${visit.patient?.name}`)) {
+        try {
+          await cancelVisitService(visit.id);
+          await fetchVisits();
+        } catch (error: any) {
+          alert(error?.response?.data?.message || error.message || 'Gagal membatalkan antrean');
+        }
+      }
     }
   };
 
@@ -67,10 +77,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* 3. Main Queue List */}
       <div className="w-full">
-        <HomeDashboard
-          visits={visits}
-          onActionClick={handleActionClick}
-        />
+        <HomeDashboard visits={visits} onActionClick={handleActionClick} />
       </div>
 
       {/* Modal Struk Nota Pembayaran */}
@@ -104,14 +111,12 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Dokter Jaga:</span>
-                <span className="font-bold text-slate-800">
-                  {selectedReceiptVisit.doctor?.name}
-                </span>
+                <span className="font-bold text-slate-800">{selectedReceiptVisit.doctor?.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Metode Bayar:</span>
                 <span className="font-bold text-slate-800">
-                  {selectedReceiptVisit.invoice?.paymentMethod || "CASH"}
+                  {selectedReceiptVisit.invoice?.paymentMethod || 'CASH'}
                 </span>
               </div>
             </div>
@@ -120,8 +125,7 @@ export const DashboardPage: React.FC = () => {
             <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl flex justify-between items-center">
               <span className="font-bold text-xs text-emerald-900 uppercase">TOTAL TERBAYAR (PAID):</span>
               <span className="font-black text-base text-emerald-700">
-                Rp{" "}
-                {Number(selectedReceiptVisit.invoice?.totalAmount || 0).toLocaleString("id-ID")}
+                Rp {Number(selectedReceiptVisit.invoice?.totalAmount || 0).toLocaleString('id-ID')}
               </span>
             </div>
 

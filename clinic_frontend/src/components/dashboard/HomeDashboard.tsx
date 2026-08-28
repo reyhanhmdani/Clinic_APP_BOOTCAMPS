@@ -56,8 +56,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       const q = search.toLowerCase();
       const patientName = item.patient?.name?.toLowerCase() || '';
       const noRm = item.patient?.noRm?.toLowerCase() || '';
+      const nik = item.patient?.nik?.toLowerCase() || '';
       const doctorName = item.doctor?.name?.toLowerCase() || '';
-      return patientName.includes(q) || noRm.includes(q) || doctorName.includes(q);
+      return patientName.includes(q) || noRm.includes(q) || nik.includes(q) || doctorName.includes(q);
     }
 
     return true;
@@ -79,13 +80,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const countCompleted = visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length;
 
   return (
-    <div id="antrean-table" className="p-5 sm:p-7 bg-white border border-slate-100 shadow-sm rounded-[24px] flex flex-col space-y-5 sm:space-y-6">
+    <div
+      id="antrean-table"
+      className="p-5 sm:p-7 bg-white border border-slate-100 shadow-sm rounded-[24px] flex flex-col space-y-5 sm:space-y-6"
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 pb-2">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            Daftar Antrean Pasien
-          </h2>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Daftar Antrean Pasien</h2>
           <p className="text-xs text-slate-400 font-normal mt-0.5">
             Pantau dan kelola alur pemeriksaan pasien secara real-time
           </p>
@@ -187,8 +189,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                     {/* Info Pasien */}
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">
-                        {item.patient?.noRm} • {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
+                      <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                        <span>{item.patient?.noRm}</span>
+                        <span>•</span>
+                        <span>
+                          {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
+                        </span>
+                        {item.patient?.nik && (
+                          <>
+                            <span>•</span>
+                            <span className="text-slate-500 font-semibold">NIK: {item.patient.nik}</span>
+                          </>
+                        )}
                       </div>
                     </td>
 
@@ -246,13 +258,23 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                           Proses Bayar
                         </button>
                       ) : isWaiting ? (
-                        <button
-                          type="button"
-                          onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
-                          className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
-                        >
-                          Panggil Pasien
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
+                            className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
+                          >
+                            Panggil Pasien
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onActionClick && onActionClick(item, 'CANCEL_VISIT')}
+                            className="p-1.5 border border-slate-200 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-full shadow-xs cursor-pointer transition-all"
+                            title="Batalkan Antrean"
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
                       ) : item.status === 'IN_KONSULTASI' ? (
                         <button
                           type="button"

@@ -3,8 +3,10 @@ import {
   createInvoiceService,
   getAllInvoiceService,
   getInvoiceByIdService,
+  payCustomerInvoiceService,
   payInvoiceService,
 } from '../services/invoiceService.js';
+import { ApiError } from '../utils/apiError.js';
 
 export const getAllInvoiceController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -52,6 +54,24 @@ export const payInvoiceController = async (req: Request, res: Response, next: Ne
     return res.status(200).json({
       message: 'Berhasil melakukan pembayaran invoice',
       data: payInvoice,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// CUSTOMERS
+export const payCustomerInvoiceController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user.id;
+    const { invoiceId, paymentMethod } = req.body;
+
+    if (!invoiceId) throw new ApiError(400, 'ID invoice wajib di sertakan');
+
+    const paidInvoice = await payCustomerInvoiceService(userId, Number(invoiceId), paymentMethod);
+    return res.status(200).json({
+      message: 'Berhasil membayar tagihan (LUNAS)',
+      data: paidInvoice,
     });
   } catch (error) {
     next(error);

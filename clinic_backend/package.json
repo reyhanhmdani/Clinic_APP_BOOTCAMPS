@@ -33,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.4",
+    "docx": "^9.7.1",
     "prisma": "^7.9.1",
     "tsx": "^4.23.7",
     "typescript": "^7.0.2"

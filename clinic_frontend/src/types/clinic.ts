@@ -14,6 +14,8 @@ export interface User {
 
 export interface Patient {
   id: number;
+  userId?: number;
+  nik?: string;
   noRm: string;
   name: string;
   gender: Gender;

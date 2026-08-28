@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import {
+  bookCustomerVisitService,
   createVisitService,
+  getActiveCustomerVisitService,
   getAllVisitService,
   getVisitByIdService,
   updateVisitService,
@@ -54,6 +56,40 @@ export const updateVisitController = async (req: Request, res: Response, next: N
     return res.status(200).json({
       message: `Berhasil mengUpdate data Visit dengan Id ${updateVisit.id}`,
       data: updateVisit,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// CUSTOMERS
+export const bookCustomerVisitController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user.id;
+    const { doctorId } = req.body;
+
+    if (!doctorId) {
+      return res.status(400).json({ message: 'Silahkan pilih dokter yang bertugas' });
+    }
+
+    const visit = await bookCustomerVisitService(userId, Number(doctorId));
+    return res.status(201).json({
+      message: 'Berhasil mendaftarkan antrian dokter',
+      data: visit,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getActiveCustomerVisitController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user.id;
+    const activeData = await getActiveCustomerVisitService(userId);
+
+    return res.status(200).json({
+      message: activeData ? 'Antrian aktif ditemukan' : 'Tidak ada antrian aktif saat ini',
+      data: activeData,
     });
   } catch (error) {
     next(error);

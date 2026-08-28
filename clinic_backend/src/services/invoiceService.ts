@@ -1,4 +1,4 @@
-﻿import prisma from '../config/prisma.js';
+import prisma from '../config/prisma.js';
 import { ApiError } from '../utils/apiError.js';
 import { CreateInvoiceInput, payInvoiceInput } from '../validation/invoiceSchema.js';
 import { getVisitByIdService } from './visitService.js';
@@ -165,4 +165,42 @@ export const payInvoiceService = async (id: number, input?: payInvoiceInput) => 
     },
   });
   return payInvoice;
+};
+
+// CUSTOMERS
+export const payCustomerInvoiceService = async (
+  userId: number,
+  invoiceId: number,
+  paymentMethod: PaymentMethod = PaymentMethod.QRIS,
+) => {
+  // ambil data pasien milik user
+  const patient = await prisma.patient.findUnique({
+    where: { userId },
+  });
+  if (!patient) throw new ApiError(404, 'Data pasien tidak ditemukan');
+
+  // ambil invoice dan pastikan invoice ini benar milik pasien yang sedang login (security check)
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+    include: { visit: true },
+  });
+
+  if (!invoice) throw new ApiError(404, 'Tagihan invoice tidak di temukan');
+
+  if (invoice.visit.patientId !== patient.id)
+    throw new ApiError(403, 'Anda tidak memiliki hak akses untuk membayar tagihan pasien lain');
+
+  if (invoice.status === InvoiceStatus.PAID) throw new ApiError(400, 'Tagihan ini sudah lunas');
+
+  // update status invoice menjadi PAID
+  const updateInvoice = await prisma.invoice.update({
+    where: { id: invoiceId },
+    data: {
+      status: InvoiceStatus.PAID,
+      paymentMethod,
+      paidAt: new Date(),
+    },
+  });
+
+  return updateInvoice;
 };

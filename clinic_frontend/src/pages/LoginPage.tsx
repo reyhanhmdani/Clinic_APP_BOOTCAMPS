@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle, Sparkles, ShieldCheck, HeartPulse, Stethoscope, Clock } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  LogIn,
+  AlertCircle,
+  Sparkles,
+  ShieldCheck,
+  HeartPulse,
+  Stethoscope,
+  Clock,
+} from 'lucide-react';
 import { loginService } from '../services/authService';
 import { useAuthStore } from '../stores/authStore';
 
@@ -22,7 +34,13 @@ export const LoginPage: React.FC = () => {
     try {
       const authData = await loginService({ email, password });
       loginStore(authData.user as any, authData.token);
-      navigate('/dashboard');
+
+      // cek apakah dia admin atau customer
+      if (authData.user.role === 'ADMIN') {
+        navigate('/dashboard');
+      } else if (authData.user.role === 'CUSTOMER') {
+        navigate('/portal');
+      }
     } catch (error: any) {
       const msg = error?.response?.data?.message || 'Email atau kata sandi tidak sesuai!';
       setErrorMessage(msg);
@@ -45,7 +63,6 @@ export const LoginPage: React.FC = () => {
 
       {/* 2. Main Responsive Grid Container */}
       <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        
         {/* Left Side: Brand Story & Hospitality Showcase (Hidden on Mobile, Visible on Tablet/Desktop) */}
         <div className="hidden lg:flex lg:col-span-7 flex-col justify-between space-y-8 text-white pr-4">
           {/* Header Brand */}
@@ -60,7 +77,8 @@ export const LoginPage: React.FC = () => {
             </h1>
 
             <p className="text-sm xl:text-base text-slate-200/90 font-normal leading-relaxed max-w-xl">
-              Portal sistem terpadu untuk efisiensi antrean klinik, rekam medis digital terintegrasi, konsultasi dokter spesialis, dan layanan apotek farmasi terpercaya.
+              Portal sistem terpadu untuk efisiensi antrean klinik, rekam medis digital terintegrasi, konsultasi dokter
+              spesialis, dan layanan apotek farmasi terpercaya.
             </p>
           </div>
 
@@ -101,7 +119,6 @@ export const LoginPage: React.FC = () => {
         {/* Right Side: Sleek Modern Login Card */}
         <div className="w-full lg:col-span-5 max-w-md mx-auto">
           <div className="bg-white/95 backdrop-blur-xl border border-white/80 shadow-2xl rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 space-y-6">
-            
             {/* Header Login Card */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -116,9 +133,7 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight pt-2">
-                Selamat Datang
-              </h2>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight pt-2">Selamat Datang</h2>
               <p className="text-xs text-slate-500 font-normal">
                 Silakan masuk untuk mengakses sistem administrasi & layanan klinik
               </p>
@@ -136,9 +151,7 @@ export const LoginPage: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Input Email */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 block">
-                  Email Akun
-                </label>
+                <label className="text-xs font-semibold text-slate-700 block">Email Akun</label>
                 <div className="relative flex items-center">
                   <Mail size={16} className="absolute left-3.5 text-slate-400" />
                   <input
@@ -155,9 +168,7 @@ export const LoginPage: React.FC = () => {
               {/* Input Password */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-semibold text-slate-700 block">
-                    Kata Sandi
-                  </label>
+                  <label className="text-xs font-semibold text-slate-700 block">Kata Sandi</label>
                 </div>
                 <div className="relative flex items-center">
                   <Lock size={16} className="absolute left-3.5 text-slate-400" />
@@ -173,7 +184,7 @@ export const LoginPage: React.FC = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 text-slate-400 hover:text-slate-700 flex items-center cursor-pointer p-1"
-                    title={showPassword ? "Sembunyikan sandi" : "Lihat sandi"}
+                    title={showPassword ? 'Sembunyikan sandi' : 'Lihat sandi'}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -206,7 +217,6 @@ export const LoginPage: React.FC = () => {
             &copy; {new Date().getFullYear()} ReyClinic Medical Center • Layanan Kesehatan Terpadu
           </p>
         </div>
-
       </div>
     </div>
   );

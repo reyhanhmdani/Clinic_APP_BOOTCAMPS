@@ -46,15 +46,19 @@ model User {
   username  String?  @db.VarChar(255)
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
-  role      Role     @default(ADMIN)
+  role      Role     @default(CUSTOMER)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  patient Patient?
 
   @@map("users")
 }
 
 model Patient {
   id        Int      @id @default(autoincrement())
+  userId    Int?     @unique @map("user_id")
+  nik String? @unique @db.VarChar(16)
   noRm      String   @unique @map("no_rm") @db.VarChar(255)
   name      String   @db.VarChar(255)
   gender    Gender
@@ -64,6 +68,7 @@ model Patient {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  user   User?   @relation(fields: [userId], references: [id])
   visits Visit[]
 
   @@map("patients")

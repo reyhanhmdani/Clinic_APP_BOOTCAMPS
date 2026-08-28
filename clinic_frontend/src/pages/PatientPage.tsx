@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2 } from "lucide-react";
-import type { Patient } from "../types/clinic";
-import { usePatientStore } from "../stores/patientStore";
-import {
-  createPatientService,
-  updatePatientService,
-  deletePatientService,
-} from "../services/patientService";
-import { PatientHistoryModal } from "../components/patients/PatientHistoryModal";
+import React, { useState, useEffect } from 'react';
+import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2 } from 'lucide-react';
+import type { Patient } from '../types/clinic';
+import { usePatientStore } from '../stores/patientStore';
+import { createPatientService, updatePatientService, deletePatientService } from '../services/patientService';
+import { PatientHistoryModal } from '../components/patients/PatientHistoryModal';
 
 export const PatientPage: React.FC = () => {
   const { patients, loading: isLoading, fetchPatients } = usePatientStore();
 
   // Filter & Search State
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGender, setSelectedGender] = useState<"ALL" | "MALE" | "FEMALE">("ALL");
-  const [viewMode, setViewMode] = useState<"TABLE" | "GRID">("TABLE");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGender, setSelectedGender] = useState<'ALL' | 'MALE' | 'FEMALE'>('ALL');
+  const [viewMode, setViewMode] = useState<'TABLE' | 'GRID'>('TABLE');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"CREATE" | "EDIT">("CREATE");
+  const [modalMode, setModalMode] = useState<'CREATE' | 'EDIT'>('CREATE');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   // Rekam Medis Modal State
@@ -28,11 +24,12 @@ export const PatientPage: React.FC = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    name: "",
-    gender: "MALE" as "MALE" | "FEMALE",
-    age: "",
-    phone: "",
-    address: "",
+    name: '',
+    nik: '',
+    gender: 'MALE' as 'MALE' | 'FEMALE',
+    age: '',
+    phone: '',
+    address: '',
   });
 
   useEffect(() => {
@@ -40,27 +37,29 @@ export const PatientPage: React.FC = () => {
   }, []);
 
   const openCreateModal = () => {
-    setModalMode("CREATE");
+    setModalMode('CREATE');
     setSelectedPatient(null);
     setFormData({
-      name: "",
-      gender: "MALE",
-      age: "",
-      phone: "",
-      address: "",
+      name: '',
+      nik: '',
+      gender: 'MALE',
+      age: '',
+      phone: '',
+      address: '',
     });
     setIsModalOpen(true);
   };
 
   const openEditModal = (patient: Patient) => {
-    setModalMode("EDIT");
+    setModalMode('EDIT');
     setSelectedPatient(patient);
     setFormData({
       name: patient.name,
+      nik: patient.nik || '',
       gender: patient.gender,
       age: String(patient.age),
-      phone: patient.phone || "",
-      address: patient.address || "",
+      phone: patient.phone || '',
+      address: patient.address || '',
     });
     setIsModalOpen(true);
   };
@@ -74,39 +73,41 @@ export const PatientPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Nama pasien wajib diisi!");
+      alert('Nama pasien wajib diisi!');
       return;
     }
     const numAge = Number(formData.age);
     if (!formData.age || isNaN(numAge) || numAge <= 0) {
-      alert("Usia pasien harus berupa angka valid!");
+      alert('Usia pasien harus berupa angka valid!');
       return;
     }
 
     try {
-      if (modalMode === "CREATE") {
+      if (modalMode === 'CREATE') {
         await createPatientService({
           name: formData.name.trim(),
+          nik: formData.nik.trim() || undefined,
           gender: formData.gender,
           age: numAge,
           phone: formData.phone.trim() || undefined,
           address: formData.address.trim() || undefined,
         });
-        alert("Pasien baru berhasil didaftarkan!");
-      } else if (modalMode === "EDIT" && selectedPatient) {
+        alert('Pasien baru berhasil didaftarkan!');
+      } else if (modalMode === 'EDIT' && selectedPatient) {
         await updatePatientService(selectedPatient.id, {
           name: formData.name.trim(),
+          nik: formData.nik.trim() || undefined,
           gender: formData.gender,
           age: numAge,
           phone: formData.phone.trim() || undefined,
           address: formData.address.trim() || undefined,
         });
-        alert("Data pasien berhasil diperbarui!");
+        alert('Data pasien berhasil diperbarui!');
       }
       setIsModalOpen(false);
       fetchPatients();
     } catch (err: any) {
-      const message = err?.response?.data?.message || err.message || "Gagal menyimpan data pasien";
+      const message = err?.response?.data?.message || err.message || 'Gagal menyimpan data pasien';
       alert(message);
     }
   };
@@ -118,7 +119,7 @@ export const PatientPage: React.FC = () => {
         alert(`Data pasien ${name} berhasil dihapus`);
         fetchPatients();
       } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || "Gagal menghapus pasien";
+        const message = err?.response?.data?.message || err.message || 'Gagal menghapus pasien';
         alert(message);
       }
     }
@@ -126,8 +127,8 @@ export const PatientPage: React.FC = () => {
 
   // Filter Logic
   const filteredPatients = patients.filter((patient) => {
-    if (selectedGender !== "ALL" && patient.gender !== selectedGender) return false;
-    if (searchTerm.trim() !== "") {
+    if (selectedGender !== 'ALL' && patient.gender !== selectedGender) return false;
+    if (searchTerm.trim() !== '') {
       const q = searchTerm.toLowerCase();
       return (
         patient.name.toLowerCase().includes(q) ||
@@ -146,9 +147,7 @@ export const PatientPage: React.FC = () => {
           <div className="inline-block bg-lime-100 text-lime-900 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-lime-200 uppercase mb-1">
             Master Data
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
-            Data Pasien
-          </h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Data Pasien</h1>
           <p className="text-xs text-slate-400 font-normal mt-0.5">
             Total {patients.length} pasien terdaftar dalam database klinik
           </p>
@@ -177,11 +176,7 @@ export const PatientPage: React.FC = () => {
             className="w-full bg-transparent text-xs font-medium text-slate-800 outline-none placeholder:text-slate-400"
           />
           {searchTerm.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm("")}
-              className="text-slate-400 hover:text-slate-700"
-            >
+            <button type="button" onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-700">
               <X size={14} />
             </button>
           )}
@@ -190,9 +185,9 @@ export const PatientPage: React.FC = () => {
         {/* Gender Filter Pills */}
         <div className="flex items-center gap-1.5 shrink-0">
           {[
-            { id: "ALL", label: "Semua" },
-            { id: "MALE", label: "Laki-laki" },
-            { id: "FEMALE", label: "Perempuan" },
+            { id: 'ALL', label: 'Semua' },
+            { id: 'MALE', label: 'Laki-laki' },
+            { id: 'FEMALE', label: 'Perempuan' },
           ].map((g) => (
             <button
               key={g.id}
@@ -200,8 +195,8 @@ export const PatientPage: React.FC = () => {
               onClick={() => setSelectedGender(g.id as any)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 selectedGender === g.id
-                  ? "bg-[#061e15] text-white shadow-xs font-bold"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
+                  ? 'bg-[#061e15] text-white shadow-xs font-bold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
               }`}
             >
               {g.label}
@@ -213,9 +208,9 @@ export const PatientPage: React.FC = () => {
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-full shrink-0">
           <button
             type="button"
-            onClick={() => setViewMode("TABLE")}
+            onClick={() => setViewMode('TABLE')}
             className={`p-1.5 rounded-full transition-all ${
-              viewMode === "TABLE" ? "bg-white text-slate-900 shadow-xs" : "text-slate-400 hover:text-slate-700"
+              viewMode === 'TABLE' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
             }`}
             title="Tampilan Tabel"
           >
@@ -223,9 +218,9 @@ export const PatientPage: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setViewMode("GRID")}
+            onClick={() => setViewMode('GRID')}
             className={`p-1.5 rounded-full transition-all ${
-              viewMode === "GRID" ? "bg-white text-slate-900 shadow-xs" : "text-slate-400 hover:text-slate-700"
+              viewMode === 'GRID' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-400 hover:text-slate-700'
             }`}
             title="Tampilan Grid Kartu"
           >
@@ -243,16 +238,14 @@ export const PatientPage: React.FC = () => {
       ) : filteredPatients.length === 0 ? (
         <div className="py-16 text-center bg-white border border-slate-100 shadow-sm rounded-[24px] p-6 space-y-2 flex flex-col items-center justify-center">
           <UserX size={44} className="text-slate-300" />
-          <h3 className="text-base font-bold text-slate-800">
-            Tidak Ada Data Pasien
-          </h3>
+          <h3 className="text-base font-bold text-slate-800">Tidak Ada Data Pasien</h3>
           <p className="text-xs text-slate-400 font-normal max-w-sm mx-auto">
             {searchTerm
               ? `Tidak ada pasien yang cocok dengan pencarian "${searchTerm}"`
-              : "Belum ada pasien yang didaftarkan ke sistem."}
+              : 'Belum ada pasien yang didaftarkan ke sistem.'}
           </p>
         </div>
-      ) : viewMode === "TABLE" ? (
+      ) : viewMode === 'TABLE' ? (
         /* TABLE VIEW */
         <div className="bg-white border border-slate-100 shadow-sm rounded-[24px] overflow-hidden">
           <div className="overflow-x-auto">
@@ -274,25 +267,29 @@ export const PatientPage: React.FC = () => {
                         {patient.noRm}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-sm text-slate-900 capitalize">{patient.name}</td>
+                    <td className="p-4">
+                      <div className="font-bold text-sm text-slate-900 capitalize leading-tight">{patient.name}</div>
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">NIK: {patient.nik || '-'}</div>
+                    </td>
+
                     <td className="p-4">
                       <div className="flex items-center gap-1.5">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                            patient.gender === "MALE"
-                              ? "bg-sky-50 text-sky-700 border-sky-200"
-                              : "bg-rose-50 text-rose-700 border-rose-200"
+                            patient.gender === 'MALE'
+                              ? 'bg-sky-50 text-sky-700 border-sky-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200'
                           }`}
                         >
-                          {patient.gender === "MALE" ? "L" : "P"}
+                          {patient.gender === 'MALE' ? 'L' : 'P'}
                         </span>
                         <span>{patient.age} Th</span>
                       </div>
                     </td>
                     <td className="p-4">
-                      <p className="font-semibold text-slate-800">{patient.phone || "-"}</p>
+                      <p className="font-semibold text-slate-800">{patient.phone || '-'}</p>
                       <p className="text-[11px] text-slate-400 truncate max-w-xs">
-                        {patient.address || "Belum ada alamat"}
+                        {patient.address || 'Belum ada alamat'}
                       </p>
                     </td>
                     <td className="p-4 text-right">
@@ -348,25 +345,24 @@ export const PatientPage: React.FC = () => {
                   </span>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                      patient.gender === "MALE"
-                        ? "bg-sky-50 text-sky-700 border-sky-200"
-                        : "bg-rose-50 text-rose-700 border-rose-200"
+                      patient.gender === 'MALE'
+                        ? 'bg-sky-50 text-sky-700 border-sky-200'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}
                   >
-                    {patient.gender === "MALE" ? "Laki-laki" : "Perempuan"} • {patient.age} Th
+                    {patient.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'} • {patient.age} Th
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 capitalize mb-2">
-                  {patient.name}
-                </h3>
+                <div className="font-bold text-sm text-slate-900 capitalize">{patient.name}</div>
+                <div className="text-[11px] text-slate-400 font-mono">NIK: {patient.nik || '-'}</div>
                 <div className="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100 text-xs space-y-1.5 mb-4">
                   <p className="font-semibold text-slate-800 flex items-center gap-1.5">
                     <Phone size={14} className="text-slate-400" />
-                    <span>{patient.phone || "Tidak ada nomor HP"}</span>
+                    <span>{patient.phone || 'Tidak ada nomor HP'}</span>
                   </p>
                   <p className="text-[11px] text-slate-400 flex items-start gap-1.5">
                     <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
-                    <span className="truncate">{patient.address || "Alamat belum diisi"}</span>
+                    <span className="truncate">{patient.address || 'Alamat belum diisi'}</span>
                   </p>
                 </div>
               </div>
@@ -407,11 +403,9 @@ export const PatientPage: React.FC = () => {
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                  {modalMode === "CREATE" ? "Tambah Pasien Baru" : "Edit Data Pasien"}
+                  {modalMode === 'CREATE' ? 'Tambah Pasien Baru' : 'Edit Data Pasien'}
                 </h3>
-                <p className="text-xs text-slate-400 font-normal">
-                  Formulir pendaftaran rekam medis klinik
-                </p>
+                <p className="text-xs text-slate-400 font-normal">Formulir pendaftaran rekam medis klinik</p>
               </div>
               <button
                 type="button"
@@ -425,9 +419,7 @@ export const PatientPage: React.FC = () => {
             <form onSubmit={handleSubmitForm} className="space-y-3.5">
               {/* Nama Pasien */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nama Lengkap Pasien *
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Pasien *</label>
                 <input
                   type="text"
                   required
@@ -438,17 +430,28 @@ export const PatientPage: React.FC = () => {
                 />
               </div>
 
+              {/* NIK */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nomor Induk Kependudukan (NIK - 16 Digit)
+                </label>
+                <input
+                  type="text"
+                  maxLength={16}
+                  value={formData.nik}
+                  onChange={(e) => setFormData({ ...formData, nik: e.target.value })}
+                  placeholder="Contoh: 3201011504950001"
+                  className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15]"
+                />
+              </div>
+
               {/* Gender & Usia */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Jenis Kelamin *
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
                   <select
                     value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value as any })
-                    }
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
                     className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-900 outline-none focus:bg-white focus:border-[#061e15] cursor-pointer"
                   >
                     <option value="MALE">Laki-laki</option>
@@ -456,9 +459,7 @@ export const PatientPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Usia (Tahun) *
-                  </label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Usia (Tahun) *</label>
                   <input
                     type="number"
                     required
@@ -473,9 +474,7 @@ export const PatientPage: React.FC = () => {
 
               {/* Nomor HP */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nomor HP / WhatsApp
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Nomor HP / WhatsApp</label>
                 <input
                   type="tel"
                   value={formData.phone}
@@ -487,9 +486,7 @@ export const PatientPage: React.FC = () => {
 
               {/* Alamat */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Alamat Tinggal
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Alamat Tinggal</label>
                 <textarea
                   rows={2}
                   value={formData.address}
@@ -508,11 +505,8 @@ export const PatientPage: React.FC = () => {
                 >
                   Batal
                 </button>
-                <button
-                  type="submit"
-                  className="btn-forest flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  {modalMode === "CREATE" ? "Simpan Pasien" : "Update Pasien"}
+                <button type="submit" className="btn-forest flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer">
+                  {modalMode === 'CREATE' ? 'Simpan Pasien' : 'Update Pasien'}
                 </button>
               </div>
             </form>

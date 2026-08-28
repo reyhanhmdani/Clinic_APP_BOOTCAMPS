@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import {
   createDoctorService,
   deleteDoctorService,
+  getActiveDoctorsService,
   getAllDoctorsService,
   getDoctorByIdService,
   updateDoctorService,
@@ -28,7 +29,7 @@ export const createDoctorController = async (req: Request, res: Response, next: 
       data: createDoctor,
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -70,6 +71,21 @@ export const deleteDoctorController = async (req: Request, res: Response, next: 
 
     return res.status(200).json({
       message: `Berhasil menghapus Doctor dengan id ${deleteDoctorById.id}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// CUSTOMERS
+
+export const getActiveDoctorsController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const doctors = await getActiveDoctorsService();
+
+    return res.status(200).json({
+      message: 'Berhasil mengambil daftar dokter aktif',
+      data: doctors,
     });
   } catch (error) {
     next(error);

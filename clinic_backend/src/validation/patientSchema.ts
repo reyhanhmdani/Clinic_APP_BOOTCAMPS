@@ -3,6 +3,11 @@ import { toTitleCase } from '../utils/formatter.js';
 
 export const createPatientSchema = z.object({
   name: z.string().min(1, 'Nama ga boleh kosong').transform(toTitleCase),
+  nik: z
+    .string()
+    .regex(/^\d{16}$/, 'NIK harus 16 digit angka')
+    .optional()
+    .or(z.literal('')),
   gender: z.enum(['MALE', 'FEMALE']),
   age: z.coerce.number().min(0, 'umur ga boleh angka negatif'),
   phone: z.string().optional(),

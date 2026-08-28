@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router";
-import { ArrowLeft, ArrowRight, FileText, Edit3, Stethoscope } from "lucide-react";
-import { useVisitStore } from "../stores/visitStore";
-import { useMedicineStore } from "../stores/medicineStore";
-import { createConsultationService } from "../services/consulService";
-import { createInvoiceService } from "../services/invoiceService";
+﻿import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router';
+import { ArrowLeft, ArrowRight, FileText, Edit3, Stethoscope } from 'lucide-react';
+import { useVisitStore } from '../stores/visitStore';
+import { useMedicineStore } from '../stores/medicineStore';
+import { createConsultationService } from '../services/consulService';
+import { createInvoiceService } from '../services/invoiceService';
+import { X } from 'lucide-react';
+import { cancelVisitService } from '../services/visitService';
 
 // Sub-components
-import { PatientBannerCard } from "../components/consultation/PatientBannerCard";
-import { Prescription, type PrescriptionItem } from "../components/consultation/Prescription";
-import { AddMedicineModal } from "../components/consultation/AddMedicineModal";
+import { PatientBannerCard } from '../components/consultation/PatientBannerCard';
+import { Prescription, type PrescriptionItem } from '../components/consultation/Prescription';
+import { AddMedicineModal } from '../components/consultation/AddMedicineModal';
 
 export const ConsultationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const visitId = searchParams.get("visitId");
+  const visitId = searchParams.get('visitId');
 
   const navigate = useNavigate();
   const { visits, loading: isLoading, fetchVisits } = useVisitStore();
@@ -22,8 +24,8 @@ export const ConsultationPage: React.FC = () => {
   // Strict Route Guard: Harus ada visitId
   useEffect(() => {
     if (!visitId) {
-      alert("Halaman konsultasi hanya dapat diakses melalui antrean pasien di Dashboard.");
-      navigate("/dashboard", { replace: true });
+      alert('Halaman konsultasi hanya dapat diakses melalui antrean pasien di Dashboard.');
+      navigate('/dashboard', { replace: true });
       return;
     }
     fetchVisits();
@@ -31,9 +33,9 @@ export const ConsultationPage: React.FC = () => {
   }, [visitId]);
 
   // Form State
-  const [complaint, setComplaint] = useState("");
-  const [diagnosis, setDiagnosis] = useState("");
-  const [notes, setNotes] = useState("");
+  const [complaint, setComplaint] = useState('');
+  const [diagnosis, setDiagnosis] = useState('');
+  const [notes, setNotes] = useState('');
   const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([]);
 
   // Modal & Submitting State
@@ -55,11 +57,11 @@ export const ConsultationPage: React.FC = () => {
   // Form Submission
   const handleSubmitConsultation = async () => {
     if (!visitId) {
-      return alert("ID Kunjungan tidak valid!");
+      return alert('ID Kunjungan tidak valid!');
     }
 
     if (!complaint.trim() || !diagnosis.trim()) {
-      return alert("Keluhan dan Diagnosis Medis wajib diisi!");
+      return alert('Keluhan dan Diagnosis Medis wajib diisi!');
     }
 
     setIsSubmitting(true);
@@ -82,12 +84,30 @@ export const ConsultationPage: React.FC = () => {
 
       // 3. Refresh State Global & Kembali ke Dashboard
       await fetchVisits();
-      alert("Konsultasi berhasil disimpan & Tagihan kasir telah diterbitkan!");
-      navigate("/dashboard");
+      alert('Konsultasi berhasil disimpan & Tagihan kasir telah diterbitkan!');
+      navigate('/dashboard');
     } catch (error: any) {
       alert(`Gagal menyimpan konsultasi: ${error?.response?.data?.message || error.message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelConsul = async () => {
+    if (!visitId) return;
+
+    if (confirm('Apakah anda yakin ingin membatalkan kunjungan pasien ini?')) {
+      setIsSubmitting(true);
+      try {
+        await cancelVisitService(Number(visitId));
+        fetchVisits();
+        alert('Kunjungan pasien ini telah di Batalkan');
+        navigate('/dashboard');
+      } catch (error: any) {
+        alert(`Gagal Membatalkan kunjungan: ${error?.response?.data?.message || error.message}`);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -110,9 +130,7 @@ export const ConsultationPage: React.FC = () => {
             <div className="inline-block bg-lime-100 text-lime-900 font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-lime-200 uppercase tracking-wider mb-1">
               Examination Suite
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
-              Pemeriksaan Dokter
-            </h1>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Pemeriksaan Dokter</h1>
             <p className="text-xs text-slate-500 font-medium">
               Input Anamnesis, Diagnosis Medis, dan Resep Obat Pasien (Kunjungan #{visitId})
             </p>
@@ -197,18 +215,23 @@ export const ConsultationPage: React.FC = () => {
       </div>
 
       {/* Action Submit Button */}
-      <div className="flex justify-center w-full pt-4">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full pt-4">
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleCancelConsul}
+          className="px-6 py-3 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-full text-xs font-bold transition-all cursor-pointer w-full sm:w-auto flex items-center justify-center gap-1.5"
+        >
+          <X size={16} />
+          <span>Batalkan Kunjungan</span>
+        </button>
         <button
           type="button"
           disabled={isSubmitting}
           onClick={handleSubmitConsultation}
           className="btn-forest px-8 py-3.5 text-xs font-bold rounded-full hover:shadow-lg transition-all w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 tracking-wide cursor-pointer"
         >
-          <span>
-            {isSubmitting
-              ? "Menyimpan Konsultasi..."
-              : "Selesai Konsultasi & Buat Tagihan Kasir"}
-          </span>
+          <span>{isSubmitting ? 'Menyimpan Konsultasi...' : 'Selesai Konsultasi & Buat Tagihan Kasir'}</span>
           <ArrowRight size={16} />
         </button>
       </div>

@@ -8,20 +8,43 @@ import { MedicinePage } from './pages/admin/MedicinePage';
 import { PatientPage } from './pages/admin/PatientPage';
 import { DoctorPage } from './pages/admin/DoctorPage';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { CustomerPage } from './pages/customers/CustomerPage';
+import { PublicRoute } from './components/common/PublicRoute';
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/register',
+    element: (
+      <PublicRoute>
+        <RegisterPage />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: '/customers',
+    element: (
+      <ProtectedRoute allowedRoles={['CUSTOMER']}>
+        <CustomerPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/login" replace />,
   },
   {
     path: '/dashboard',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={['ADMIN']}>
         <Layout />
       </ProtectedRoute>
     ),

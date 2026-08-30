@@ -3,6 +3,7 @@ import { ApiError } from '../utils/apiError.js';
 import { CreateInvoiceInput, payInvoiceInput } from '../validation/invoiceSchema.js';
 import { getVisitByIdService } from './visitService.js';
 import { InvoiceStatus, PaymentMethod } from '@prisma/client';
+import { io } from '../app.js';
 
 const invoiceSelectPayload = {
   // 1. Field Utama Invoice (Faktur Kasir)
@@ -131,6 +132,7 @@ export const createInvoiceService = async (input: CreateInvoiceInput) => {
       paymentMethod: input.paymentMethod ?? PaymentMethod.CASH,
     },
   });
+  io.emit('QUEUE_UPDATED', { type: 'INVOICE_CREATED', invoiceId: createInvoice.id });
 
   return createInvoice;
 };
@@ -164,6 +166,9 @@ export const payInvoiceService = async (id: number, input?: payInvoiceInput) => 
       paymentMethod: input?.paymentMethod ?? invoice.paymentMethod,
     },
   });
+
+  io.emit('QUEUE_UPDATED', { type: 'INVOICE_PAID', invoiceId: id });
+
   return payInvoice;
 };
 
@@ -201,6 +206,8 @@ export const payCustomerInvoiceService = async (
       paidAt: new Date(),
     },
   });
+
+  io.emit('QUEUE_UPDATED', { type: 'INVOICE_PAID', invoiceId });
 
   return updateInvoice;
 };

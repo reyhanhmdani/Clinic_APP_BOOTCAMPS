@@ -184,14 +184,14 @@ const PATIENTS_DATA = [
 
 // --- 3. DATA DOCTORS (8 Dokter) ---
 const DOCTORS_DATA = [
-  { id: "1", name: "Dr. Andri Wijaya", spesialis: "Spesialis Penyakit Dalam", phone: "0811-0001-0001", fee: 150000, isActive: true },
-  { id: "2", name: "Dr. Budi Santoso", spesialis: "Dokter Umum", phone: "0811-0002-0002", fee: 50000, isActive: true },
-  { id: "3", name: "Dr. Sarah Lestari", spesialis: "Spesialis Gigi & Mulut", phone: "0811-0003-0003", fee: 100000, isActive: true },
-  { id: "4", name: "Dr. Hendra Gunawan", spesialis: "Spesialis Tulang & Orthopedi", phone: "0811-0004-0004", fee: 200000, isActive: true },
-  { id: "5", name: "Dr. Maya Indah", spesialis: "Spesialis Kulit & Kelamin", phone: "0811-0005-0005", fee: 120000, isActive: true },
-  { id: "6", name: "Dr. Rizky Alamsyah", spesialis: "Spesialis Anak", phone: "0811-0006-0006", fee: 130000, isActive: true },
-  { id: "7", name: "Dr. Dewi Sartika", spesialis: "Spesialis Mata", phone: "0811-0007-0007", fee: 110000, isActive: true },
-  { id: "8", name: "Dr. Fulanah", spesialis: "Dokter Umum", phone: "0811-0008-0008", fee: 50000, isActive: false },
+  { id: "1", name: "Dr. Andri Wijaya", gender: Gender.MALE, spesialis: "Spesialis Penyakit Dalam", phone: "0811-0001-0001", fee: 150000, isActive: true },
+  { id: "2", name: "Dr. Budi Santoso", gender: Gender.MALE, spesialis: "Dokter Umum", phone: "0811-0002-0002", fee: 50000, isActive: true },
+  { id: "3", name: "Dr. Sarah Lestari", gender: Gender.FEMALE, spesialis: "Spesialis Gigi & Mulut", phone: "0811-0003-0003", fee: 100000, isActive: true },
+  { id: "4", name: "Dr. Hendra Gunawan", gender: Gender.MALE, spesialis: "Spesialis Tulang & Orthopedi", phone: "0811-0004-0004", fee: 200000, isActive: true },
+  { id: "5", name: "Dr. Maya Indah", gender: Gender.FEMALE, spesialis: "Spesialis Kulit & Kelamin", phone: "0811-0005-0005", fee: 120000, isActive: true },
+  { id: "6", name: "Dr. Rizky Alamsyah", gender: Gender.MALE, spesialis: "Spesialis Anak", phone: "0811-0006-0006", fee: 130000, isActive: true },
+  { id: "7", name: "Dr. Dewi Sartika", gender: Gender.FEMALE, spesialis: "Spesialis Mata", phone: "0811-0007-0007", fee: 110000, isActive: true },
+  { id: "8", name: "Dr. Fulanah", gender: Gender.FEMALE, spesialis: "Dokter Umum", phone: "0811-0008-0008", fee: 50000, isActive: false },
 ];
 
 // --- 4. DATA MEDICINES (10 Obat) ---
@@ -376,101 +376,99 @@ const VISITS_DATA = [
   },
 
   // === H-0 (HARI INI - 10 Kunjungan Live) ===
-  // 3x WAITING
+  // 6x COMPLETED (4 Lunas, 2 Belum Lunas) - Datang Pagi Terlebih Dahulu
   {
     id: "V1",
-    patient_id: "1", // Budi (Online)
-    doctor_id: "1",  // Dr. Andri
+    patient_id: "3", // Ahmad Rizky (Online)
+    doctor_id: "4",  // Dr. Hendra
     queue_number: 1,
-    status: "WAITING",
-    visitDate: today,
-    checkInTime: null,
+    status: "COMPLETED",
+    visitDate: new Date(`${todayStr}T07:30:00`),
+    checkInTime: new Date(`${todayStr}T07:30:00`),
   },
   {
     id: "V2",
-    patient_id: "2", // Siti (Online)
-    doctor_id: "3",  // Dr. Sarah
+    patient_id: "4", // Marina Putri (Online)
+    doctor_id: "5",  // Dr. Maya
     queue_number: 2,
-    status: "WAITING",
-    visitDate: today,
-    checkInTime: null,
-  },
-  {
-    id: "V3",
-    patient_id: "7", // Agus (Online)
-    doctor_id: "1",  // Dr. Andri
-    queue_number: 3,
-    status: "WAITING",
-    visitDate: today,
-    checkInTime: null,
-  },
-
-  // 2x IN_KONSULTASI
-  {
-    id: "V4",
-    patient_id: "9", // Joko Widodo (Offline loket)
-    doctor_id: "2",  // Dr. Budi
-    queue_number: 4,
-    status: "IN_KONSULTASI",
-    visitDate: today,
-    checkInTime: new Date(`${todayStr}T08:30:00`),
-  },
-  {
-    id: "V5",
-    patient_id: "6", // Dewi Lestari (Online)
-    doctor_id: "2",  // Dr. Budi
-    queue_number: 5,
-    status: "IN_KONSULTASI",
-    visitDate: today,
-    checkInTime: new Date(`${todayStr}T09:15:00`),
-  },
-
-  // 4x COMPLETED (2 Lunas, 2 Belum Lunas)
-  {
-    id: "V6",
-    patient_id: "3", // Ahmad Rizky (Online)
-    doctor_id: "4",  // Dr. Hendra
-    queue_number: 6,
     status: "COMPLETED",
-    visitDate: today,
+    visitDate: new Date(`${todayStr}T07:45:00`),
     checkInTime: new Date(`${todayStr}T07:45:00`),
   },
   {
-    id: "V7",
-    patient_id: "4", // Marina Putri (Online)
-    doctor_id: "5",  // Dr. Maya
-    queue_number: 7,
+    id: "V3",
+    patient_id: "5", // Eko Prasetyo (Online)
+    doctor_id: "6",  // Dr. Rizky
+    queue_number: 3,
     status: "COMPLETED",
-    visitDate: today,
+    visitDate: new Date(`${todayStr}T08:00:00`),
     checkInTime: new Date(`${todayStr}T08:00:00`),
   },
   {
-    id: "V8",
-    patient_id: "5", // Eko Prasetyo (Online)
-    doctor_id: "6",  // Dr. Rizky
-    queue_number: 8,
+    id: "V4",
+    patient_id: "1", // Budi Santoso (Online)
+    doctor_id: "5",  // Dr. Maya
+    queue_number: 4,
     status: "COMPLETED",
-    visitDate: today,
-    checkInTime: new Date(`${todayStr}T08:10:00`),
+    visitDate: new Date(`${todayStr}T08:15:00`),
+    checkInTime: new Date(`${todayStr}T08:15:00`),
   },
   {
-    id: "V9",
-    patient_id: "1", // Budi Santoso (visit 2)
-    doctor_id: "5",  // Dr. Maya
-    queue_number: 9,
+    id: "V5",
+    patient_id: "9", // Joko Widodo (Offline loket)
+    doctor_id: "1",  // Dr. Andri
+    queue_number: 5,
     status: "COMPLETED",
-    visitDate: today,
-    checkInTime: new Date(`${todayStr}T09:00:00`),
+    visitDate: new Date(`${todayStr}T08:30:00`),
+    checkInTime: new Date(`${todayStr}T08:30:00`),
+  },
+  {
+    id: "V6",
+    patient_id: "6", // Dewi Lestari (Online)
+    doctor_id: "7",  // Dr. Dewi Sartika
+    queue_number: 6,
+    status: "COMPLETED",
+    visitDate: new Date(`${todayStr}T08:45:00`),
+    checkInTime: new Date(`${todayStr}T08:45:00`),
   },
 
-  // 1x CANCELLED
+  // 2x IN_KONSULTASI - Sedang Diperiksa di Poli
+  {
+    id: "V7",
+    patient_id: "10", // Hendra (Offline loket)
+    doctor_id: "2",   // Dr. Budi
+    queue_number: 7,
+    status: "IN_KONSULTASI",
+    visitDate: new Date(`${todayStr}T09:15:00`),
+    checkInTime: new Date(`${todayStr}T09:15:00`),
+  },
+  {
+    id: "V8",
+    patient_id: "2", // Siti Aisyah (Online)
+    doctor_id: "3",  // Dr. Sarah
+    queue_number: 8,
+    status: "IN_KONSULTASI",
+    visitDate: new Date(`${todayStr}T09:30:00`),
+    checkInTime: new Date(`${todayStr}T09:30:00`),
+  },
+
+  // 2x WAITING - Pasien Baru Mendaftar di Antrean
+  {
+    id: "V9",
+    patient_id: "7", // Agus (Online)
+    doctor_id: "1",  // Dr. Andri
+    queue_number: 9,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:00:00`),
+    checkInTime: null,
+  },
   {
     id: "V10",
-    patient_id: "6", // Dewi Lestari (visit 2)
-    doctor_id: "7",  // Dr. Dewi Sartika
+    patient_id: "8", // Rian (Online)
+    doctor_id: "4",  // Dr. Hendra
     queue_number: 10,
-    status: "CANCELLED",
-    visitDate: today,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:15:00`),
     checkInTime: null,
   },
 ];
@@ -655,9 +653,9 @@ const CONSULTATIONS_DATA = [
     prescribed_medicines: [{ medicine_id: "8", qty: 2, price: 12000 }],
   },
 
-  // --- H-0 (HARI INI) ---
+  // --- H-0 (Hari Ini): 6 Pasien Selesai Konsultasi ---
   {
-    visit_id: "V6",
+    visit_id: "V1",
     complaint: "Nyeri pada pergelangan kaki setelah terkilir saat bermain futsal.",
     diagnosis: "Sprain Ankle Grade 1 (S93.4)",
     notes: "Istirahat total 3 hari, kompres es 15 menit tiap 4 jam. Kontrol minggu depan.",
@@ -668,7 +666,7 @@ const CONSULTATIONS_DATA = [
     ],
   },
   {
-    visit_id: "V7",
+    visit_id: "V2",
     complaint: "Alergi gatal kemerahan pada kulit tangan dan leher sejak 2 hari lalu.",
     diagnosis: "Dermatitis Alergika (L23.9)",
     notes: "Hindari pemicu alergi (seafood, debu). Oleskan salep 2x sehari pagi & malam.",
@@ -679,7 +677,7 @@ const CONSULTATIONS_DATA = [
     ],
   },
   {
-    visit_id: "V8",
+    visit_id: "V3",
     complaint: "Demam tinggi sudah 3 hari disertai mual dan badan lemas.",
     diagnosis: "Demam Dengue / Viral Infection (A90)",
     notes: "Minum banyak cairan (air putih, jus), cek lab darah lengkap besok pagi.",
@@ -690,7 +688,7 @@ const CONSULTATIONS_DATA = [
     ],
   },
   {
-    visit_id: "V9",
+    visit_id: "V4",
     complaint: "Gatal-gatal di area punggung dan perut sejak seminggu terakhir.",
     diagnosis: "Urticaria / Biduran (L50.9)",
     notes: "Mandi air hangat, hindari garuk. Kontrol jika tidak membaik dalam 5 hari.",
@@ -698,6 +696,28 @@ const CONSULTATIONS_DATA = [
     prescribed_medicines: [
       { medicine_id: "6", qty: 3, price: 2500 },
       { medicine_id: "10", qty: 1, price: 15000 },
+    ],
+  },
+  {
+    visit_id: "V5",
+    complaint: "Batuk berdahak dan dada sesak di malam hari.",
+    diagnosis: "Bronkitis Akut (J20.9)",
+    notes: "Hindari udara dingin dan asap rokok. Habiskan obat sesuai anjuran.",
+    consultation_fee: 150000,
+    prescribed_medicines: [
+      { medicine_id: "3", qty: 2, price: 8000 },
+      { medicine_id: "7", qty: 1, price: 18000 },
+    ],
+  },
+  {
+    visit_id: "V6",
+    complaint: "Mata merah, berair, dan terasa perih silau.",
+    diagnosis: "Konjungtivitis Akut (H10.9)",
+    notes: "Gunakan tetes mata teratur. Jangan menggosok mata dengan tangan kotor.",
+    consultation_fee: 110000,
+    prescribed_medicines: [
+      { medicine_id: "6", qty: 2, price: 2500 },
+      { medicine_id: "2", qty: 1, price: 3000 },
     ],
   },
 ];
@@ -886,39 +906,39 @@ const INVOICES_DATA = [
     paidAt: getDaysAgo(1, 15, 45),
   },
 
-  // --- H-0 (HARI INI): Rp 291.000 (2 Lunas, 2 Unpaid) ---
+  // --- H-0 (HARI INI): 4 Lunas, 2 Unpaid ---
   {
-    visit_id: "V6",
+    visit_id: "V1",
     invoice_no: "INV-2025-0018",
-    status: "UNPAID",
+    status: "PAID",
     consultation_fee: 200000,
     medicine_fee: 22000,
     total: 222000,
-    payment_method: "CASH",
-    paidAt: null,
+    payment_method: "QRIS",
+    paidAt: new Date(`${todayStr}T08:00:00`),
   },
   {
-    visit_id: "V7",
+    visit_id: "V2",
     invoice_no: "INV-2025-0019",
     status: "PAID",
     consultation_fee: 120000,
     medicine_fee: 20000,
     total: 140000,
     payment_method: "QRIS",
-    paidAt: today,
+    paidAt: new Date(`${todayStr}T08:15:00`),
   },
   {
-    visit_id: "V8",
+    visit_id: "V3",
     invoice_no: "INV-2025-0020",
     status: "PAID",
     consultation_fee: 130000,
     medicine_fee: 21000,
     total: 151000,
     payment_method: "CASH",
-    paidAt: today,
+    paidAt: new Date(`${todayStr}T08:30:00`),
   },
   {
-    visit_id: "V9",
+    visit_id: "V4",
     invoice_no: "INV-2025-0021",
     status: "UNPAID",
     consultation_fee: 120000,
@@ -926,6 +946,26 @@ const INVOICES_DATA = [
     total: 142500,
     payment_method: "CASH",
     paidAt: null,
+  },
+  {
+    visit_id: "V5",
+    invoice_no: "INV-2025-0022",
+    status: "UNPAID",
+    consultation_fee: 150000,
+    medicine_fee: 34000,
+    total: 184000,
+    payment_method: "CASH",
+    paidAt: null,
+  },
+  {
+    visit_id: "V6",
+    invoice_no: "INV-2025-0023",
+    status: "PAID",
+    consultation_fee: 110000,
+    medicine_fee: 8000,
+    total: 118000,
+    payment_method: "QRIS",
+    paidAt: new Date(`${todayStr}T09:15:00`),
   },
 ];
 
@@ -999,6 +1039,7 @@ async function main() {
     const createdDoctor = await prisma.doctor.create({
       data: {
         name: d.name,
+        gender: d.gender,
         spesialis: d.spesialis,
         phone: d.phone,
         fee: d.fee,

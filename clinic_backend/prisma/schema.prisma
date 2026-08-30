@@ -77,6 +77,7 @@ model Patient {
 model Doctor {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(255)
+  gender    Gender   @default(MALE)
   spesialis String   @db.VarChar(255)
   phone     String?  @db.VarChar(255)
   fee       Decimal  @default(50000) @db.Decimal(12, 2)

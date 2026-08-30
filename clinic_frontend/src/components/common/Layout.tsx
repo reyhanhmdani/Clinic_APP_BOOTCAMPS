@@ -32,7 +32,7 @@ export function Layout() {
       />
 
       {/* 3. Main Container Area */}
-      <main className="flex-1 w-full ml-0 md:ml-64 p-4 sm:p-6 md:p-8 min-h-screen transition-all">
+      <main className="flex-1 w-full ml-0 md:ml-20 lg:ml-24 p-4 sm:p-6 md:p-8 min-h-screen transition-all">
         {/* Global Top Header Bar */}
         <TopAppBar
           onToggleSidebar={() => setIsSidebarOpen(true)}

@@ -4,22 +4,24 @@ import { CreateVisitInput, UpdateVisitInput } from '../validation/visitSchema.js
 import { getDoctorByIdService } from './doctorService.js';
 import { getPatientByIdService } from './patientService.js';
 import { VisitStatus } from '@prisma/client';
+import { io } from '../app.js';
 
 export const getAllVisitService = async () => {
   const visits = await prisma.visit.findMany({
-    orderBy: {
-      queueNumber: 'desc',
-    },
+    orderBy: [
+      {
+        visitDate: 'desc',
+      },
+      {
+        queueNumber: 'desc',
+      },
+    ],
     include: {
       patient: true,
       doctor: true,
       invoice: true,
     },
   });
-
-  if (visits.length === 0) {
-    throw new ApiError(404, 'Data Visit Kosong');
-  }
 
   return visits;
 };
@@ -40,19 +42,19 @@ export const createVisitService = async (input: CreateVisitInput) => {
   const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
   const endOfDay = new Date(`${dateStr}T23:59:59.000Z`);
 
-  // hitung antrian khusus di hari tersebut aja
-  // const todayVisit = await prisma.visit.count({
-  //   where: {
-  //     visitDate: {
-  //       gte: startOfDay,
-  //       lte: endOfDay,
-  //     },
-  //   },
-  // });
+  // hitung antrian khusus di hari tersebut (lanjutkan dari antrean tertinggi hari ini)
+  const lastVisitOfDay = await prisma.visit.findFirst({
+    where: {
+      visitDate: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+    orderBy: { queueNumber: 'desc' },
+    select: { queueNumber: true },
+  });
 
-  const totalVisits = await prisma.visit.count();
-
-  const queueNumber = totalVisits + 1;
+  const queueNumber = (lastVisitOfDay?.queueNumber || 0) + 1;
 
   const createVisit = await prisma.visit.create({
     data: {
@@ -63,6 +65,7 @@ export const createVisitService = async (input: CreateVisitInput) => {
     },
   });
 
+  io.emit('QUEUE_UPDATED', { type: 'NEW_VISIT', visitId: createVisit.id });
   return createVisit;
 };
 
@@ -103,6 +106,7 @@ export const updateVisitService = async (id: number, input: UpdateVisitInput) =>
     data: updateData,
   });
 
+  io.emit('QUEUE_UPDATED', { type: 'STATUS_UPDATED', visitId: updatedVisit.id });
   return updatedVisit;
 };
 
@@ -145,12 +149,19 @@ export const bookCustomerVisitService = async (userId: number, doctorId: number)
     throw new ApiError(400, `Anda sudah memiliki antrian aktif (No. ${activeExisting.queueNumber}) yang belum selesai`);
   }
 
-  // hitung nomor antrian
-  const totalVisits = await prisma.visit.count();
-  const queueNumber = totalVisits + 1;
+  // hitung nomor antrian hari ini (lanjutkan dari antrean tertinggi hari ini)
+  const lastTodayVisit = await prisma.visit.findFirst({
+    where: {
+      visitDate: { gte: todayStart, lte: todayEnd },
+    },
+    orderBy: { queueNumber: 'desc' },
+    select: { queueNumber: true },
+  });
+
+  const queueNumber = (lastTodayVisit?.queueNumber || 0) + 1;
 
   // buat tiket antrian
-  return await prisma.visit.create({
+  const created = await prisma.visit.create({
     data: {
       patientId: patient.id,
       doctorId,
@@ -167,6 +178,9 @@ export const bookCustomerVisitService = async (userId: number, doctorId: number)
       },
     },
   });
+
+  io.emit('QUEUE_UPDATED', { type: 'CUSTOMER_BOOKED', visitId: created.id });
+  return created;
 };
 
 export const getActiveCustomerVisitService = async (userId: number) => {

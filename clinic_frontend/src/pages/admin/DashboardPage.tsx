@@ -12,6 +12,9 @@ import { StatsGrid } from '../../components/dashboard/StatsGrid';
 import { WorkflowGuide } from '../../components/common/WorkflowGuide';
 import { HomeDashboard } from '../../components/dashboard/HomeDashboard';
 
+// socket
+import { socket } from '../../services/socket';
+
 export const DashboardPage: React.FC = () => {
   const [selectedReceiptVisit, setSelectedReceiptVisit] = useState<Visit | null>(null);
 
@@ -27,6 +30,15 @@ export const DashboardPage: React.FC = () => {
     fetchInvoices();
     fetchDoctors();
     fetchPatients();
+
+    // Tangkap sinyal real-time:
+    socket.on('QUEUE_UPDATED', () => {
+      fetchVisits();
+      fetchInvoices();
+    });
+    return () => {
+      socket.off('QUEUE_UPDATED');
+    };
   }, []);
 
   // Operational Stats Computation

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2 } from 'lucide-react';
+import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2, Smartphone, Building2 } from 'lucide-react';
 import type { Patient } from '../../types/clinic';
 import { usePatientStore } from '../../stores/patientStore';
 import { createPatientService, updatePatientService, deletePatientService } from '../../services/patientService';
@@ -268,7 +268,20 @@ export const PatientPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="p-4">
-                      <div className="font-bold text-sm text-slate-900 capitalize leading-tight">{patient.name}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-slate-900 capitalize leading-tight">{patient.name}</span>
+                        {patient.userId ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#061e15] text-[#b4f105] shadow-2xs">
+                            <Smartphone size={10} className="stroke-[2.5]" />
+                            <span>Akun Online</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                            <Building2 size={10} className="text-slate-400" />
+                            <span>Loket Offline</span>
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">NIK: {patient.nik || '-'}</div>
                     </td>
 
@@ -353,7 +366,20 @@ export const PatientPage: React.FC = () => {
                     {patient.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'} • {patient.age} Th
                   </span>
                 </div>
-                <div className="font-bold text-sm text-slate-900 capitalize">{patient.name}</div>
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="font-bold text-sm text-slate-900 capitalize">{patient.name}</span>
+                  {patient.userId ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#061e15] text-[#b4f105] shadow-2xs">
+                      <Smartphone size={9} className="stroke-[2.5]" />
+                      <span>Online</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                      <Building2 size={9} className="text-slate-400" />
+                      <span>Offline</span>
+                    </span>
+                  )}
+                </div>
                 <div className="text-[11px] text-slate-400 font-mono">NIK: {patient.nik || '-'}</div>
                 <div className="bg-slate-50/70 p-3.5 rounded-2xl border border-slate-100 text-xs space-y-1.5 mb-4">
                   <p className="font-semibold text-slate-800 flex items-center gap-1.5">

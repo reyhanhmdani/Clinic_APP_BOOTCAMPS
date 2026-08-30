@@ -14,6 +14,7 @@ export const MOCK_DOCTORS: Doctor[] = [
   {
     id: 1,
     name: 'Dr. Andri',
+    gender: 'MALE',
     spesialis: 'Dokter Umum',
     fee: 50000,
     isActive: true,
@@ -23,6 +24,7 @@ export const MOCK_DOCTORS: Doctor[] = [
   {
     id: 2,
     name: 'Dr. Budi',
+    gender: 'MALE',
     spesialis: 'Spesialis Anak',
     fee: 75000,
     isActive: true,
@@ -32,6 +34,7 @@ export const MOCK_DOCTORS: Doctor[] = [
   {
     id: 3,
     name: 'Dr. Sarah',
+    gender: 'FEMALE',
     spesialis: 'Spesialis Gigi',
     fee: 100000,
     isActive: true,

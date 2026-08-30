@@ -75,8 +75,15 @@ export const registerService = async ({ username, email, password }: RegisterInp
     },
   });
 
+  const token = jwt.sign(
+    { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role },
+    process.env.JWT_SECRET as string,
+    { expiresIn: '24h' },
+  );
+
   const { password: _, ...userWithoutPassword } = newUser;
   return {
+    token,
     user: userWithoutPassword,
   };
 };

@@ -18,6 +18,7 @@ export const createDoctorService = async (input: CreateDoctorInput) => {
   const createDoctor = await prisma.doctor.create({
     data: {
       name: input.name,
+      gender: input.gender,
       spesialis: input.spesialis,
       fee: input.fee,
       phone: input.phone ?? null,
@@ -82,6 +83,7 @@ export const getActiveDoctorsService = async () => {
     select: {
       id: true,
       name: true,
+      gender: true,
       spesialis: true,
       fee: true,
     },

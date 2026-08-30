@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox, Smartphone, Building2 } from 'lucide-react';
 import type { Visit } from '../../types/clinic';
 
 interface HomeDashboardProps {
@@ -168,14 +168,38 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-700">
-              {displayedVisits.map((item, index) => {
+              {displayedVisits.map((item) => {
                 const isWaiting = item.status === 'WAITING';
                 const isCancelled = item.status === 'CANCELLED';
                 const isUnpaid =
                   item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
 
-                const sequentialQueueNumber = (validCurrentPage - 1) * itemsPerPage + index + 1;
-                const formattedQueue = `A-${String(sequentialQueueNumber).padStart(3, '0')}`;
+                const formattedQueue = `A-${String(item.queueNumber).padStart(3, '0')}`;
+
+                const vDate = new Date(item.visitDate);
+                const now = new Date();
+                const isToday =
+                  vDate.getDate() === now.getDate() &&
+                  vDate.getMonth() === now.getMonth() &&
+                  vDate.getFullYear() === now.getFullYear();
+
+                const yesterday = new Date(now);
+                yesterday.setDate(now.getDate() - 1);
+                const isYesterday =
+                  vDate.getDate() === yesterday.getDate() &&
+                  vDate.getMonth() === yesterday.getMonth() &&
+                  vDate.getFullYear() === yesterday.getFullYear();
+
+                const dayLabel = isToday
+                  ? 'Hari Ini'
+                  : isYesterday
+                  ? 'Kemarin'
+                  : vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
+                const timeStr = vDate.toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
 
                 return (
                   <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
@@ -188,8 +212,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
                     {/* Info Pasien */}
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</div>
-                      <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</span>
+                        {item.patient?.userId ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#061e15] text-[#b4f105] shadow-2xs">
+                            <Smartphone size={10} className="stroke-[2.5]" />
+                            <span>Akun Online</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                            <Building2 size={10} className="text-slate-400" />
+                            <span>Loket Offline</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap mt-0.5">
                         <span>{item.patient?.noRm}</span>
                         <span>•</span>
                         <span>
@@ -210,16 +247,18 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       <div className="text-[11px] text-slate-400">{item.doctor?.spesialis}</div>
                     </td>
 
-                    {/* Waktu Masuk */}
+                    {/* Waktu & Tanggal Masuk */}
                     <td className="py-3.5 px-4">
-                      <span className="font-mono font-medium text-slate-500">
-                        {item.checkInTime
-                          ? new Date(item.checkInTime).toLocaleTimeString('id-ID', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : 'Baru Terdaftar'}
-                      </span>
+                      <div className="flex flex-col">
+                        <span
+                          className={`text-[10px] font-bold font-mono ${
+                            isToday ? 'text-emerald-700' : 'text-slate-400'
+                          }`}
+                        >
+                          {dayLabel}
+                        </span>
+                        <span className="font-mono font-medium text-slate-600 text-xs">{timeStr}</span>
+                      </div>
                     </td>
 
                     {/* Status Badge */}

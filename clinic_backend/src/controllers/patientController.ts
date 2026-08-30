@@ -100,7 +100,10 @@ export const checkNikController = async (req: Request, res: Response, next: Next
   try {
     const { nik } = req.params;
     const result = await checkNikService(nik as string);
-    return res.status(200).json(result);
+    return res.status(200).json({
+      message: result.message,
+      data: result,
+    });
   } catch (error) {
     next(error);
   }

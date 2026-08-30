@@ -8,6 +8,7 @@ export const getAllPatientsService = async () => {
     orderBy: { updatedAt: 'desc' },
     select: {
       id: true,
+      userId: true,
       name: true,
       nik: true,
       noRm: true,
@@ -203,17 +204,27 @@ export const checkNikService = async (nik: string) => {
 };
 
 export const registerPatientProfileService = async (userId: number, input: CreatePatientInput) => {
-  // 1. cek apakah user sudah punya data pasien
+  const nik = input.nik?.trim() || null;
+  const phone = input.phone?.trim() || null;
+  const address = input.address?.trim() || null;
+
+  // 1. cek apakah user sudah punya data pasien (Update mode)
   const existingUser = await prisma.patient.findUnique({
     where: { userId },
   });
   if (existingUser) {
-    throw new ApiError(400, `Aku Anda sudah terdaftar sebagai pasien dengan no RM: ${existingUser.noRm}`);
+    return await prisma.patient.update({
+      where: { id: existingUser.id },
+      data: {
+        nik: nik || existingUser.nik,
+        name: input.name || existingUser.name,
+        gender: input.gender || existingUser.gender,
+        age: input.age !== undefined ? Number(input.age) : existingUser.age,
+        phone: phone !== null ? phone : existingUser.phone,
+        address: address !== null ? address : existingUser.address,
+      },
+    });
   }
-
-  const nik = input.nik?.trim() || null;
-  const phone = input.phone?.trim() || null;
-  const address = input.address?.trim() || null;
   // 2. Jika NIK sudah ada di sistem (pernah berobat di loket offline) -> Hubungkan!
   if (nik) {
     const offlinePatient = await prisma.patient.findUnique({ where: { nik } });
@@ -277,7 +288,11 @@ export const getCustomerHistoryService = async (userId: number) => {
   });
 
   if (!patient) {
-    throw new ApiError(404, 'Data pasien tidak ditemukan');
+    return {
+      patient: null,
+      totalVisits: 0,
+      visits: [],
+    };
   }
 
   const visits = await prisma.visit.findMany({

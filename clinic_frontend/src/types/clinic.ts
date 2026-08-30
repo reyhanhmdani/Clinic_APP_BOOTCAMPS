@@ -28,6 +28,7 @@ export interface Patient {
 export interface Doctor {
   id: number;
   name: string;
+  gender: Gender;
   spesialis: string;
   phone?: string;
   fee: number;

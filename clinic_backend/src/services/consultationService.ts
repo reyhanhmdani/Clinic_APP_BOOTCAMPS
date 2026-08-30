@@ -5,6 +5,7 @@ import { CreateConsultationInput, UpdateConsultationInput } from '../validation/
 import { getVisitByIdService } from './visitService.js';
 import { getMedicineByIdService } from './medicineService.js';
 import { getDoctorByIdService } from './doctorService.js';
+import { io } from '../app.js';
 
 const consultationSelectPayload = {
   id: true,
@@ -124,6 +125,10 @@ export const createConsultationService = async (input: CreateConsultationInput) 
   await prisma.visit.update({
     where: { id: input.visitId },
     data: { status: VisitStatus.COMPLETED },
+  });
+  io.emit('QUEUE_UPDATED', {
+    type: 'CONSULTATION_COMPLETED',
+    visitId: input.visitId,
   });
 
   return createConsultation;

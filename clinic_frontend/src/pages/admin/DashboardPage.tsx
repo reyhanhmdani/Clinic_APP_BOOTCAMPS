@@ -131,6 +131,36 @@ export const DashboardPage: React.FC = () => {
                   {selectedReceiptVisit.invoice?.paymentMethod || 'CASH'}
                 </span>
               </div>
+
+              {/* Rincian Resep Obat (Jika Ada) */}
+              {selectedReceiptVisit.consultation?.consultationMedicines &&
+                selectedReceiptVisit.consultation.consultationMedicines.length > 0 && (
+                  <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                      Rincian Terapi Obat (R/):
+                    </span>
+                    <div className="space-y-1.5">
+                      {selectedReceiptVisit.consultation.consultationMedicines.map((m: any, idx: number) => (
+                        <div key={m.id || idx} className="text-[11px] bg-white p-2 rounded-lg border border-slate-200/60 space-y-0.5">
+                          <div className="flex justify-between items-center text-slate-800">
+                            <span className="font-bold">
+                              • {m.medicine?.name} ({m.qty} {m.medicine?.unit || 'pcs'})
+                            </span>
+                            <span className="font-semibold text-slate-900">
+                              Rp {Number(m.subTotal || (m.price * m.qty) || 0).toLocaleString('id-ID')}
+                            </span>
+                          </div>
+                          {m.instructions && (
+                            <div className="text-[10px] text-emerald-800 font-medium pl-2.5 flex items-center gap-1">
+                              <span className="text-slate-400 font-normal">↳ Intruksi:</span>
+                              <span>{m.instructions}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
 
             {/* Total Pembayaran */}
@@ -140,6 +170,11 @@ export const DashboardPage: React.FC = () => {
                 Rp {Number(selectedReceiptVisit.invoice?.totalAmount || 0).toLocaleString('id-ID')}
               </span>
             </div>
+
+            {/* Catatan Farmasi */}
+            <p className="text-[10px] text-slate-400 font-mono text-center italic -mt-1">
+              * Tunjukkan struk resmi ini ke Loket Farmasi untuk penyerahan obat.
+            </p>
 
             {/* Action Buttons */}
             <div className="flex gap-2.5 pt-2">

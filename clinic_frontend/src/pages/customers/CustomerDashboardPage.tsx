@@ -13,6 +13,8 @@ import {
   Star,
   User,
   X,
+  PackageCheck,
+  CreditCard,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCustomerContext } from '../../layouts/CustomerLayout';
@@ -32,7 +34,16 @@ export const CustomerDashboardPage: React.FC = () => {
     cancelActiveVisit,
   } = useCustomerContext();
 
-  const unpaidVisit = history?.visits?.find((v) => v.invoice && v.invoice.status === 'UNPAID');
+  const isUnpaid = activeVisit?.visit?.invoice?.status === 'UNPAID';
+  const isWaitingPharmacy =
+    activeVisit?.visit?.invoice?.status === 'PAID' &&
+    !!activeVisit?.visit?.consultation?.consultationMedicines?.length &&
+    !activeVisit?.visit?.consultation?.isDispensed;
+
+  const unpaidVisit =
+    isUnpaid
+      ? activeVisit?.visit
+      : history?.visits?.find((v) => v.invoice && v.invoice.status === 'UNPAID');
 
   const handleCancelTicket = async () => {
     if (!activeVisit?.visit) return;
@@ -63,22 +74,45 @@ export const CustomerDashboardPage: React.FC = () => {
 
       {/* 2. Live Active Queue Ticket */}
       {activeVisit?.visit && (
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2.5">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span
+                className={`w-2 h-2 rounded-full animate-pulse ${
+                  isWaitingPharmacy
+                    ? 'bg-amber-500'
+                    : isUnpaid
+                    ? 'bg-rose-500'
+                    : 'bg-emerald-500'
+                }`}
+              />
               <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
-                Antrean Poli Aktif
+                {isWaitingPharmacy
+                  ? 'Loket Farmasi'
+                  : isUnpaid
+                  ? 'Kasir Klinik'
+                  : 'Antrean Poli Aktif'}
               </span>
             </div>
+
             <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                activeVisit.visit.status === 'IN_KONSULTASI'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-[#edf3ec] text-[#346538]'
+              className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                isWaitingPharmacy
+                  ? 'bg-amber-50 text-amber-900 border-amber-200'
+                  : isUnpaid
+                  ? 'bg-rose-50 text-rose-800 border-rose-200'
+                  : activeVisit.visit.status === 'IN_KONSULTASI'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  : 'bg-[#edf3ec] text-[#346538] border-emerald-200/60'
               }`}
             >
-              {activeVisit.visit.status === 'IN_KONSULTASI' ? 'Sedang Diperiksa' : 'Dalam Antrean'}
+              {isWaitingPharmacy
+                ? '⏳ Menyiapkan Obat'
+                : isUnpaid
+                ? '💳 Menunggu Pembayaran'
+                : activeVisit.visit.status === 'IN_KONSULTASI'
+                ? 'Sedang Diperiksa'
+                : 'Dalam Antrean'}
             </span>
           </div>
 
@@ -90,8 +124,28 @@ export const CustomerDashboardPage: React.FC = () => {
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 block font-medium">Sisa Antrean di Depan</span>
-              <span className="text-xl font-bold text-emerald-800 font-mono">{activeVisit.queueAhead} Orang</span>
+              {isWaitingPharmacy ? (
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-medium">Status Obat</span>
+                  <span className="text-xs font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                    Sedang Diracik
+                  </span>
+                </div>
+              ) : isUnpaid ? (
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-medium">Total Tagihan</span>
+                  <span className="text-sm font-bold text-rose-700 font-mono">
+                    Rp {Number(activeVisit.visit.invoice?.totalAmount || 0).toLocaleString('id-ID')}
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-medium">Sisa Antrean di Depan</span>
+                  <span className="text-xl font-bold text-emerald-800 font-mono">
+                    {activeVisit.queueAhead} Orang
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -108,6 +162,68 @@ export const CustomerDashboardPage: React.FC = () => {
               WIB
             </span>
           </div>
+
+          {/* Banner Menunggu di Loket Farmasi */}
+          {isWaitingPharmacy && (
+            <div className="bg-amber-50/90 border border-amber-200/80 rounded-xl p-3.5 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-2 text-amber-950 font-extrabold text-xs">
+                <PackageCheck size={16} className="text-amber-700 shrink-0" />
+                <span>Resep Obat Sedang Disiapkan</span>
+              </div>
+              <p className="text-[11.5px] text-amber-900 leading-relaxed">
+                Pembayaran Anda telah <strong>LUNAS (PAID)</strong>. Petugas farmasi sedang meracik dan menyiapkan obat sesuai resep dokter. Silakan menunggu di depan loket Apotek.
+              </p>
+              {activeVisit.visit.consultation?.consultationMedicines &&
+                activeVisit.visit.consultation.consultationMedicines.length > 0 && (
+                  <div className="pt-2 border-t border-amber-200/60 space-y-1">
+                    <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider block">
+                      Rincian Obat:
+                    </span>
+                    {activeVisit.visit.consultation.consultationMedicines.map((m: any, idx: number) => (
+                      <div
+                        key={m.id || idx}
+                        className="text-[11px] text-amber-950 flex justify-between bg-white/70 px-2 py-1 rounded-md border border-amber-100"
+                      >
+                        <span className="font-semibold">
+                          • {m.medicine?.name} ({m.qty} {m.medicine?.unit || 'pcs'})
+                        </span>
+                        {m.instructions && (
+                          <span className="text-[10px] text-emerald-800 font-medium">
+                            {m.instructions}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          )}
+
+          {/* Banner Tagihan Kasir Menunggu Pembayaran */}
+          {isUnpaid && activeVisit.visit.invoice && (
+            <div className="bg-rose-50/90 border border-rose-200/80 rounded-xl p-3.5 space-y-2.5 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-rose-950 font-extrabold text-xs">
+                  <CreditCard size={16} className="text-rose-700 shrink-0" />
+                  <span>Selesaikan Pembayaran Kasir</span>
+                </div>
+                <span className="text-xs font-black text-rose-900 font-mono">
+                  Rp {Number(activeVisit.visit.invoice.totalAmount).toLocaleString('id-ID')}
+                </span>
+              </div>
+              <p className="text-[11px] text-rose-800 leading-tight">
+                Pemeriksaan dokter selesai. Silakan bayar tagihan via QRIS untuk mengambil obat di loket Farmasi.
+              </p>
+              <button
+                type="button"
+                onClick={() => payInvoice(activeVisit.visit.invoice!.id)}
+                className="w-full py-2 bg-[#061e15] hover:bg-[#0a2f21] text-[#b4f105] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+              >
+                <QrCode size={14} />
+                <span>Bayar Sekarang (QRIS)</span>
+              </button>
+            </div>
+          )}
 
           {/* Tombol Batalkan Tiket (Jika belum diperiksa) */}
           {activeVisit.visit.status === 'WAITING' && (

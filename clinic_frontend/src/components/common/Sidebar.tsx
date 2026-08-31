@@ -5,6 +5,7 @@ import {
   Users,
   Stethoscope,
   Pill,
+  PackageCheck,
   LogOut,
   X,
 } from 'lucide-react';
@@ -47,8 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { label: 'Dashboard', Icon: LayoutGrid, path: '/dashboard' },
     { label: 'Data Pasien', Icon: Users, path: '/dashboard/patients' },
     { label: 'Data Dokter', Icon: Stethoscope, path: '/dashboard/doctors' },
-    // { label: 'Pemeriksaan Medis', Icon: ClipboardList, path: '/dashboard/consultations' },
-    // { label: 'Kasir & Invoice', Icon: CreditCard, path: '/dashboard/invoices' },
+    { label: 'Farmasi & Resep', Icon: PackageCheck, path: '/dashboard/pharmacy' },
     { label: 'Katalog Obat', Icon: Pill, path: '/dashboard/medicines' },
   ];
 

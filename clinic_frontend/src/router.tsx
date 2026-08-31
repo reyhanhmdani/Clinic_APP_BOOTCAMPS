@@ -17,6 +17,8 @@ import { CustomerHistoryPage } from './pages/customers/CustomerHistoryPage';
 import { CustomerNotificationPage } from './pages/customers/CustomerNotificationPage';
 import { CustomerProfilePage } from './pages/customers/CustomerProfilePage';
 
+import { PharmacyPage } from './pages/admin/PharmacyPage';
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -91,6 +93,10 @@ export const router = createBrowserRouter([
       {
         path: 'invoices',
         element: <InvoicePage />,
+      },
+      {
+        path: 'pharmacy',
+        element: <PharmacyPage />,
       },
       {
         path: 'medicines',

@@ -7,25 +7,28 @@ export interface CheckNikResult {
   message: string;
   data: Patient | null;
 }
-
+export type CustomerHistoryVisit = Visit & {
+  doctor: { id: number; name: string; spesialis: string; fee: number };
+  consultation?: {
+    id: number;
+    complaint: string;
+    diagnosis: string;
+    notes?: string;
+    consultationMedicines?: Array<{
+      id: number;
+      qty: number; // 👈 Jumlah obat
+      price: number;
+      subTotal: number;
+      instructions?: string; // 👈 Aturan pakai (misal: 3x1 sesudah makan)
+      medicine: { id: number; name: string; price: number; unit: string };
+    }>;
+  };
+  invoice?: Invoice;
+};
 export interface CustomerHistoryData {
   patient: Patient;
   totalVisits: number;
-  visits: Array<
-    Visit & {
-      doctor: { id: number; name: string; spesialis: string; fee: number };
-      consultation?: {
-        id: number;
-        complaint: string;
-        diagnosis: string;
-        notes?: string;
-        consultationMedicines?: Array<{
-          medicine: { id: number; name: string; price: number; unit: string };
-        }>;
-      };
-      invoice?: Invoice;
-    }
-  >;
+  visits: CustomerHistoryVisit[];
 }
 
 export interface ActiveCustomerVisitData {

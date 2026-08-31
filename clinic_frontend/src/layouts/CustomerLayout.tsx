@@ -189,7 +189,7 @@ export const CustomerLayout: React.FC = () => {
   return (
     <div className="min-h-[100dvh] w-full bg-[#fbfbfa] text-[#111111] font-sans antialiased pb-28 selection:bg-[#b4f105] selection:text-[#061e15]">
       {/* 1. Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#fbfbfa]/90 backdrop-blur-md px-4 sm:px-6 pt-3 pb-2.5 border-b border-slate-200/60">
+      <header className="sticky top-0 z-40 bg-[#fbfbfa]/90 backdrop-blur-md px-4 sm:px-6 pt-3 pb-2.5 border-b border-slate-200/60 print:hidden">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#061e15] text-[#b4f105] flex items-center justify-center font-black text-lg shadow-2xs shrink-0 select-none">
@@ -249,7 +249,7 @@ export const CustomerLayout: React.FC = () => {
       </main>
 
       {/* 3. Floating Bottom Dock Navigation */}
-      <nav className="fixed bottom-3 inset-x-4 max-w-md mx-auto bg-white/95 backdrop-blur-2xl border border-slate-200/80 rounded-full px-4 py-2 z-40 shadow-[0_12px_40px_rgba(0,0,0,0.1)]">
+      <nav className="fixed bottom-3 inset-x-4 max-w-md mx-auto bg-white/95 backdrop-blur-2xl border border-slate-200/80 rounded-full px-4 py-2 z-40 shadow-[0_12px_40px_rgba(0,0,0,0.1)] print:hidden">
         <div className="flex items-center justify-between">
           <NavLink
             to="/customers"

@@ -20,6 +20,15 @@ export const getAllVisitService = async () => {
       patient: true,
       doctor: true,
       invoice: true,
+      consultation: {
+        include: {
+          consultationMedicines: {
+            include: {
+              medicine: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -199,14 +208,27 @@ export const getActiveCustomerVisitService = async (userId: number) => {
     where: {
       patientId: patient.id,
       visitDate: { gte: todayStart, lte: todayEnd },
-      OR: [{ status: { in: [VisitStatus.WAITING, VisitStatus.IN_KONSULTASI] } }, { invoice: { status: 'UNPAID' } }],
+      OR: [
+        { status: { in: [VisitStatus.WAITING, VisitStatus.IN_KONSULTASI] } },
+        { invoice: { status: 'UNPAID' } },
+        {
+          // kunjungan tetep aktif jika ada resep obat yang belum di serahkan
+          consultation: {
+            consultationMedicines: { some: {} },
+            isDispensed: false,
+          },
+        },
+      ],
     },
     include: {
       doctor: { select: { id: true, name: true, spesialis: true, fee: true } },
       consultation: {
         select: {
+          id: true,
           diagnosis: true,
           complaint: true,
+          isDispensed: true,
+          dispensedAt: true,
           consultationMedicines: {
             include: { medicine: { select: { name: true, price: true, unit: true } } },
           },

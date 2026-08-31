@@ -193,8 +193,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 const dayLabel = isToday
                   ? 'Hari Ini'
                   : isYesterday
-                  ? 'Kemarin'
-                  : vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+                    ? 'Kemarin'
+                    : vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 
                 const timeStr = vDate.toLocaleTimeString('id-ID', {
                   hour: '2-digit',
@@ -278,6 +278,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                       ) : isCancelled ? (
                         <span className="bg-slate-100 text-slate-500 border border-slate-200 font-medium text-[10px] px-3 py-0.5 rounded-full">
                           Dibatalkan
+                        </span>
+                      ) : item.consultation?.consultationMedicines &&
+                        item.consultation.consultationMedicines.length > 0 &&
+                        !item.consultation.isDispensed ? (
+                        <span className="bg-amber-50 text-amber-900 border border-amber-200 font-semibold text-[10px] px-3 py-0.5 rounded-full flex items-center justify-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <span>Di Farmasi</span>
                         </span>
                       ) : (
                         <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">

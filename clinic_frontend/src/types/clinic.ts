@@ -62,8 +62,19 @@ export interface Consultation {
   notes?: string;
   consultationFee: number;
   createdAt?: string;
+  isDispensed?: boolean;
+  dispensedAt?: string;
   visit?: Visit;
   consultationMedicines?: ConsultationMedicine[];
+}
+
+export interface PharmacyQueueData {
+  pending: Consultation[];
+  completed: Consultation[];
+  stats: {
+    totalPending: number;
+    totalCompleted: number;
+  };
 }
 
 export interface Medicine {

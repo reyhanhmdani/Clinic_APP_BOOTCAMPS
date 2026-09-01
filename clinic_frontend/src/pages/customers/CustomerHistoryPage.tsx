@@ -9,26 +9,26 @@ export const CustomerHistoryPage: React.FC = () => {
 
   return (
     <>
-      <div className="space-y-4 animate-fade-in print:hidden">
-        {/* Header Riwayat */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-1">
+      <div className="space-y-4 animate-fade-in print:hidden text-[#12241E]">
+        {/* Header Riwayat (Frosted Glass) */}
+        <div className="bg-white/85 backdrop-blur-xl border border-white/90 rounded-3xl p-5 shadow-[0_4px_20px_rgba(5,150,105,0.04)] space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-              Catatan Medis Digital
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#5A6E65]">
+              REKAM MEDIS ELEKTRONIK
             </span>
-            <span className="text-xs font-mono font-bold bg-[#edf3ec] text-[#346538] px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+            <span className="text-xs font-mono font-extrabold bg-emerald-50 text-[#059669] px-3 py-0.5 rounded-full border border-emerald-200">
               {patient?.noRm || 'RM-ONLINE'}
             </span>
           </div>
-          <h2 className="text-base font-bold text-slate-900">Riwayat Kunjungan Pasien</h2>
-          <p className="text-xs text-slate-500">
-            Total {history?.totalVisits || history?.visits?.length || 0} kunjungan konsultasi tercatat.
+          <h2 className="text-base font-extrabold text-[#12241E]">Riwayat Kunjungan Pasien</h2>
+          <p className="text-xs text-[#5A6E65] font-medium">
+            Total {history?.totalVisits || history?.visits?.length || 0} catatan konsultasi dan resep obat tersimpan aman.
           </p>
         </div>
 
         {/* List Riwayat Detail */}
         {history?.visits && history.visits.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {history.visits.map((v: any) => {
               const isPaid = v.invoice?.status === 'PAID';
               const isUnpaid = v.invoice?.status === 'UNPAID';
@@ -42,24 +42,26 @@ export const CustomerHistoryPage: React.FC = () => {
               return (
                 <div
                   key={v.id}
-                  className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs space-y-3.5 hover:border-slate-300 transition-colors"
+                  className="bg-white/85 backdrop-blur-xl border border-white/90 rounded-3xl p-5 shadow-[0_6px_25px_rgba(5,150,105,0.04)] space-y-4 hover:border-emerald-300/80 transition-all"
                 >
                   {/* Header Kartu: Dokter & Status */}
-                  <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div className="flex items-start justify-between gap-2 border-b border-emerald-950/6 pb-3">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-medium block">{visitDateFormatted}</span>
-                      <h3 className="text-sm font-bold text-slate-900">{v.doctor?.name || 'Dokter Spesialis'}</h3>
-                      <p className="text-xs font-medium text-emerald-800">{v.doctor?.spesialis}</p>
+                      <span className="text-[10px] text-[#5A6E65] font-medium block">{visitDateFormatted}</span>
+                      <h3 className="text-sm font-extrabold text-[#12241E] leading-tight mt-0.5">
+                        {v.doctor?.name || 'Dokter Spesialis'}
+                      </h3>
+                      <p className="text-xs font-bold text-[#059669] mt-0.5">{v.doctor?.spesialis}</p>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap justify-end">
                       <span
-                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
                           isPaid
-                            ? 'bg-[#edf3ec] text-[#346538] border-emerald-200/60'
+                            ? 'bg-emerald-50 text-[#059669] border-emerald-200'
                             : isUnpaid
-                              ? 'bg-[#fbf3db] text-[#956400] border-[#f1dfaa]'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                            ? 'bg-rose-50 text-[#FF4D6D] border-rose-200'
+                            : 'bg-[#F6F8F6] text-[#5A6E65] border-emerald-950/10'
                         }`}
                       >
                         {isPaid ? '✓ Lunas' : isUnpaid ? '⏳ Belum Bayar' : 'Selesai'}
@@ -68,7 +70,7 @@ export const CustomerHistoryPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedVisitForPrint(v)}
-                        className="text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="text-xs font-extrabold text-[#059669] bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
                       >
                         <FileText size={13} />
                         <span>Unduh Rekam Medis</span>
@@ -77,48 +79,48 @@ export const CustomerHistoryPage: React.FC = () => {
                   </div>
 
                   {/* Detail Diagnosa & Keluhan */}
-                  <div className="bg-slate-50/70 rounded-xl p-3 space-y-2 border border-slate-100 text-xs">
+                  <div className="bg-[#F6F8F6]/80 rounded-2xl p-3.5 space-y-2 border border-emerald-950/6 text-xs">
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="text-[9px] font-extrabold text-[#5A6E65] uppercase tracking-wider block">
                         Diagnosa Dokter:
                       </span>
-                      <p className="font-bold text-slate-900">
+                      <p className="font-extrabold text-[#12241E] mt-0.5">
                         {v.consultation?.diagnosis || 'Pemeriksaan rutin / konsultasi umum'}
                       </p>
                     </div>
                     {v.consultation?.complaint && (
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                          Keluhan:
+                        <span className="text-[9px] font-extrabold text-[#5A6E65] uppercase tracking-wider block">
+                          Keluhan Utama:
                         </span>
-                        <p className="text-slate-600">{v.consultation.complaint}</p>
+                        <p className="text-[#5A6E65] font-medium mt-0.5">{v.consultation.complaint}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Rincian Resep Obat */}
                   {v.consultation?.consultationMedicines && v.consultation.consultationMedicines.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <div className="space-y-2">
+                      <span className="text-[9px] font-extrabold text-[#5A6E65] uppercase tracking-wider block">
                         Rincian Terapi Obat (R/):
                       </span>
                       <div className="space-y-1.5">
                         {v.consultation.consultationMedicines.map((m: any, idx: number) => (
                           <div
                             key={m.id || idx}
-                            className="text-xs bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/60 space-y-0.5"
+                            className="text-xs bg-white p-2.5 rounded-xl border border-emerald-950/6 space-y-0.5 font-medium"
                           >
-                            <div className="flex justify-between items-center text-slate-800">
+                            <div className="flex justify-between items-center text-[#12241E]">
                               <span className="font-bold">
                                 • {m.medicine?.name} ({m.qty} {m.medicine?.unit || 'pcs'})
                               </span>
-                              <span className="font-semibold text-slate-900 font-mono">
+                              <span className="font-bold font-mono text-[#059669]">
                                 Rp {Number(m.subTotal || (m.price * m.qty) || 0).toLocaleString('id-ID')}
                               </span>
                             </div>
                             {m.instructions && (
-                              <div className="text-[10.5px] text-emerald-800 font-medium pl-2.5 flex items-center gap-1">
-                                <span className="text-slate-400 font-normal">↳ Instruksi:</span>
+                              <div className="text-[10.5px] text-[#059669] font-bold pl-2.5 flex items-center gap-1">
+                                <span className="text-[#5A6E65] font-normal">↳ Petunjuk:</span>
                                 <span>{m.instructions}</span>
                               </div>
                             )}
@@ -130,12 +132,12 @@ export const CustomerHistoryPage: React.FC = () => {
 
                   {/* Tagihan & Tombol Bayar jika Unpaid */}
                   {v.invoice && (
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <div className="pt-3 border-t border-emerald-950/6 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-slate-400 block font-mono">
+                        <span className="text-[10px] text-[#5A6E65] block font-mono">
                           No. Invoice: {v.invoice.invoiceNo}
                         </span>
-                        <span className="text-xs font-bold text-slate-900 font-mono">
+                        <span className="text-sm font-black text-[#12241E] font-mono">
                           Rp {Number(v.invoice.totalAmount).toLocaleString('id-ID')}
                         </span>
                       </div>
@@ -144,7 +146,7 @@ export const CustomerHistoryPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => payInvoice(v.invoice!.id)}
-                          className="bg-[#b4f105] text-[#061e15] hover:bg-[#a1da03] text-xs font-bold px-4 py-1.5 rounded-full transition-all cursor-pointer shadow-xs active:scale-95"
+                          className="bg-[#FF4D6D] hover:bg-[#E00B41] text-white text-xs font-black px-4 py-2 rounded-xl transition-all cursor-pointer shadow-md active:scale-95"
                         >
                           Bayar Tagihan (QRIS)
                         </button>
@@ -156,12 +158,9 @@ export const CustomerHistoryPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-8 text-center space-y-2">
-            <FileText size={32} className="text-slate-300 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-800">Belum Ada Riwayat Kunjungan</h4>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto">
-              Semua catatan konsultasi, diagnosa dokter, dan resep obat Anda akan tersimpan rapi di sini.
-            </p>
+          <div className="text-center py-10 px-4 bg-white/80 backdrop-blur-xl rounded-3xl border border-white/80 text-xs text-[#5A6E65] space-y-1">
+            <p className="font-bold text-[#12241E]">Belum ada riwayat kunjungan.</p>
+            <p>Ambil antrean periksa untuk memulai konsultasi dokter pertama Anda.</p>
           </div>
         )}
       </div>

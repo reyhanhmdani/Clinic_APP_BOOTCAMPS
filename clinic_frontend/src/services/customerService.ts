@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Patient, Doctor, Visit, Invoice } from '../types/clinic';
+import type { Patient, Doctor, Visit, Invoice, PaymentMethod } from '../types/clinic';
 
 export interface CheckNikResult {
   exists: boolean;
@@ -83,7 +83,10 @@ export const getCustomerHistoryService = async (): Promise<CustomerHistoryData> 
 };
 
 // pembayaran mandiri
-export const payCustomerInvoiceService = async (invoiceId: number, paymentMethod: 'QRIS'): Promise<Invoice> => {
+export const payCustomerInvoiceService = async (
+  invoiceId: number,
+  paymentMethod: PaymentMethod = 'QRIS',
+): Promise<Invoice> => {
   const response = await api.post<{ message: string; data: Invoice }>('/customers/pay-invoice', {
     invoiceId,
     paymentMethod,

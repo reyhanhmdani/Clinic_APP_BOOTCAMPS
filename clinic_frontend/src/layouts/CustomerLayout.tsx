@@ -22,6 +22,7 @@ import { CustomerBookingModal } from '../components/customers/CustomerBookingMod
 import { CustomerQrisModal } from '../components/customers/CustomerQrisModal';
 
 import { cancelVisitService } from '../services/visitService';
+import { getMidtransSnapTokenService } from '../services/invoiceService';
 
 export interface CustomerContextType {
   patient: Patient | null;
@@ -110,8 +111,8 @@ export const CustomerLayout: React.FC = () => {
     });
 
     return () => {
-      socket.off('QUEUE_UPDATED')
-    }
+      socket.off('QUEUE_UPDATED');
+    };
   }, []);
 
   // 2. Action Handlers
@@ -143,13 +144,60 @@ export const CustomerLayout: React.FC = () => {
     }
   };
 
+  const mapPaymentMethod = (paymentType?: string): 'QRIS' | 'TRANSFER' | 'CARD' => {
+    if (!paymentType) return 'QRIS';
+    const type = paymentType.toLowerCase();
+    if (type.includes('qris') || type.includes('gopay') || type.includes('shopeepay')) {
+      return 'QRIS';
+    }
+    if (type.includes('card')) {
+      return 'CARD';
+    }
+    return 'TRANSFER';
+  };
+
   const handlePayInvoice = async (invoiceId: number) => {
     try {
-      await payCustomerInvoiceService(invoiceId, 'QRIS');
-      setShowQrisModal(true);
-      setHistory(await getCustomerHistoryService());
+      // 1. Minta token Snap ke backend
+      const snapData = await getMidtransSnapTokenService(invoiceId);
+
+      // 2. Munculkan Modal Pop-up Snap Midtrans (QRIS, VA, Card)
+      if (window.snap) {
+        window.snap.pay(snapData.token, {
+          onSuccess: async function (result: any) {
+            console.log('Payment success result:', result);
+
+            // Deteksi metode bayar yang dipilih pasien
+            const chosenMethod = mapPaymentMethod(result?.payment_type);
+
+            try {
+              await payCustomerInvoiceService(invoiceId, chosenMethod);
+            } catch (e) {
+              console.log('Invoice already marked paid:', e);
+            }
+
+            const paymentTypeName = (result?.payment_type || 'Pembayaran').toUpperCase();
+            alert(`🎉 Pembayaran Berhasil via ${paymentTypeName}! Tagihan Anda telah LUNAS.`);
+            await loadData(); // Auto reload agar status pindah ke Loket Farmasi
+          },
+          onPending: function (result: any) {
+            console.log('Payment pending:', result);
+            alert('⏳ Menunggu penyelesaian pembayaran QRIS / Virtual Account...');
+          },
+          onError: function (result: any) {
+            console.error('Payment error:', result);
+            alert('❌ Pembayaran gagal atau dibatalkan.');
+          },
+          onClose: function () {
+            console.log('Customer menutup popup pembayaran');
+          },
+        });
+      } else {
+        // Fallback jika script snap belum termuat
+        window.open(snapData.redirectUrl, '_blank');
+      }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal memproses pembayaran');
+      alert(error.response?.data?.message || 'Gagal memproses pembayaran Midtrans');
     }
   };
 
@@ -187,47 +235,47 @@ export const CustomerLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#fbfbfa] text-[#111111] font-sans antialiased pb-28 selection:bg-[#b4f105] selection:text-[#061e15]">
-      {/* 1. Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#fbfbfa]/90 backdrop-blur-md px-4 sm:px-6 pt-3 pb-2.5 border-b border-slate-200/60 print:hidden">
+    <div className="min-h-[100dvh] w-full bg-[#F6F8F6] text-[#12241E] font-sans antialiased pb-28 selection:bg-emerald-100 selection:text-[#0F4C3A]">
+      {/* 1. Header Bar (Nordic Frosted Glass) */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl px-4 sm:px-6 pt-3.5 pb-3 border-b border-emerald-950/6 print:hidden shadow-xs">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#061e15] text-[#b4f105] flex items-center justify-center font-black text-lg shadow-2xs shrink-0 select-none">
-              <span>✱</span>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-[#059669] flex items-center justify-center font-black text-base shadow-2xs shrink-0 select-none border border-emerald-200">
+              <span>🩺</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-[0.12em] font-semibold text-slate-400">
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#5A6E65]">
                   {patient?.name || user?.username || 'Pasien'}
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100 animate-pulse" />
               </div>
               <button
                 type="button"
-                className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1 leading-tight hover:text-[#061e15] transition-colors cursor-pointer"
+                className="text-xs sm:text-sm font-extrabold text-[#12241E] flex items-center gap-1 leading-tight hover:text-[#059669] transition-colors cursor-pointer"
               >
-                <MapPin size={12} className="text-[#061e15]" />
-                <span>ReyClinic Central Jakarta</span>
-                <span className="text-[9px] text-slate-400">▼</span>
+                <MapPin size={12} className="text-[#059669]" />
+                <span>ReyClinic Central</span>
+                <span className="text-[9px] text-[#5A6E65]">▼</span>
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => navigate('/customers/notifications')}
-              className="w-9 h-9 rounded-full bg-white border border-slate-200/80 text-slate-700 hover:text-slate-900 flex items-center justify-center cursor-pointer relative transition-all active:scale-95 shadow-2xs"
+              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-emerald-950/10 text-[#12241E] hover:bg-emerald-50/60 flex items-center justify-center cursor-pointer relative transition-all active:scale-95 shadow-2xs"
               title="Pemberitahuan"
             >
               <Bell size={16} />
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 absolute top-2 right-2 ring-1 ring-white" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] absolute top-2 right-2 ring-2 ring-white" />
             </button>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="w-9 h-9 rounded-full bg-white border border-slate-200/80 text-slate-500 hover:text-rose-600 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-2xs"
+              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-emerald-950/10 text-[#5A6E65] hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-2xs"
               title="Keluar"
             >
               <LogOut size={15} />
@@ -239,34 +287,34 @@ export const CustomerLayout: React.FC = () => {
       {/* 2. Nested Sub-Page Content */}
       <main className="max-w-md mx-auto px-4 sm:px-6 py-4 space-y-4">
         {loading && (
-          <div className="bg-white/80 border border-slate-200/80 rounded-2xl p-2.5 flex items-center justify-center gap-2 text-xs text-slate-500 animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span>Memperbarui data antrean & profil...</span>
+          <div className="bg-white/80 backdrop-blur-md border border-emerald-950/8 rounded-2xl p-2.5 flex items-center justify-center gap-2 text-xs text-[#5A6E65] animate-pulse shadow-2xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
+            <span>Memperbarui data antrean & rekam medis...</span>
           </div>
         )}
 
         <Outlet context={contextValue} />
       </main>
 
-      {/* 3. Floating Bottom Dock Navigation */}
-      <nav className="fixed bottom-3 inset-x-4 max-w-md mx-auto bg-white/95 backdrop-blur-2xl border border-slate-200/80 rounded-full px-4 py-2 z-40 shadow-[0_12px_40px_rgba(0,0,0,0.1)] print:hidden">
+      {/* 3. Floating Bottom Dock Navigation (Frosted Nordic Glass) */}
+      <nav className="fixed bottom-3 inset-x-4 max-w-md mx-auto bg-white/85 backdrop-blur-2xl border border-white/80 rounded-full px-4 py-2 z-40 shadow-[0_12px_36px_rgba(5,150,105,0.08)] print:hidden">
         <div className="flex items-center justify-between">
           <NavLink
             to="/customers"
             end
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#061e15]' : 'text-slate-400 hover:text-slate-600'
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-slate-100' : ''}`}>
+                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
                   <Home size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
                 </div>
-                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>Beranda</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#061e15] -mt-0.5" />}
+                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Beranda</span>
+                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
               </>
             )}
           </NavLink>
@@ -275,18 +323,18 @@ export const CustomerLayout: React.FC = () => {
             to="/customers/notifications"
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#061e15]' : 'text-slate-400 hover:text-slate-600'
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`p-1 rounded-xl transition-all relative ${isActive ? 'bg-slate-100' : ''}`}>
+                <div className={`p-1 rounded-xl transition-all relative ${isActive ? 'bg-emerald-50' : ''}`}>
                   <Bell size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 absolute top-1 right-1 ring-1 ring-white" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] absolute top-1 right-1 ring-1 ring-white" />
                 </div>
-                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>Notif</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#061e15] -mt-0.5" />}
+                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Notif</span>
+                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
               </>
             )}
           </NavLink>
@@ -295,11 +343,11 @@ export const CustomerLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => handleOpenBookingModal()}
-              className="w-13 h-13 rounded-full bg-[#061e15] text-[#b4f105] flex items-center justify-center shadow-[0_8px_20px_-4px_rgba(6,30,21,0.45)] border-4 border-white cursor-pointer active:scale-90 hover:scale-105 transition-all relative group"
+              className="w-13 h-13 rounded-full bg-[#059669] hover:bg-[#047857] text-white flex items-center justify-center shadow-[0_8px_20px_-4px_rgba(5,150,105,0.45)] border-4 border-white cursor-pointer active:scale-90 hover:scale-105 transition-all relative group"
               title="Buat Kunjungan Dokter"
             >
-              <Stethoscope size={23} className="group-hover:rotate-6 transition-transform" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#b4f105] animate-ping pointer-events-none" />
+              <Stethoscope size={22} className="stroke-[2.5] group-hover:rotate-6 transition-transform" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping pointer-events-none" />
             </button>
           </div>
 
@@ -307,17 +355,17 @@ export const CustomerLayout: React.FC = () => {
             to="/customers/history"
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#061e15]' : 'text-slate-400 hover:text-slate-600'
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-slate-100' : ''}`}>
+                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
                   <FileText size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
                 </div>
-                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>Riwayat</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#061e15] -mt-0.5" />}
+                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Riwayat</span>
+                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
               </>
             )}
           </NavLink>
@@ -326,17 +374,17 @@ export const CustomerLayout: React.FC = () => {
             to="/customers/profile"
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#061e15]' : 'text-slate-400 hover:text-slate-600'
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-slate-100' : ''}`}>
+                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
                   <User size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
                 </div>
-                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>Profil</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#061e15] -mt-0.5" />}
+                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Profil</span>
+                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
               </>
             )}
           </NavLink>

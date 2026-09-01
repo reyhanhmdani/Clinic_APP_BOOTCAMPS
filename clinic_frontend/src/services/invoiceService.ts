@@ -24,3 +24,14 @@ export const payInvoiceService = async (invoiceId: number, input?: PayInvoiceInp
   const response = await api.patch<{ data: Invoice }>(`/invoices/${invoiceId}/pay`, input);
   return response.data.data;
 };
+
+// midtrans
+export const getMidtransSnapTokenService = async (
+  invoiceId: number,
+): Promise<{ token: string; redirectUrl: string; invoiceNo: string; totalAmount: number }> => {
+  const response = await api.post<{
+    data: { token: string; redirectUrl: string; invoiceNo: string; totalAmount: number };
+  }>(`/invoices/${invoiceId}/midtrans-token`);
+  return response.data.data;
+};
+  

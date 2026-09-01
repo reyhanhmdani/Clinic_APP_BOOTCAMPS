@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import { logger } from './middlewares/logger.js';
 import mainRouter from './routes/index.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
@@ -35,7 +35,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(logger);
-
 app.use('/api/v1', mainRouter);
 app.use(errorMiddleware);
 

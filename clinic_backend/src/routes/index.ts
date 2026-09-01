@@ -9,11 +9,15 @@ import consultationRoutes from './consultationRoute.js';
 import customerRoutes from './customersRoute.js';
 import pharmacyRoutes from './pharmacyRoute.js';
 import { authentication } from '../middlewares/authentication.js';
+import { handleMidtransNotificationController } from '../controllers/invoiceController.js';
 
 const mainRouter = express.Router();
 
 // Public route (Authentication)
 mainRouter.use('/auth', authRoutes);
+
+// Route publik untuk webhook Midtrans
+mainRouter.post('/midtrans-webhook', handleMidtransNotificationController);
 
 // Kita jaga semua route harus login dulu
 mainRouter.use(authentication);

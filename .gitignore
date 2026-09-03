@@ -56,3 +56,8 @@ Thumbs.db
 **/*.md
 
 /clinic_mobile/
+
+# 9. Presentations & Slides
+PPT/
+*.pptx
+Panduan_Presentasi_Video_Midtrans_SocketIO.*

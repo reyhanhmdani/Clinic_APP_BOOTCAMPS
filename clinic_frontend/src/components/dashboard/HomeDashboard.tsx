@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox, Smartphone, Building2 } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox, Smartphone, Building2, Stethoscope } from 'lucide-react';
 import type { Visit } from '../../types/clinic';
 
 interface HomeDashboardProps {
@@ -79,15 +79,141 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   ).length;
   const countCompleted = visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length;
 
+  const renderStatusBadge = (item: Visit) => {
+    const isWaiting = item.status === 'WAITING';
+    const isCancelled = item.status === 'CANCELLED';
+    const isUnpaid =
+      item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
+
+    if (isWaiting) {
+      return (
+        <span className="bg-amber-50 text-amber-800 border border-amber-200 font-semibold text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full whitespace-nowrap">
+          Menunggu
+        </span>
+      );
+    }
+    if (item.status === 'IN_KONSULTASI') {
+      return (
+        <span className="bg-sky-50 text-sky-800 border border-sky-200 font-semibold text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full whitespace-nowrap">
+          Diperiksa
+        </span>
+      );
+    }
+    if (isUnpaid) {
+      return (
+        <span className="bg-rose-50 text-rose-800 border border-rose-200 font-semibold text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full whitespace-nowrap">
+          Belum Bayar
+        </span>
+      );
+    }
+    if (isCancelled) {
+      return (
+        <span className="bg-slate-100 text-slate-500 border border-slate-200 font-medium text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full whitespace-nowrap">
+          Dibatalkan
+        </span>
+      );
+    }
+    if (
+      item.consultation?.consultationMedicines &&
+      item.consultation.consultationMedicines.length > 0 &&
+      !item.consultation.isDispensed
+    ) {
+      return (
+        <span className="bg-amber-50 text-amber-900 border border-amber-200 font-semibold text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full flex items-center justify-center gap-1 whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          <span>Di Farmasi</span>
+        </span>
+      );
+    }
+    return (
+      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[10px] px-2.5 sm:px-3 py-0.5 rounded-full whitespace-nowrap">
+        Selesai
+      </span>
+    );
+  };
+
+  const renderActionButton = (item: Visit) => {
+    const isWaiting = item.status === 'WAITING';
+    const isCancelled = item.status === 'CANCELLED';
+    const isUnpaid =
+      item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
+
+    if (isUnpaid) {
+      return (
+        <button
+          type="button"
+          onClick={() => onActionClick && onActionClick(item, 'PROCESS_PAYMENT')}
+          className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
+        >
+          Proses Bayar
+        </button>
+      );
+    }
+    if (isWaiting) {
+      return (
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
+            className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
+          >
+            Panggil Pasien
+          </button>
+          <button
+            type="button"
+            onClick={() => onActionClick && onActionClick(item, 'CANCEL_VISIT')}
+            className="p-1.5 border border-slate-200 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-full shadow-xs cursor-pointer transition-all"
+            title="Batalkan Antrean"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      );
+    }
+    if (item.status === 'IN_KONSULTASI') {
+      return (
+        <button
+          type="button"
+          onClick={() => onActionClick && onActionClick(item, 'CONSULTATION')}
+          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
+        >
+          Periksa Dokter
+        </button>
+      );
+    }
+    if (isCancelled) {
+      return (
+        <span className="bg-slate-100 text-slate-500 font-medium text-xs px-3 py-1 rounded-full inline-block">
+          Batal
+        </span>
+      );
+    }
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="bg-emerald-100 text-emerald-800 font-semibold text-xs px-3 py-1 rounded-full inline-block">
+          Lunas
+        </span>
+        <button
+          type="button"
+          onClick={() => onActionClick && onActionClick(item, 'PRINT_RECEIPT')}
+          className="p-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full shadow-xs cursor-pointer font-bold flex items-center justify-center transition-all"
+          title="Lihat & Cetak Struk Nota"
+        >
+          <Receipt size={15} />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div
       id="antrean-table"
-      className="p-5 sm:p-7 bg-white border border-slate-100 shadow-sm rounded-[24px] flex flex-col space-y-5 sm:space-y-6"
+      className="p-4 sm:p-6 lg:p-7 bg-white border border-slate-100 shadow-sm rounded-[22px] sm:rounded-[24px] flex flex-col space-y-4 sm:space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 pb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 pb-1 sm:pb-2">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Daftar Antrean Pasien</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Daftar Antrean Pasien</h2>
           <p className="text-xs text-slate-400 font-normal mt-0.5">
             Pantau dan kelola alur pemeriksaan pasien secara real-time
           </p>
@@ -114,8 +240,8 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Filter Tabs - Horizontal Scrollable on Small Screens */}
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 max-w-full no-scrollbar">
         {[
           { id: 'ALL', label: 'Semua', count: visits.length },
           { id: 'WAITING', label: 'Menunggu', count: countWaiting },
@@ -129,7 +255,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold rounded-full transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold rounded-full transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
                 isActive
                   ? 'bg-[#061e15] text-white shadow-xs font-bold'
                   : 'bg-slate-100/70 hover:bg-slate-200/60 text-slate-600'
@@ -148,214 +274,208 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         })}
       </div>
 
-      {/* Main Table */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-100">
-        {displayedVisits.length === 0 ? (
-          <div className="py-14 text-center text-xs font-medium text-slate-400 space-y-2 bg-white flex flex-col items-center justify-center">
-            <Inbox size={32} className="text-slate-300 stroke-[1.5]" />
-            <p>Tidak ada antrian yang cocok dengan filter atau kata kunci pencarian.</p>
-          </div>
-        ) : (
-          <table className="w-full text-left border-collapse min-w-[700px] bg-white">
-            <thead>
-              <tr className="bg-slate-50/60 text-[11px] font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-100">
-                <th className="py-3 px-4">Antrean</th>
-                <th className="py-3 px-4">Pasien</th>
-                <th className="py-3 px-4">Dokter Bertugas</th>
-                <th className="py-3 px-4">Waktu Masuk</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-700">
-              {displayedVisits.map((item) => {
-                const isWaiting = item.status === 'WAITING';
-                const isCancelled = item.status === 'CANCELLED';
-                const isUnpaid =
-                  item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
+      {/* Main Content: Empty State */}
+      {displayedVisits.length === 0 ? (
+        <div className="py-14 text-center text-xs font-medium text-slate-400 space-y-2 bg-white flex flex-col items-center justify-center border border-slate-100 rounded-2xl">
+          <Inbox size={32} className="text-slate-300 stroke-[1.5]" />
+          <p>Tidak ada antrian yang cocok dengan filter atau kata kunci pencarian.</p>
+        </div>
+      ) : (
+        <>
+          {/* 1. Mobile Card View (< sm / 640px) */}
+          <div className="sm:hidden space-y-3">
+            {displayedVisits.map((item) => {
+              const formattedQueue = `A-${String(item.queueNumber).padStart(3, '0')}`;
+              const vDate = new Date(item.visitDate);
+              const now = new Date();
+              const isToday =
+                vDate.getDate() === now.getDate() &&
+                vDate.getMonth() === now.getMonth() &&
+                vDate.getFullYear() === now.getFullYear();
+              const timeStr = vDate.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
 
-                const formattedQueue = `A-${String(item.queueNumber).padStart(3, '0')}`;
-
-                const vDate = new Date(item.visitDate);
-                const now = new Date();
-                const isToday =
-                  vDate.getDate() === now.getDate() &&
-                  vDate.getMonth() === now.getMonth() &&
-                  vDate.getFullYear() === now.getFullYear();
-
-                const yesterday = new Date(now);
-                yesterday.setDate(now.getDate() - 1);
-                const isYesterday =
-                  vDate.getDate() === yesterday.getDate() &&
-                  vDate.getMonth() === yesterday.getMonth() &&
-                  vDate.getFullYear() === yesterday.getFullYear();
-
-                const dayLabel = isToday
-                  ? 'Hari Ini'
-                  : isYesterday
-                    ? 'Kemarin'
-                    : vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-
-                const timeStr = vDate.toLocaleTimeString('id-ID', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-
-                return (
-                  <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                    {/* Nomor Antrian */}
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono bg-slate-100 text-slate-800 px-3 py-1 rounded-full font-bold text-xs">
-                        {formattedQueue}
+              return (
+                <div
+                  key={item.id}
+                  className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2.5 shadow-2xs"
+                >
+                  {/* Card Top: Queue Number + Time + Status Badge */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono bg-slate-200/80 text-slate-900 px-2.5 py-0.5 rounded-full font-extrabold text-xs">
+                      {formattedQueue}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-slate-500">
+                        {isToday ? 'Hari ini' : ''} {timeStr}
                       </span>
-                    </td>
+                      {renderStatusBadge(item)}
+                    </div>
+                  </div>
 
-                    {/* Info Pasien */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</span>
-                        {item.patient?.userId ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#061e15] text-[#b4f105] shadow-2xs">
-                            <Smartphone size={10} className="stroke-[2.5]" />
-                            <span>Akun Online</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
-                            <Building2 size={10} className="text-slate-400" />
-                            <span>Loket Offline</span>
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap mt-0.5">
-                        <span>{item.patient?.noRm}</span>
-                        <span>•</span>
-                        <span>
-                          {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
-                        </span>
-                        {item.patient?.nik && (
-                          <>
-                            <span>•</span>
-                            <span className="text-slate-500 font-semibold">NIK: {item.patient.nik}</span>
-                          </>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Dokter */}
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-800">{item.doctor?.name}</div>
-                      <div className="text-[11px] text-slate-400">{item.doctor?.spesialis}</div>
-                    </td>
-
-                    {/* Waktu & Tanggal Masuk */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-col">
-                        <span
-                          className={`text-[10px] font-bold font-mono ${
-                            isToday ? 'text-emerald-700' : 'text-slate-400'
-                          }`}
-                        >
-                          {dayLabel}
-                        </span>
-                        <span className="font-mono font-medium text-slate-600 text-xs">{timeStr}</span>
-                      </div>
-                    </td>
-
-                    {/* Status Badge */}
-                    <td className="py-3.5 px-4 text-center">
-                      {isWaiting ? (
-                        <span className="bg-amber-50 text-amber-800 border border-amber-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
-                          Menunggu
-                        </span>
-                      ) : item.status === 'IN_KONSULTASI' ? (
-                        <span className="bg-sky-50 text-sky-800 border border-sky-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
-                          Diperiksa
-                        </span>
-                      ) : isUnpaid ? (
-                        <span className="bg-rose-50 text-rose-800 border border-rose-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
-                          Belum Bayar
-                        </span>
-                      ) : isCancelled ? (
-                        <span className="bg-slate-100 text-slate-500 border border-slate-200 font-medium text-[10px] px-3 py-0.5 rounded-full">
-                          Dibatalkan
-                        </span>
-                      ) : item.consultation?.consultationMedicines &&
-                        item.consultation.consultationMedicines.length > 0 &&
-                        !item.consultation.isDispensed ? (
-                        <span className="bg-amber-50 text-amber-900 border border-amber-200 font-semibold text-[10px] px-3 py-0.5 rounded-full flex items-center justify-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                          <span>Di Farmasi</span>
+                  {/* Card Body: Patient Info */}
+                  <div className="space-y-1 pt-0.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</span>
+                      {item.patient?.userId ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#061e15] text-[#b4f105]">
+                          <Smartphone size={9} className="stroke-[2.5]" />
+                          <span>Online</span>
                         </span>
                       ) : (
-                        <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[10px] px-3 py-0.5 rounded-full">
-                          Selesai
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                          <Building2 size={9} className="text-slate-400" />
+                          <span>Offline</span>
                         </span>
                       )}
-                    </td>
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                      <span>{item.patient?.noRm}</span>
+                      <span>•</span>
+                      <span>
+                        {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
+                      </span>
+                      {item.patient?.nik && (
+                        <>
+                          <span>•</span>
+                          <span className="text-slate-500 font-medium">NIK: {item.patient.nik}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
 
-                    {/* Action Button */}
-                    <td className="py-3.5 px-4 text-right">
-                      {isUnpaid ? (
-                        <button
-                          type="button"
-                          onClick={() => onActionClick && onActionClick(item, 'PROCESS_PAYMENT')}
-                          className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
-                        >
-                          Proses Bayar
-                        </button>
-                      ) : isWaiting ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
-                            className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
-                          >
-                            Panggil Pasien
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onActionClick && onActionClick(item, 'CANCEL_VISIT')}
-                            className="p-1.5 border border-slate-200 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-full shadow-xs cursor-pointer transition-all"
-                            title="Batalkan Antrean"
-                          >
-                            <X size={15} />
-                          </button>
-                        </div>
-                      ) : item.status === 'IN_KONSULTASI' ? (
-                        <button
-                          type="button"
-                          onClick={() => onActionClick && onActionClick(item, 'CONSULTATION')}
-                          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
-                        >
-                          Periksa Dokter
-                        </button>
-                      ) : isCancelled ? (
-                        <span className="bg-slate-100 text-slate-500 font-medium text-xs px-3 py-1 rounded-full inline-block">
-                          Batal
+                  {/* Card Middle: Doctor */}
+                  <div className="flex items-center gap-2 text-xs bg-white px-3 py-1.5 rounded-xl border border-slate-200/60">
+                    <Stethoscope size={13} className="text-emerald-700 shrink-0" />
+                    <span className="font-semibold text-slate-800 truncate">{item.doctor?.name}</span>
+                    <span className="text-slate-400 text-[11px] truncate">({item.doctor?.spesialis})</span>
+                  </div>
+
+                  {/* Card Bottom: Action Button */}
+                  <div className="pt-1 flex items-center justify-end">{renderActionButton(item)}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 2. Tablet & Desktop Table View (>= sm / 640px) */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-slate-100">
+            <table className="w-full text-left border-collapse min-w-[580px] bg-white">
+              <thead>
+                <tr className="bg-slate-50/60 text-[11px] font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-100">
+                  <th className="py-3 px-3 sm:px-4">Antrean</th>
+                  <th className="py-3 px-3 sm:px-4">Pasien</th>
+                  <th className="py-3 px-3 sm:px-4">Dokter Bertugas</th>
+                  <th className="py-3 px-3 sm:px-4">Waktu Masuk</th>
+                  <th className="py-3 px-3 sm:px-4 text-center">Status</th>
+                  <th className="py-3 px-3 sm:px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-700">
+                {displayedVisits.map((item) => {
+                  const formattedQueue = `A-${String(item.queueNumber).padStart(3, '0')}`;
+                  const vDate = new Date(item.visitDate);
+                  const now = new Date();
+                  const isToday =
+                    vDate.getDate() === now.getDate() &&
+                    vDate.getMonth() === now.getMonth() &&
+                    vDate.getFullYear() === now.getFullYear();
+
+                  const yesterday = new Date(now);
+                  yesterday.setDate(now.getDate() - 1);
+                  const isYesterday =
+                    vDate.getDate() === yesterday.getDate() &&
+                    vDate.getMonth() === yesterday.getMonth() &&
+                    vDate.getFullYear() === yesterday.getFullYear();
+
+                  const dayLabel = isToday
+                    ? 'Hari Ini'
+                    : isYesterday
+                      ? 'Kemarin'
+                      : vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
+                  const timeStr = vDate.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                      {/* Nomor Antrian */}
+                      <td className="py-3 px-3 sm:px-4">
+                        <span className="font-mono bg-slate-100 text-slate-800 px-2.5 sm:px-3 py-1 rounded-full font-bold text-xs">
+                          {formattedQueue}
                         </span>
-                      ) : (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <span className="bg-emerald-100 text-emerald-800 font-semibold text-xs px-3 py-1 rounded-full inline-block">
-                            Lunas
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => onActionClick && onActionClick(item, 'PRINT_RECEIPT')}
-                            className="p-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full shadow-xs cursor-pointer font-bold flex items-center justify-center transition-all"
-                            title="Lihat & Cetak Struk Nota"
-                          >
-                            <Receipt size={15} />
-                          </button>
+                      </td>
+
+                      {/* Info Pasien */}
+                      <td className="py-3 px-3 sm:px-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-slate-900 capitalize">{item.patient?.name}</span>
+                          {item.patient?.userId ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#061e15] text-[#b4f105] shadow-2xs">
+                              <Smartphone size={10} className="stroke-[2.5]" />
+                              <span>Online</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                              <Building2 size={10} className="text-slate-400" />
+                              <span>Offline</span>
+                            </span>
+                          )}
                         </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+                        <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <span>{item.patient?.noRm}</span>
+                          <span>•</span>
+                          <span>
+                            {item.patient?.gender === 'MALE' ? 'L' : 'P'} ({item.patient?.age} th)
+                          </span>
+                          {item.patient?.nik && (
+                            <>
+                              <span>•</span>
+                              <span className="text-slate-500 font-semibold">NIK: {item.patient.nik}</span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Dokter */}
+                      <td className="py-3 px-3 sm:px-4">
+                        <div className="font-bold text-slate-800">{item.doctor?.name}</div>
+                        <div className="text-[11px] text-slate-400">{item.doctor?.spesialis}</div>
+                      </td>
+
+                      {/* Waktu & Tanggal Masuk */}
+                      <td className="py-3 px-3 sm:px-4">
+                        <div className="flex flex-col">
+                          <span
+                            className={`text-[10px] font-bold font-mono ${
+                              isToday ? 'text-emerald-700' : 'text-slate-400'
+                            }`}
+                          >
+                            {dayLabel}
+                          </span>
+                          <span className="font-mono font-medium text-slate-600 text-xs">{timeStr}</span>
+                        </div>
+                      </td>
+
+                      {/* Status Badge */}
+                      <td className="py-3 px-3 sm:px-4 text-center">{renderStatusBadge(item)}</td>
+
+                      {/* Action Button */}
+                      <td className="py-3 px-3 sm:px-4 text-right">
+                        <div className="flex items-center justify-end">{renderActionButton(item)}</div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Pagination Footer */}
       {filteredVisits.length > 0 && (

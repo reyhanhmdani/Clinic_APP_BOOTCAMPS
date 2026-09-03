@@ -165,9 +165,9 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mb-6">
-      {/* Card 1: Featured Dark Hero Banner */}
-      <div className="bg-[#072418] text-white rounded-[22px] sm:rounded-[24px] p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-sm min-h-[175px] sm:min-h-[185px]">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5 mb-6">
+      {/* Card 1: Featured Dark Hero Banner (Full span on tablet, 1-col on desktop) */}
+      <div className="bg-[#072418] text-white rounded-[22px] sm:rounded-[24px] p-5 sm:p-6 relative overflow-hidden flex flex-col justify-between shadow-sm min-h-[175px] sm:min-h-[185px] md:col-span-2 xl:col-span-1">
         {/* Top Update Pill */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="inline-flex items-center gap-1.5 bg-white/10 text-white text-[10px] sm:text-[11px] font-semibold px-2.5 sm:px-3 py-1 rounded-full border border-white/10">
@@ -235,7 +235,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ stats }) => {
           </div>
 
           {/* Big Amount */}
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight my-1 truncate">
+          <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight my-1 truncate">
             {formatRupiah(totalRevenue)}
           </div>
 

@@ -114,15 +114,17 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ onToggleSidebar, onAddPati
 
         {/* Sisi Kanan: Action Button + Fullscreen + Tanggal + User Profile */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Tombol Tambah Antrean (Desktop & Tablet) */}
+          {/* Tombol Tambah Antrean (Mobile, Tablet, & Desktop) */}
           {onAddPatientVisit && (
             <button
               type="button"
               onClick={onAddPatientVisit}
-              className="btn-lime hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold shadow-xs cursor-pointer select-none"
+              className="btn-lime flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold shadow-xs cursor-pointer select-none active:scale-95 transition-all"
+              title="Daftarkan Pasien Baru"
             >
               <Plus size={15} strokeWidth={2.5} />
-              <span>Tambah Antrean</span>
+              <span className="hidden sm:inline">Tambah Antrean</span>
+              <span className="sm:hidden text-[11px] font-extrabold">+ Antrean</span>
             </button>
           )}
 

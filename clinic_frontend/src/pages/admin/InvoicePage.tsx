@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { ArrowLeft, CheckCircle2, CreditCard, Banknote, QrCode, Calendar, Printer } from 'lucide-react';
+import { toast } from 'sonner';
 import { useVisitStore } from '../../stores/visitStore';
 import { payInvoiceService } from '../../services/invoiceService';
 import { formatRupiah } from '../../utils/formatRupiah';
@@ -32,7 +33,7 @@ export const InvoicePage: React.FC = () => {
 
   const handleProcessPayment = async () => {
     if (!selectedVisit?.invoice?.id) {
-      alert('Faktur tagihan tidak ditemukan!');
+      toast.error('Faktur tagihan tidak ditemukan!');
       return;
     }
 
@@ -43,10 +44,10 @@ export const InvoicePage: React.FC = () => {
       });
 
       await fetchVisits();
-      alert('Pembayaran berhasil diproses dan status telah Lunas (PAID)!');
+      toast.success('Pembayaran berhasil diproses dan status telah Lunas (PAID)!');
       navigate('/dashboard');
     } catch (error: any) {
-      alert(`Gagal memproses pembayaran: ${error?.response?.data?.message || error.message}`);
+      toast.error(`Gagal memproses pembayaran: ${error?.response?.data?.message || error.message}`);
     } finally {
       setIsProcessing(false);
     }

@@ -12,6 +12,8 @@ import {
 import { getPharmacyQueueService, dispenseMedicineService } from '../../services/pharmacyService';
 import type { Consultation, PharmacyQueueData } from '../../types/clinic';
 import { socket } from '../../services/socket';
+import { toast } from 'sonner';
+import { confirmDialog } from '../../stores/confirmStore';
 
 export const PharmacyPage: React.FC = () => {
   const [data, setData] = useState<PharmacyQueueData>({
@@ -30,7 +32,7 @@ export const PharmacyPage: React.FC = () => {
       const res = await getPharmacyQueueService();
       setData(res);
     } catch (err: any) {
-      console.error('Gagal mengambil antrean farmasi:', err);
+      toast.error('Gagal memuat antrean farmasi');
     } finally {
       setIsLoading(false);
     }
@@ -52,22 +54,26 @@ export const PharmacyPage: React.FC = () => {
 
   const handleDispense = async (consultation: Consultation) => {
     const patientName = consultation.visit?.patient?.name || 'Pasien';
-    if (
-      !window.confirm(
-        `Apakah Anda yakin obat untuk pasien ${patientName} sudah disiapkan dan siap diserahkan?`
-      )
-    ) {
+    const isConfirmed = await confirmDialog({
+      title: 'Konfirmasi Penyerahan Obat',
+      description: `Apakah Anda yakin obat untuk pasien ${patientName} sudah disiapkan dan siap diserahkan?`,
+      confirmText: 'Ya, Serahkan Obat',
+      cancelText: 'Batal',
+      variant: 'success',
+    });
+    if (!isConfirmed) {
       return;
     }
 
     setIsDispensing(consultation.id);
     try {
       await dispenseMedicineService(consultation.id);
+      toast.success(`Obat untuk pasien ${patientName} berhasil diserahkan!`);
       setSuccessMessage(`Obat untuk pasien ${patientName} berhasil diserahkan!`);
       setTimeout(() => setSuccessMessage(null), 4000);
       await fetchQueue();
     } catch (err: any) {
-      alert(`Gagal menyerahkan obat: ${err?.response?.data?.message || err.message}`);
+      toast.error(`Gagal menyerahkan obat: ${err?.response?.data?.message || err.message}`);
     } finally {
       setIsDispensing(null);
     }

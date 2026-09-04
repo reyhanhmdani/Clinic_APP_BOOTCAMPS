@@ -23,6 +23,7 @@ import { CustomerQrisModal } from '../components/customers/CustomerQrisModal';
 
 import { cancelVisitService } from '../services/visitService';
 import { getMidtransSnapTokenService } from '../services/invoiceService';
+import { toast } from 'sonner';
 
 export interface CustomerContextType {
   patient: Patient | null;
@@ -137,10 +138,10 @@ export const CustomerLayout: React.FC = () => {
     try {
       await bookCustomerVisitService(selectedDoctorId);
       setShowBookingModal(false);
-      alert('Nomor antrean berhasil diterbitkan!');
+      toast.success('Nomor antrean berhasil diterbitkan!');
       setActiveVisit(await getActiveCustomerVisitService());
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal membuat kunjungan dokter');
+      toast.error(error.response?.data?.message || 'Gagal membuat kunjungan dokter');
     }
   };
 
@@ -177,16 +178,16 @@ export const CustomerLayout: React.FC = () => {
             }
 
             const paymentTypeName = (result?.payment_type || 'Pembayaran').toUpperCase();
-            alert(`🎉 Pembayaran Berhasil via ${paymentTypeName}! Tagihan Anda telah LUNAS.`);
+            toast.success(`Pembayaran Berhasil via ${paymentTypeName}! Tagihan Anda telah LUNAS.`);
             await loadData(); // Auto reload agar status pindah ke Loket Farmasi
           },
           onPending: function (result: any) {
             console.log('Payment pending:', result);
-            alert('⏳ Menunggu penyelesaian pembayaran QRIS / Virtual Account...');
+            toast.info('Menunggu penyelesaian pembayaran QRIS / Virtual Account...');
           },
           onError: function (result: any) {
             console.error('Payment error:', result);
-            alert('❌ Pembayaran gagal atau dibatalkan.');
+            toast.error('Pembayaran gagal atau dibatalkan.');
           },
           onClose: function () {
             console.log('Customer menutup popup pembayaran');
@@ -197,7 +198,7 @@ export const CustomerLayout: React.FC = () => {
         window.open(snapData.redirectUrl, '_blank');
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal memproses pembayaran Midtrans');
+      toast.error(error.response?.data?.message || 'Gagal memproses pembayaran Midtrans');
     }
   };
 
@@ -205,11 +206,11 @@ export const CustomerLayout: React.FC = () => {
     try {
       setLoading(true);
       await cancelVisitService(visitId);
-      alert('Tiket antrean berhasil dibatalkan');
+      toast.success('Tiket antrean berhasil dibatalkan');
       setActiveVisit(null);
       await loadData();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal membatalkan antrean');
+      toast.error(error.response?.data?.message || 'Gagal membatalkan antrean');
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, X, PauseCircle, PlayCircle, Trash2, UserX, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Doctor, Gender } from '../../types/clinic';
 import { useDoctorStore } from '../../stores/doctorStore';
 import { useVisitStore } from '../../stores/visitStore';
 import { createDoctorService, updateDoctorService, deleteDoctorService } from '../../services/doctorService';
 import { formatRupiah } from '../../utils/formatRupiah';
+import { confirmDialog } from '../../stores/confirmStore';
 
 export const DoctorPage: React.FC = () => {
   const { doctors, loading: isLoading, fetchDoctors } = useDoctorStore();
@@ -72,12 +74,12 @@ export const DoctorPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim() || !formData.spesialis.trim()) {
-      alert('Nama dokter dan Spesialisasi wajib diisi!');
+      toast.error('Nama dokter dan Spesialisasi wajib diisi!');
       return;
     }
     const numFee = Number(formData.fee);
     if (!formData.fee || isNaN(numFee) || numFee < 0) {
-      alert('Tarif jasa medis harus berupa nominal angka valid!');
+      toast.error('Tarif jasa medis harus berupa nominal angka valid!');
       return;
     }
 
@@ -91,7 +93,7 @@ export const DoctorPage: React.FC = () => {
           room: formData.room.trim() || undefined,
           isActive: true,
         });
-        alert('Data dokter baru berhasil ditambahkan!');
+        toast.success('Data dokter baru berhasil ditambahkan!');
       } else if (modalMode === 'EDIT' && selectedDoctor) {
         await updateDoctorService(selectedDoctor.id, {
           name: formData.name.trim(),
@@ -101,13 +103,13 @@ export const DoctorPage: React.FC = () => {
           room: formData.room.trim() || undefined,
           isActive: formData.isActive,
         });
-        alert('Data dokter berhasil diperbarui!');
+        toast.success('Data dokter berhasil diperbarui!');
       }
       setIsModalOpen(false);
       fetchDoctors();
     } catch (err: any) {
       const message = err?.response?.data?.message || err.message || 'Gagal menyimpan data dokter';
-      alert(message);
+      toast.error(message);
     }
   };
 
@@ -116,17 +118,24 @@ export const DoctorPage: React.FC = () => {
     const nextStatus = !doctor.isActive;
     const actionText = nextStatus ? 'mengaktifkan jadwal praktek' : 'menonaktifkan (liburkan)';
 
-    if (confirm(`Apakah Anda yakin ingin ${actionText} dokter ${doctor.name}?`)) {
-      try {
-        await updateDoctorService(doctor.id, {
-          isActive: nextStatus,
-        });
-        alert(`Status dokter ${doctor.name} berhasil diubah menjadi ${nextStatus ? 'AKTIF' : 'NONAKTIF'}.`);
-        fetchDoctors();
-      } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || 'Gagal mengubah status dokter';
-        alert(message);
-      }
+    const isConfirmed = await confirmDialog({
+      title: nextStatus ? 'Aktifkan Jadwal Dokter' : 'Nonaktifkan Jadwal Dokter',
+      description: `Apakah Anda yakin ingin ${actionText} dokter ${doctor.name}?`,
+      confirmText: nextStatus ? 'Ya, Aktifkan' : 'Ya, Nonaktifkan',
+      cancelText: 'Batal',
+      variant: nextStatus ? 'primary' : 'warning',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      await updateDoctorService(doctor.id, {
+        isActive: nextStatus,
+      });
+      toast.success(`Status dokter ${doctor.name} berhasil diubah menjadi ${nextStatus ? 'AKTIF' : 'NONAKTIF'}.`);
+      fetchDoctors();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || 'Gagal mengubah status dokter';
+      toast.error(message);
     }
   };
 
@@ -134,21 +143,28 @@ export const DoctorPage: React.FC = () => {
   const handleDeleteDoctor = async (id: number, name: string) => {
     const hasVisits = visits.some((v) => v.doctorId === id);
     if (hasVisits) {
-      alert(
+      toast.warning(
         `Dokter ${name} tidak dapat dihapus permanen karena telah memiliki riwayat kunjungan/pemeriksaan pasien. Silakan gunakan tombol 'Nonaktifkan' untuk meliburkan jadwal praktek dokter.`,
       );
       return;
     }
 
-    if (confirm(`Apakah Anda yakin ingin menghapus data dokter ${name}? Aksi ini permanen.`)) {
-      try {
-        await deleteDoctorService(id);
-        alert(`Data dokter ${name} berhasil dihapus dari sistem.`);
-        fetchDoctors();
-      } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || 'Gagal menghapus dokter';
-        alert(message);
-      }
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Data Dokter',
+      description: `Apakah Anda yakin ingin menghapus data dokter ${name}? Tindakan ini bersifat permanen.`,
+      confirmText: 'Ya, Hapus Dokter',
+      cancelText: 'Batal',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      await deleteDoctorService(id);
+      toast.success(`Data dokter ${name} berhasil dihapus dari sistem.`);
+      fetchDoctors();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || 'Gagal menghapus dokter';
+      toast.error(message);
     }
   };
 

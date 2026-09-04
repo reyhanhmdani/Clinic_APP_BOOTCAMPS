@@ -6,6 +6,8 @@ import { useInvoiceStore } from '../../stores/invoiceStore';
 import { useDoctorStore } from '../../stores/doctorStore';
 import { usePatientStore } from '../../stores/patientStore';
 import { cancelVisitService } from '../../services/visitService';
+import { toast } from 'sonner';
+import { confirmDialog } from '../../stores/confirmStore';
 
 // Components
 import { StatsGrid } from '../../components/dashboard/StatsGrid';
@@ -58,8 +60,9 @@ export const DashboardPage: React.FC = () => {
     if (actionType === 'CALL_PATIENT') {
       try {
         await callPatient(visit.id);
+        toast.info(`Memanggil pasien ${visit.patient?.name || ''}...`);
       } catch (err: any) {
-        alert(err.message || 'Gagal memanggil pasien');
+        toast.error(err.message || 'Gagal memanggil pasien');
       }
     } else if (actionType === 'CONSULTATION') {
       navigate(`/dashboard/consultations?visitId=${visit.id}`);
@@ -68,13 +71,21 @@ export const DashboardPage: React.FC = () => {
     } else if (actionType === 'PRINT_RECEIPT') {
       setSelectedReceiptVisit(visit);
     } else if (actionType === 'CANCEL_VISIT') {
-      if (confirm(`Apakah anda yakin ingin membatalkan andrean pasien ${visit.patient?.name}`)) {
-        try {
-          await cancelVisitService(visit.id);
-          await fetchVisits();
-        } catch (error: any) {
-          alert(error?.response?.data?.message || error.message || 'Gagal membatalkan antrean');
-        }
+      const isConfirmed = await confirmDialog({
+        title: 'Batalkan Kunjungan Pasien',
+        description: `Apakah Anda yakin ingin membatalkan antrean pasien ${visit.patient?.name || ''}?`,
+        confirmText: 'Ya, Batalkan Antrean',
+        cancelText: 'Kembali',
+        variant: 'danger',
+      });
+      if (!isConfirmed) return;
+
+      try {
+        await cancelVisitService(visit.id);
+        await fetchVisits();
+        toast.success('Antrean berhasil dibatalkan');
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || error.message || 'Gagal membatalkan antrean');
       }
     }
   };

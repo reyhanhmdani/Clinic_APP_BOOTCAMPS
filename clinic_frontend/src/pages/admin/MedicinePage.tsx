@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, X, AlertTriangle, Pill, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Medicine } from '../../types/clinic';
 import { useMedicineStore } from '../../stores/medicineStore';
 import { createMedicineService, updateMedicineService, deleteMedicineService } from '../../services/medicineService';
 import { formatRupiah } from '../../utils/formatRupiah';
+import { confirmDialog } from '../../stores/confirmStore';
 
 export const MedicinePage: React.FC = () => {
   const { medicines, loading: isLoading, fetchMedicines } = useMedicineStore();
@@ -56,18 +58,18 @@ export const MedicinePage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert('Nama obat wajib diisi!');
+      toast.error('Nama obat wajib diisi!');
       return;
     }
     const numPrice = Number(formData.price);
     const numStock = Number(formData.stock);
 
     if (!formData.price || isNaN(numPrice) || numPrice < 0) {
-      alert('Harga satuan obat harus berupa angka valid!');
+      toast.error('Harga satuan obat harus berupa angka valid!');
       return;
     }
     if (!formData.stock || isNaN(numStock) || numStock < 0) {
-      alert('Jumlah stok obat harus berupa angka valid!');
+      toast.error('Jumlah stok obat harus berupa angka valid!');
       return;
     }
 
@@ -79,7 +81,7 @@ export const MedicinePage: React.FC = () => {
           stock: numStock,
           unit: formData.unit.trim() || 'Tablet',
         });
-        alert('Obat baru berhasil ditambahkan ke apotek!');
+        toast.success('Obat baru berhasil ditambahkan ke apotek!');
       } else if (modalMode === 'EDIT' && selectedMedicine) {
         await updateMedicineService(selectedMedicine.id, {
           name: formData.name.trim(),
@@ -87,26 +89,33 @@ export const MedicinePage: React.FC = () => {
           stock: numStock,
           unit: formData.unit.trim() || 'Tablet',
         });
-        alert('Data obat berhasil diperbarui!');
+        toast.success('Data obat berhasil diperbarui!');
       }
       setIsModalOpen(false);
       fetchMedicines();
     } catch (err: any) {
       const message = err?.response?.data?.message || err.message || 'Gagal menyimpan data obat';
-      alert(message);
+      toast.error(message);
     }
   };
 
   const handleDeleteMedicine = async (id: number, name: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus ${name} dari inventori obat?`)) {
-      try {
-        await deleteMedicineService(id);
-        alert(`Obat ${name} berhasil dihapus.`);
-        fetchMedicines();
-      } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || 'Gagal menghapus obat';
-        alert(message);
-      }
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Obat dari Inventori',
+      description: `Apakah Anda yakin ingin menghapus ${name} dari inventori obat? Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: 'Ya, Hapus Obat',
+      cancelText: 'Batal',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      await deleteMedicineService(id);
+      toast.success(`Obat ${name} berhasil dihapus.`);
+      fetchMedicines();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || 'Gagal menghapus obat';
+      toast.error(message);
     }
   };
 

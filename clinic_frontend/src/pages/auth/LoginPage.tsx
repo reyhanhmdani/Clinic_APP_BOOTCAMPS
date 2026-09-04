@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { Eye, EyeOff, AlertCircle, ShieldCheck, HeartPulse, Clock } from 'lucide-react';
 import { loginService } from '../../services/authService';
 import { useAuthStore } from '../../stores/authStore';
+import { toast } from 'sonner';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -175,7 +176,7 @@ export const LoginPage: React.FC = () => {
                   <div className="text-right pt-0.5">
                     <button
                       type="button"
-                      onClick={() => alert('Fitur reset kata sandi akan dikirim ke email terdaftar.')}
+                      onClick={() => toast.info('Fitur reset kata sandi akan dikirim ke email terdaftar.')}
                       className="text-[11px] font-bold text-[#5e773f] hover:underline cursor-pointer"
                     >
                       Forgot Password?

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, X, Table2, LayoutGrid, FileText, Phone, MapPin, UserX, Loader2, Smartphone, Building2 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Patient } from '../../types/clinic';
 import { usePatientStore } from '../../stores/patientStore';
 import { createPatientService, updatePatientService, deletePatientService } from '../../services/patientService';
 import { PatientHistoryModal } from '../../components/patients/PatientHistoryModal';
+import { confirmDialog } from '../../stores/confirmStore';
 
 export const PatientPage: React.FC = () => {
   const { patients, loading: isLoading, fetchPatients } = usePatientStore();
@@ -73,12 +75,12 @@ export const PatientPage: React.FC = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert('Nama pasien wajib diisi!');
+      toast.error('Nama pasien wajib diisi!');
       return;
     }
     const numAge = Number(formData.age);
     if (!formData.age || isNaN(numAge) || numAge <= 0) {
-      alert('Usia pasien harus berupa angka valid!');
+      toast.error('Usia pasien harus berupa angka valid!');
       return;
     }
 
@@ -92,7 +94,7 @@ export const PatientPage: React.FC = () => {
           phone: formData.phone.trim() || undefined,
           address: formData.address.trim() || undefined,
         });
-        alert('Pasien baru berhasil didaftarkan!');
+        toast.success('Pasien baru berhasil didaftarkan!');
       } else if (modalMode === 'EDIT' && selectedPatient) {
         await updatePatientService(selectedPatient.id, {
           name: formData.name.trim(),
@@ -102,26 +104,33 @@ export const PatientPage: React.FC = () => {
           phone: formData.phone.trim() || undefined,
           address: formData.address.trim() || undefined,
         });
-        alert('Data pasien berhasil diperbarui!');
+        toast.success('Data pasien berhasil diperbarui!');
       }
       setIsModalOpen(false);
       fetchPatients();
     } catch (err: any) {
       const message = err?.response?.data?.message || err.message || 'Gagal menyimpan data pasien';
-      alert(message);
+      toast.error(message);
     }
   };
 
   const handleDeletePatient = async (id: number, name: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus data pasien ${name}?`)) {
-      try {
-        await deletePatientService(id);
-        alert(`Data pasien ${name} berhasil dihapus`);
-        fetchPatients();
-      } catch (err: any) {
-        const message = err?.response?.data?.message || err.message || 'Gagal menghapus pasien';
-        alert(message);
-      }
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Data Pasien',
+      description: `Apakah Anda yakin ingin menghapus data pasien ${name}? Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: 'Ya, Hapus Pasien',
+      cancelText: 'Batal',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
+
+    try {
+      await deletePatientService(id);
+      toast.success(`Data pasien ${name} berhasil dihapus`);
+      fetchPatients();
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err.message || 'Gagal menghapus pasien';
+      toast.error(message);
     }
   };
 

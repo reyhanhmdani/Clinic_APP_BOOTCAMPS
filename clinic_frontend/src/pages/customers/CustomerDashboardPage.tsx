@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCustomerContext } from '../../layouts/CustomerLayout';
+import { confirmDialog } from '../../stores/confirmStore';
 
 interface HealthArticle {
   id: number;
@@ -144,7 +145,13 @@ export const CustomerDashboardPage: React.FC = () => {
 
   const handleCancelTicket = async () => {
     if (!activeVisit?.visit) return;
-    if (confirm(`Apakah Anda yakin ingin membatalkan antrean ${activeVisit.visit.doctor?.name}?`)) {
+    const isConfirmed = await confirmDialog({
+      title: 'Batalkan Antrean?',
+      description: `Apakah Anda yakin ingin membatalkan antrean dengan dokter ${activeVisit.visit.doctor?.name || 'ini'}?`,
+      confirmText: 'Ya, Batalkan',
+      variant: 'danger',
+    });
+    if (isConfirmed) {
       await cancelActiveVisit(activeVisit.visit.id);
     }
   };

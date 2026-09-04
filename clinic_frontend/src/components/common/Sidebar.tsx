@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
+import { confirmDialog } from '../../stores/confirmStore';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,12 +37,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleLogout = () => {
-    if (window.confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
-      logout();
-      onClose();
-      navigate('/login');
-    }
+  const handleLogout = async () => {
+    const isConfirmed = await confirmDialog({
+      title: 'Keluar dari Sistem',
+      description: 'Apakah Anda yakin ingin keluar dari sistem klinik?',
+      confirmText: 'Ya, Keluar',
+      cancelText: 'Batal',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
+
+    logout();
+    onClose();
+    navigate('/login');
   };
 
   const navigationItems = [

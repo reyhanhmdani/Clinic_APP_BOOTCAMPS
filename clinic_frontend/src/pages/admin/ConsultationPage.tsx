@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router';
 import { ArrowLeft, ArrowRight, FileText, Edit3, Stethoscope } from 'lucide-react';
 import { useVisitStore } from '../../stores/visitStore';
@@ -7,6 +7,8 @@ import { createConsultationService } from '../../services/consulService';
 import { createInvoiceService } from '../../services/invoiceService';
 import { X } from 'lucide-react';
 import { cancelVisitService } from '../../services/visitService';
+import { toast } from 'sonner';
+import { confirmDialog } from '../../stores/confirmStore';
 
 // Sub-components
 import { PatientBannerCard } from '../../components/consultation/PatientBannerCard';
@@ -24,7 +26,7 @@ export const ConsultationPage: React.FC = () => {
   // Strict Route Guard: Harus ada visitId
   useEffect(() => {
     if (!visitId) {
-      alert('Halaman konsultasi hanya dapat diakses melalui antrean pasien di Dashboard.');
+      toast.warning('Halaman konsultasi hanya dapat diakses melalui antrean pasien di Dashboard.');
       navigate('/dashboard', { replace: true });
       return;
     }
@@ -57,11 +59,13 @@ export const ConsultationPage: React.FC = () => {
   // Form Submission
   const handleSubmitConsultation = async () => {
     if (!visitId) {
-      return alert('ID Kunjungan tidak valid!');
+      toast.error('ID Kunjungan tidak valid!');
+      return;
     }
 
     if (!complaint.trim() || !diagnosis.trim()) {
-      return alert('Keluhan dan Diagnosis Medis wajib diisi!');
+      toast.error('Keluhan dan Diagnosis Medis wajib diisi!');
+      return;
     }
 
     setIsSubmitting(true);
@@ -84,10 +88,10 @@ export const ConsultationPage: React.FC = () => {
 
       // 3. Refresh State Global & Kembali ke Dashboard
       await fetchVisits();
-      alert('Konsultasi berhasil disimpan & Tagihan kasir telah diterbitkan!');
+      toast.success('Konsultasi berhasil disimpan & Tagihan kasir telah diterbitkan!');
       navigate('/dashboard');
     } catch (error: any) {
-      alert(`Gagal menyimpan konsultasi: ${error?.response?.data?.message || error.message}`);
+      toast.error(`Gagal menyimpan konsultasi: ${error?.response?.data?.message || error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -96,18 +100,25 @@ export const ConsultationPage: React.FC = () => {
   const handleCancelConsul = async () => {
     if (!visitId) return;
 
-    if (confirm('Apakah anda yakin ingin membatalkan kunjungan pasien ini?')) {
-      setIsSubmitting(true);
-      try {
-        await cancelVisitService(Number(visitId));
-        fetchVisits();
-        alert('Kunjungan pasien ini telah di Batalkan');
-        navigate('/dashboard');
-      } catch (error: any) {
-        alert(`Gagal Membatalkan kunjungan: ${error?.response?.data?.message || error.message}`);
-      } finally {
-        setIsSubmitting(false);
-      }
+    const isConfirmed = await confirmDialog({
+      title: 'Batalkan Kunjungan Pasien',
+      description: 'Apakah Anda yakin ingin membatalkan kunjungan pasien ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Ya, Batalkan Kunjungan',
+      cancelText: 'Kembali',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
+
+    setIsSubmitting(true);
+    try {
+      await cancelVisitService(Number(visitId));
+      fetchVisits();
+      toast.success('Kunjungan pasien ini telah dibatalkan');
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast.error(`Gagal membatalkan kunjungan: ${error?.response?.data?.message || error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

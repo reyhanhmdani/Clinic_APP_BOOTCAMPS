@@ -3,6 +3,7 @@ import { X, Users } from 'lucide-react';
 import type { Patient, Doctor } from '../../types/clinic';
 import { useVisitStore } from '../../stores/visitStore';
 import { createVisitService } from '../../services/visitService';
+import { toast } from 'sonner';
 
 interface CreateVisitModalProps {
   isOpen: boolean;
@@ -32,12 +33,12 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({
     e.preventDefault();
 
     if (!selectedPatientId) {
-      alert('Pilih pasien terdaftar terlebih dahulu!');
+      toast.error('Pilih pasien terdaftar terlebih dahulu!');
       return;
     }
 
     if (!selectedDoctorId) {
-      alert('Pilih dokter terlebih dahulu!');
+      toast.error('Pilih dokter terlebih dahulu!');
       return;
     }
 
@@ -49,14 +50,14 @@ export const CreateVisitModal: React.FC<CreateVisitModalProps> = ({
       });
 
       await fetchVisits();
-      alert('Antrean pasien berhasil ditambahkan!');
+      toast.success('Antrean pasien berhasil ditambahkan!');
 
       // Reset form
       setSelectedPatientId('');
       setSelectedDoctorId('');
       onClose();
     } catch (error: any) {
-      alert(`Gagal menambah antrean: ${error?.response?.data?.message || error.message}`);
+      toast.error(`Gagal menambah antrean: ${error?.response?.data?.message || error.message}`);
     } finally {
       setIsSubmitting(false);
     }

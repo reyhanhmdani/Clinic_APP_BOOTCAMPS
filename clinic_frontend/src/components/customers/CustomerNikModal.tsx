@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, X, CheckCircle2, AlertCircle, UserPlus, Phone, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { checkNikCustomerService, type CheckNikResult } from '../../services/customerService';
 import type { Patient } from '../../types/clinic';
+import { toast } from 'sonner';
 
 interface CustomerNikModalProps {
   isOpen: boolean;
@@ -11,6 +12,39 @@ interface CustomerNikModalProps {
   onRegisterPatient: (data: Partial<Patient>) => Promise<Patient>;
 }
 
+interface FormState {
+  nik: string;
+  name: string;
+  phone: string;
+  gender: 'MALE' | 'FEMALE';
+  dob: string;
+  address: string;
+}
+
+const INITIAL_FORM: FormState = {
+  nik: '',
+  name: '',
+  phone: '',
+  gender: 'MALE',
+  dob: '',
+  address: '',
+};
+
+// Pure utility untuk menghitung umur akurat dari tanggal lahir
+const calculateAgeFromDob = (dobString: string): number | undefined => {
+  if (!dobString) return undefined;
+  const birth = new Date(dobString);
+  if (isNaN(birth.getTime())) return undefined;
+
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+    age--;
+  }
+  return Math.max(0, age);
+};
+
 export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
   isOpen,
   onClose,
@@ -18,82 +52,65 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
   initialPatient,
   onRegisterPatient,
 }) => {
-  const [nikInput, setNikInput] = useState<string>('');
-  const [nameInput, setNameInput] = useState<string>('');
-  const [phoneInput, setPhoneInput] = useState<string>('');
-  const [genderInput, setGenderInput] = useState<'MALE' | 'FEMALE'>('MALE');
-  const [dobInput, setDobInput] = useState<string>('');
-  const [addressInput, setAddressInput] = useState<string>('');
-  const [nikChecking, setNikChecking] = useState<boolean>(false);
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [isCheckingNik, setIsCheckingNik] = useState<boolean>(false);
   const [nikCheckResult, setNikCheckResult] = useState<CheckNikResult | null>(null);
-  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Sync state whenever modal opens or initialPatient changes
+  // Sinkronisasi form saat modal dibuka atau initialPatient berubah
   useEffect(() => {
-    if (isOpen) {
-      if (initialPatient) {
-        setNikInput(initialPatient.nik || '');
-        setNameInput(initialPatient.name || '');
-        setPhoneInput(initialPatient.phone || '');
-        setGenderInput(initialPatient.gender || 'MALE');
-        setAddressInput(initialPatient.address || '');
-        if (initialPatient.age) {
-          const approxYear = new Date().getFullYear() - initialPatient.age;
-          setDobInput(`${approxYear}-01-01`);
-        } else {
-          setDobInput('');
-        }
-      } else {
-        setNikInput('');
-        setNameInput('');
-        setPhoneInput('');
-        setGenderInput('MALE');
-        setDobInput('');
-        setAddressInput('');
-      }
-      setNikCheckResult(null);
+    if (!isOpen) return;
+
+    if (initialPatient) {
+      setForm({
+        nik: initialPatient.nik || '',
+        name: initialPatient.name || '',
+        phone: initialPatient.phone || '',
+        gender: initialPatient.gender || 'MALE',
+        address: initialPatient.address || '',
+        dob: '',
+      });
+    } else {
+      setForm(INITIAL_FORM);
     }
+    setNikCheckResult(null);
   }, [isOpen, initialPatient]);
 
   if (!isOpen) return null;
 
-  const calculateAge = (dobString: string): number => {
-    if (!dobString) return 25;
-    const birth = new Date(dobString);
-    const now = new Date();
-    let age = now.getFullYear() - birth.getFullYear();
-    const m = now.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-      age--;
-    }
-    return Math.max(0, age);
-  };
+  const handleNikInput = async (rawVal: string) => {
+    // Sanitasi: Hanya izinkan digit angka 0-9 dan maksimal 16 digit
+    const digitsOnly = rawVal.replace(/\D/g, '').slice(0, 16);
+    setForm((prev) => ({ ...prev, nik: digitsOnly }));
 
-  const handleNikChange = async (val: string) => {
-    setNikInput(val);
-    // Jika NIK sama persis dengan NIK pasien yang sedang diedit, tidak perlu cek link akun lain
-    if (initialPatient?.nik && val === initialPatient.nik) {
+    // Lewati cek jika NIK sama dengan data awal pasien yang sedang diedit
+    if (initialPatient?.nik && digitsOnly === initialPatient.nik) {
       setNikCheckResult(null);
       return;
     }
 
-    if (val.length === 16) {
-      setNikChecking(true);
+    if (digitsOnly.length === 16) {
+      setIsCheckingNik(true);
       try {
-        const result = await checkNikCustomerService(val);
+        const result = await checkNikCustomerService(digitsOnly);
         setNikCheckResult(result);
+
+        // Autofill data rekam medis yang ditemukan
         if (result.exists && result.data && !result.isLinked) {
-          setNameInput(result.data.name || '');
-          setGenderInput(result.data.gender || 'MALE');
-          setPhoneInput(result.data.phone || '');
-          setAddressInput(result.data.address || '');
-          const approxYear = new Date().getFullYear() - (result.data.age || 25);
-          setDobInput(`${approxYear}-01-01`);
+          setForm((prev) => ({
+            ...prev,
+            name: result.data?.name || prev.name,
+            gender: result.data?.gender || prev.gender,
+            phone: result.data?.phone || prev.phone,
+            address: result.data?.address || prev.address,
+          }));
+          toast.info(`Data rekam medis ditemukan atas nama ${result.data.name}`);
         }
       } catch (err: any) {
-        console.error('Gagal mengecek NIK:', err);
+        toast.error('Gagal memverifikasi NIK ke server. Periksa koneksi Anda.');
+        setNikCheckResult(null);
       } finally {
-        setNikChecking(false);
+        setIsCheckingNik(false);
       }
     } else {
       setNikCheckResult(null);
@@ -102,28 +119,42 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    if (form.nik.length !== 16) {
+      toast.error('NIK KTP harus tepat 16 digit angka!');
+      return;
+    }
+
+    const calculatedAge = calculateAgeFromDob(form.dob) ?? initialPatient?.age;
+    if (calculatedAge === undefined) {
+      toast.error('Tanggal lahir pasien wajib diisi!');
+      return;
+    }
+
     try {
-      setSubmitting(true);
+      setIsSubmitting(true);
       const savedPatient = await onRegisterPatient({
-        nik: nikInput,
-        name: nameInput,
-        phone: phoneInput,
-        gender: genderInput,
-        age: dobInput ? calculateAge(dobInput) : (initialPatient?.age || 25),
-        address: addressInput,
+        nik: form.nik,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        gender: form.gender,
+        age: calculatedAge,
+        address: form.address.trim() || undefined,
       });
-      alert('Data profil pasien berhasil disimpan!');
+
+      toast.success('Data profil pasien berhasil disimpan!');
       onSaveSuccess(savedPatient);
       onClose();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal menyimpan profil pasien');
+      toast.error(error.response?.data?.message || 'Gagal menyimpan profil pasien');
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const isEditMode = Boolean(initialPatient?.id);
-  const isNikConflict = Boolean(nikCheckResult?.isLinked && nikInput !== initialPatient?.nik);
+  const isNikConflict = Boolean(nikCheckResult?.isLinked && form.nik !== initialPatient?.nik);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -161,14 +192,14 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
             <div className="relative">
               <input
                 type="text"
-                maxLength={16}
+                inputMode="numeric"
                 required
                 placeholder="3201123456789012"
-                value={nikInput}
-                onChange={(e) => handleNikChange(e.target.value)}
+                value={form.nik}
+                onChange={(e) => handleNikInput(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:bg-white focus:border-[#061e15] focus:ring-1 focus:ring-[#061e15] transition-all font-mono tracking-wider"
               />
-              {nikChecking && (
+              {isCheckingNik && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 font-medium">
                   <Loader2 size={13} className="animate-spin text-[#061e15]" />
                   <span>Cek NIK...</span>
@@ -176,7 +207,7 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
               )}
             </div>
 
-            {/* Feedback Card Hasil Cek NIK */}
+            {/* Hasil Verifikasi NIK */}
             {nikCheckResult?.exists && !nikCheckResult.isLinked && nikCheckResult.data && (
               <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-950 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-900">
@@ -185,8 +216,7 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
                 </div>
                 <p className="text-[11px] text-emerald-800 leading-snug">
                   Ditemukan atas nama <strong>{nikCheckResult.data.name}</strong> (No. RM:{' '}
-                  <span className="font-mono font-bold">{nikCheckResult.data.noRm}</span>). Data form telah terisi
-                  otomatis.
+                  <span className="font-mono font-bold">{nikCheckResult.data.noRm}</span>). Data form telah terisi otomatis.
                 </p>
               </div>
             )}
@@ -224,8 +254,8 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
               type="text"
               required
               placeholder="Fajar Pratama"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
+              value={form.name}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#061e15] transition-all"
             />
           </div>
@@ -237,9 +267,9 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setGenderInput('MALE')}
+                onClick={() => setForm((prev) => ({ ...prev, gender: 'MALE' }))}
                 className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                  genderInput === 'MALE'
+                  form.gender === 'MALE'
                     ? 'bg-[#061e15] border-[#061e15] text-[#b4f105]'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
@@ -248,9 +278,9 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setGenderInput('FEMALE')}
+                onClick={() => setForm((prev) => ({ ...prev, gender: 'FEMALE' }))}
                 className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                  genderInput === 'FEMALE'
+                  form.gender === 'FEMALE'
                     ? 'bg-[#061e15] border-[#061e15] text-[#b4f105]'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
@@ -270,8 +300,8 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
                 type="tel"
                 required
                 placeholder="081234567890"
-                value={phoneInput}
-                onChange={(e) => setPhoneInput(e.target.value)}
+                value={form.phone}
+                onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))}
                 className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#061e15] transition-all"
               />
             </div>
@@ -285,9 +315,9 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
               <CalendarIcon size={14} className="absolute left-3 text-slate-400" />
               <input
                 type="date"
-                required
-                value={dobInput}
-                onChange={(e) => setDobInput(e.target.value)}
+                required={!isEditMode}
+                value={form.dob}
+                onChange={(e) => setForm((prev) => ({ ...prev, dob: e.target.value }))}
                 className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#061e15] transition-all"
               />
             </div>
@@ -298,8 +328,8 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
             <textarea
               rows={2}
               placeholder="Alamat tempat tinggal saat ini..."
-              value={addressInput}
-              onChange={(e) => setAddressInput(e.target.value)}
+              value={form.address}
+              onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
               className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#061e15] transition-all resize-none"
             />
           </div>
@@ -314,14 +344,14 @@ export const CustomerNikModal: React.FC<CustomerNikModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isNikConflict || nikChecking || submitting}
+              disabled={isNikConflict || isCheckingNik || isSubmitting}
               className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
-                isNikConflict || submitting
+                isNikConflict || isSubmitting || isCheckingNik
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
                   : 'bg-[#061e15] hover:bg-[#0a2f21] text-[#b4f105] cursor-pointer'
               }`}
             >
-              {submitting
+              {isSubmitting
                 ? 'Menyimpan...'
                 : isEditMode
                 ? 'Simpan Perubahan'

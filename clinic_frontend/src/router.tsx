@@ -14,7 +14,6 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { CustomerLayout } from './layouts/CustomerLayout';
 import { CustomerDashboardPage } from './pages/customers/CustomerDashboardPage';
 import { CustomerHistoryPage } from './pages/customers/CustomerHistoryPage';
-import { CustomerNotificationPage } from './pages/customers/CustomerNotificationPage';
 import { CustomerProfilePage } from './pages/customers/CustomerProfilePage';
 
 import { PharmacyPage } from './pages/admin/PharmacyPage';
@@ -54,7 +53,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'notifications',
-        element: <CustomerNotificationPage />,
+        element: <Navigate to="/customers" replace />,
       },
       {
         path: 'profile',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate, useOutletContext } from 'react-router';
-import { Home, Bell, Stethoscope, FileText, User, MapPin, LogOut } from 'lucide-react';
+import { Home, FileText, User, MapPin, LogOut, Stethoscope } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import {
   getCustomerProfileService,
@@ -265,16 +265,6 @@ export const CustomerLayout: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => navigate('/customers/notifications')}
-              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-emerald-950/10 text-[#12241E] hover:bg-emerald-50/60 flex items-center justify-center cursor-pointer relative transition-all active:scale-95 shadow-2xs"
-              title="Pemberitahuan"
-            >
-              <Bell size={16} />
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] absolute top-2 right-2 ring-2 ring-white" />
-            </button>
-
-            <button
-              type="button"
               onClick={handleLogout}
               className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-emerald-950/10 text-[#5A6E65] hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-2xs"
               title="Keluar"
@@ -297,100 +287,74 @@ export const CustomerLayout: React.FC = () => {
         <Outlet context={contextValue} />
       </main>
 
-      {/* 3. Floating Bottom Dock Navigation (Frosted Nordic Glass) */}
-      <nav className="fixed bottom-3 inset-x-4 max-w-md mx-auto bg-white/85 backdrop-blur-2xl border border-white/80 rounded-full px-4 py-2 z-40 shadow-[0_12px_36px_rgba(5,150,105,0.08)] print:hidden">
-        <div className="flex items-center justify-between">
+      {/* 3. Floating Pill Capsule Dock + Detached Action Button (ReyClinic Glassmorphism) */}
+      <div className="fixed bottom-5 inset-x-4 max-w-md mx-auto flex items-center gap-2.5 z-40 print:hidden">
+        {/* Kapsul Putih Navigasi (Icon-Only Minimalis Frosted Glass) */}
+        <nav className="flex-1 h-14 bg-white/75 backdrop-blur-2xl border border-white/80 rounded-full p-1.5 shadow-[0_10px_30px_rgba(5,150,105,0.08),0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_1px_rgba(255,255,255,0.95)] flex items-center justify-around">
+          {/* 1. Beranda */}
           <NavLink
             to="/customers"
             end
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
+              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
+                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
               }`
             }
+            title="Beranda"
           >
             {({ isActive }) => (
-              <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
-                  <Home size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
-                </div>
-                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Beranda</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
-              </>
+              <Home size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
             )}
           </NavLink>
 
-          <NavLink
-            to="/customers/notifications"
-            className={({ isActive }) =>
-              `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <div className={`p-1 rounded-xl transition-all relative ${isActive ? 'bg-emerald-50' : ''}`}>
-                  <Bell size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] absolute top-1 right-1 ring-1 ring-white" />
-                </div>
-                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Notif</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
-              </>
-            )}
-          </NavLink>
-
-          <div className="flex-1 flex justify-center -mt-6">
-            <button
-              type="button"
-              onClick={() => handleOpenBookingModal()}
-              className="w-13 h-13 rounded-full bg-[#059669] hover:bg-[#047857] text-white flex items-center justify-center shadow-[0_8px_20px_-4px_rgba(5,150,105,0.45)] border-4 border-white cursor-pointer active:scale-90 hover:scale-105 transition-all relative group"
-              title="Buat Kunjungan Dokter"
-            >
-              <Stethoscope size={22} className="stroke-[2.5] group-hover:rotate-6 transition-transform" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#10B981] animate-ping pointer-events-none" />
-            </button>
-          </div>
-
+          {/* 2. Riwayat Medis & Invoice */}
           <NavLink
             to="/customers/history"
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
+              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
+                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
               }`
             }
+            title="Riwayat Medis & Tagihan"
           >
             {({ isActive }) => (
-              <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
-                  <FileText size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
-                </div>
-                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Riwayat</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
-              </>
+              <FileText size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
             )}
           </NavLink>
 
+          {/* 3. Profil Pasien */}
           <NavLink
             to="/customers/profile"
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-90 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#12241E]'
+              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
+                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
               }`
             }
+            title="Profil Pasien"
           >
             {({ isActive }) => (
-              <>
-                <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-emerald-50' : ''}`}>
-                  <User size={19} className={isActive ? 'stroke-[2.5]' : 'stroke-2'} />
-                </div>
-                <span className={`text-[10px] ${isActive ? 'font-extrabold' : 'font-semibold'}`}>Profil</span>
-                {isActive && <span className="w-1 h-1 rounded-full bg-[#059669] -mt-0.5" />}
-              </>
+              <User size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
             )}
           </NavLink>
-        </div>
-      </nav>
+        </nav>
+
+        {/* Tombol Bulat Floating Terpisah di Kanan (Ambil Antrean - Symmetrical 56px Glass Ring) */}
+        <button
+          type="button"
+          onClick={() => handleOpenBookingModal()}
+          className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(5,150,105,0.4),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/50 ring-4 ring-white/70 backdrop-blur-xl hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group relative"
+          title="Ambil Antrean Dokter"
+        >
+          <Stethoscope size={23} className="stroke-[2.4] group-hover:rotate-12 transition-transform duration-300" />
+          <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#10B981] ring-2 ring-white shadow-xs animate-pulse" />
+        </button>
+      </div>
 
       {/* 4. Modals */}
       <CustomerNikModal

@@ -13,6 +13,8 @@ const consultationSelectPayload = {
   diagnosis: true,
   notes: true,
   consultationFee: true,
+  isDispensed: true,
+  dispensedAt: true,
   createdAt: true,
   visit: {
     select: {
@@ -113,11 +115,6 @@ export const createConsultationService = async (input: CreateConsultationInput) 
           instructions: item.instructions,
         },
       });
-
-      await prisma.medicine.update({
-        where: { id: item.medicineId },
-        data: { stock: { decrement: item.qty } },
-      });
     }
   }
 
@@ -150,27 +147,15 @@ export const getConsultationByIdService = async (id: number) => {
 };
 
 export const updateConsultationService = async (id: number, input: UpdateConsultationInput) => {
-  await getConsultationByIdService(id);
+  const existing = await getConsultationByIdService(id);
 
-  // di create kita perlu ambil id visitnya, di update ga mungkin kita ubah id visit nya dari A ke B
+  // Proteksi: Jika obat sudah diserahkan di farmasi, resep terkunci
+  if (existing.isDispensed && input.medicine !== undefined) {
+    throw new ApiError(400, 'Resep tidak dapat diubah karena obat sudah diserahkan oleh farmasi');
+  }
 
-  // kita harus balekkan stok obat lama kalau kita ubah qty dari stock yang kita ambil atau malah kita mengurangi nya, dengan cara reset dlu baru ulang lagi...
-  // jalankan reset obat jika client mengirim field medicine ..
-  // cari dlu seluruh resep obat lama
   if (input.medicine !== undefined) {
-    const oldMedicines = await prisma.consultationMedicine.findMany({
-      where: { consultationId: id },
-    });
-
-    // kembalikan stok obat lama satu satu
-    for (const oldItem of oldMedicines) {
-      await prisma.medicine.update({
-        where: { id: oldItem.medicineId },
-        data: { stock: { increment: oldItem.qty } },
-      });
-    }
-
-    // hapus resep obat lama di tabel relasi
+    // Hapus relasi resep lama (tidak perlu rollback stok fisik karena belum dipotong)
     await prisma.consultationMedicine.deleteMany({
       where: { consultationId: id },
     });
@@ -182,7 +167,6 @@ export const updateConsultationService = async (id: number, input: UpdateConsult
           throw new ApiError(400, `Stok obat ${med.name} tidak mencukupi (sisa: ${med.stock})`);
         }
 
-        // simpan resep obatnya yang baru ke consultasi medicine
         const subTotal = Number(med.price) * item.qty;
         await prisma.consultationMedicine.create({
           data: {
@@ -193,11 +177,6 @@ export const updateConsultationService = async (id: number, input: UpdateConsult
             subTotal: subTotal,
             instructions: item.instructions,
           },
-        });
-
-        await prisma.medicine.update({
-          where: { id: item.medicineId },
-          data: { stock: { decrement: item.qty } },
         });
       }
     }

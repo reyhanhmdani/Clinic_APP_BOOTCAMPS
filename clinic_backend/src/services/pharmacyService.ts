@@ -56,7 +56,11 @@ export const dispenseMedicineService = async (consultationId: number) => {
           invoice: true,
         },
       },
-      consultationMedicines: true,
+      consultationMedicines: {
+        include: {
+          medicine: true,
+        },
+      },
     },
   });
 
@@ -70,28 +74,52 @@ export const dispenseMedicineService = async (consultationId: number) => {
     throw new ApiError(400, 'Obat untuk konsul ini sudah pernah di serahkan sebelumnya');
   }
 
-  // Update status obat diserahkan
-  const updated = await prisma.consultation.update({
-    where: { id: consultationId },
-    data: {
-      isDispensed: true,
-      dispensedAt: new Date(),
-    },
-    include: {
-      visit: {
-        include: {
-          patient: true,
-          doctor: true,
+  // eksekusi atomic transaction (potong stok & tandai di serahkan)
+  const updated = await prisma.$transaction(async (tx) => {
+    // kurangi stok masing masing obat
+    for (const item of consultation.consultationMedicines) {
+      // ambil stok real time saat transaksi berlangsung
+      const currentMed = await tx.medicine.findUnique({
+        where: { id: item.medicineId },
+      });
+
+      if (!currentMed || currentMed.stock < item.qty) {
+        throw new ApiError(
+          400,
+          `Stok obat ${currentMed?.name || 'Obat'} tidak mencukupi (sisa: ${currentMed?.stock ?? 0}, dibutuhkan: ${item.qty})`,
+        );
+      }
+
+      // Potong stok
+      await tx.medicine.update({
+        where: { id: item.medicineId },
+        data: { stock: { decrement: item.qty } },
+      });
+    }
+    // Tandai obat telah diserahkan
+    return await tx.consultation.update({
+      where: { id: consultationId },
+      data: {
+        isDispensed: true,
+        dispensedAt: new Date(),
+      },
+      include: {
+        visit: {
+          include: {
+            patient: true,
+            doctor: true,
+          },
+        },
+        consultationMedicines: {
+          include: {
+            medicine: true,
+          },
         },
       },
-      consultationMedicines: {
-        include: {
-          medicine: true,
-        },
-      },
-    },
+    });
   });
 
+  // broadcast realtime ke socket agar UI admin & dashboard langsung sync
   io.emit('QUEUE_UPDATED', {
     type: 'MEDICINE_DISPENSED',
     consultationId,

@@ -180,6 +180,72 @@ const PATIENTS_DATA = [
     phone: "0816-1111-4444",
     address: "Jl. Pajajaran No. 3, Bogor",
   },
+  {
+    id: "14",
+    userEmail: null,
+    nik: "3201015502900014",
+    no_rm: "RM-2025-014",
+    name: "Anisa Rahmawati",
+    gender: "Female",
+    age: 31,
+    phone: "0817-2222-5555",
+    address: "Jl. Veteran No. 12, Jakarta Pusat",
+  },
+  {
+    id: "15",
+    userEmail: null,
+    nik: "3201011408880015",
+    no_rm: "RM-2025-015",
+    name: "Dedi Kurniawan",
+    gender: "Male",
+    age: 36,
+    phone: "0818-3333-6666",
+    address: "Jl. Diponegoro No. 40, Bandung",
+  },
+  {
+    id: "16",
+    userEmail: null,
+    nik: "3201016204990016",
+    no_rm: "RM-2025-016",
+    name: "Fitri Handayani",
+    gender: "Female",
+    age: 24,
+    phone: "0819-4444-7777",
+    address: "Jl. Thamrin No. 8, Jakarta Pusat",
+  },
+  {
+    id: "17",
+    userEmail: null,
+    nik: "3201010305720017",
+    no_rm: "RM-2025-017",
+    name: "Gunawan Prasetyo",
+    gender: "Male",
+    age: 52,
+    phone: "0812-5555-8888",
+    address: "Jl. Surya Kencana No. 55, Bogor",
+  },
+  {
+    id: "18",
+    userEmail: null,
+    nik: "3201011909830018",
+    no_rm: "RM-2025-018",
+    name: "Haryanto Sutejo",
+    gender: "Male",
+    age: 41,
+    phone: "0813-6666-9999",
+    address: "Jl. Cinere Raya No. 19, Depok",
+  },
+  {
+    id: "19",
+    userEmail: null,
+    nik: "3201014807950019",
+    no_rm: "RM-2025-019",
+    name: "Indah Permatasari",
+    gender: "Female",
+    age: 29,
+    phone: "0814-7777-0000",
+    address: "Jl. Kaliurang KM 5, Yogyakarta",
+  },
 ];
 
 // --- 3. DATA DOCTORS (8 Dokter) ---
@@ -375,12 +441,12 @@ const VISITS_DATA = [
     checkInTime: getDaysAgo(1, 15, 0),
   },
 
-  // === H-0 (HARI INI - 10 Kunjungan Live) ===
-  // 6x COMPLETED (4 Lunas, 2 Belum Lunas) - Datang Pagi Terlebih Dahulu
+  // === H-0 (HARI INI - 19 KUNJUNGAN REALISTIS UNTUK DEMO) ===
+  // 1. 3x LUNAS & SELESAI AMBIL OBAT (V1 - V3)
   {
     id: "V1",
-    patient_id: "3", // Ahmad Rizky (Online)
-    doctor_id: "4",  // Dr. Hendra
+    patient_id: "1", // Budi Santoso
+    doctor_id: "1",  // Dr. Andri
     queue_number: 1,
     status: "COMPLETED",
     visitDate: new Date(`${todayStr}T07:30:00`),
@@ -388,8 +454,8 @@ const VISITS_DATA = [
   },
   {
     id: "V2",
-    patient_id: "4", // Marina Putri (Online)
-    doctor_id: "5",  // Dr. Maya
+    patient_id: "2", // Siti Aisyah
+    doctor_id: "3",  // Dr. Sarah
     queue_number: 2,
     status: "COMPLETED",
     visitDate: new Date(`${todayStr}T07:45:00`),
@@ -397,16 +463,18 @@ const VISITS_DATA = [
   },
   {
     id: "V3",
-    patient_id: "5", // Eko Prasetyo (Online)
-    doctor_id: "6",  // Dr. Rizky
+    patient_id: "3", // Ahmad Rizky
+    doctor_id: "4",  // Dr. Hendra
     queue_number: 3,
     status: "COMPLETED",
     visitDate: new Date(`${todayStr}T08:00:00`),
     checkInTime: new Date(`${todayStr}T08:00:00`),
   },
+
+  // 2. 3x LUNAS TAPI BELUM AMBIL OBAT (V4 - V6, SIAP DISERAHKAN DI FARMASI)
   {
     id: "V4",
-    patient_id: "1", // Budi Santoso (Online)
+    patient_id: "4", // Marina Putri
     doctor_id: "5",  // Dr. Maya
     queue_number: 4,
     status: "COMPLETED",
@@ -415,8 +483,8 @@ const VISITS_DATA = [
   },
   {
     id: "V5",
-    patient_id: "9", // Joko Widodo (Offline loket)
-    doctor_id: "1",  // Dr. Andri
+    patient_id: "5", // Eko Prasetyo
+    doctor_id: "6",  // Dr. Rizky
     queue_number: 5,
     status: "COMPLETED",
     visitDate: new Date(`${todayStr}T08:30:00`),
@@ -424,7 +492,7 @@ const VISITS_DATA = [
   },
   {
     id: "V6",
-    patient_id: "6", // Dewi Lestari (Online)
+    patient_id: "6", // Dewi Lestari
     doctor_id: "7",  // Dr. Dewi Sartika
     queue_number: 6,
     status: "COMPLETED",
@@ -432,43 +500,124 @@ const VISITS_DATA = [
     checkInTime: new Date(`${todayStr}T08:45:00`),
   },
 
-  // 2x IN_KONSULTASI - Sedang Diperiksa di Poli
+  // 3. 3x BELUM BAYAR (V7 - V9, SIAP DIPROSES BAYAR DI KASIR)
   {
     id: "V7",
-    patient_id: "10", // Hendra (Offline loket)
-    doctor_id: "2",   // Dr. Budi
+    patient_id: "7", // Agus Prasetyo
+    doctor_id: "1",  // Dr. Andri
     queue_number: 7,
-    status: "IN_KONSULTASI",
+    status: "COMPLETED",
+    visitDate: new Date(`${todayStr}T09:00:00`),
+    checkInTime: new Date(`${todayStr}T09:00:00`),
+  },
+  {
+    id: "V8",
+    patient_id: "8", // Rian Pratama
+    doctor_id: "2",  // Dr. Budi
+    queue_number: 8,
+    status: "COMPLETED",
     visitDate: new Date(`${todayStr}T09:15:00`),
     checkInTime: new Date(`${todayStr}T09:15:00`),
   },
   {
-    id: "V8",
-    patient_id: "2", // Siti Aisyah (Online)
-    doctor_id: "3",  // Dr. Sarah
-    queue_number: 8,
-    status: "IN_KONSULTASI",
+    id: "V9",
+    patient_id: "9", // Joko Widodo
+    doctor_id: "4",  // Dr. Hendra
+    queue_number: 9,
+    status: "COMPLETED",
     visitDate: new Date(`${todayStr}T09:30:00`),
     checkInTime: new Date(`${todayStr}T09:30:00`),
   },
 
-  // 2x WAITING - Pasien Baru Mendaftar di Antrean
+  // 4. 10x WAITING (V10 - V19, ANTRIAN BARU SIAP DIPANGGIL BERSUARA BEL SAAT DEMO)
   {
-    id: "V9",
-    patient_id: "7", // Agus (Online)
-    doctor_id: "1",  // Dr. Andri
-    queue_number: 9,
+    id: "V10",
+    patient_id: "10", // Hendra Wijaya
+    doctor_id: "2",   // Dr. Budi
+    queue_number: 10,
     status: "WAITING",
     visitDate: new Date(`${todayStr}T10:00:00`),
     checkInTime: null,
   },
   {
-    id: "V10",
-    patient_id: "8", // Rian (Online)
-    doctor_id: "4",  // Dr. Hendra
-    queue_number: 10,
+    id: "V11",
+    patient_id: "11", // Ratna Sari
+    doctor_id: "1",   // Dr. Andri
+    queue_number: 11,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:05:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V12",
+    patient_id: "12", // Bambang Pamungkas
+    doctor_id: "3",   // Dr. Sarah
+    queue_number: 12,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:10:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V13",
+    patient_id: "13", // Slamet Riyadi
+    doctor_id: "5",   // Dr. Maya
+    queue_number: 13,
     status: "WAITING",
     visitDate: new Date(`${todayStr}T10:15:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V14",
+    patient_id: "14", // Anisa Rahmawati
+    doctor_id: "6",   // Dr. Rizky
+    queue_number: 14,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:20:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V15",
+    patient_id: "15", // Dedi Kurniawan
+    doctor_id: "7",   // Dr. Dewi Sartika
+    queue_number: 15,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:25:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V16",
+    patient_id: "16", // Fitri Handayani
+    doctor_id: "4",   // Dr. Hendra
+    queue_number: 16,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:30:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V17",
+    patient_id: "17", // Gunawan Prasetyo
+    doctor_id: "2",   // Dr. Budi
+    queue_number: 17,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:35:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V18",
+    patient_id: "18", // Haryanto Sutejo
+    doctor_id: "1",   // Dr. Andri
+    queue_number: 18,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:40:00`),
+    checkInTime: null,
+  },
+  {
+    id: "V19",
+    patient_id: "19", // Indah Permatasari
+    doctor_id: "3",   // Dr. Sarah
+    queue_number: 19,
+    status: "WAITING",
+    visitDate: new Date(`${todayStr}T10:45:00`),
     checkInTime: null,
   },
 ];
@@ -653,13 +802,15 @@ const CONSULTATIONS_DATA = [
     prescribed_medicines: [{ medicine_id: "8", qty: 2, price: 12000 }],
   },
 
-  // --- H-0 (Hari Ini): 6 Pasien Selesai Konsultasi ---
+  // --- H-0 (Hari Ini): 9 Pasien Selesai Konsultasi ---
+  // V1 - V3: Selesai Ambil Obat (is_dispensed: true)
   {
     visit_id: "V1",
     complaint: "Nyeri pada pergelangan kaki setelah terkilir saat bermain futsal.",
     diagnosis: "Sprain Ankle Grade 1 (S93.4)",
     notes: "Istirahat total 3 hari, kompres es 15 menit tiap 4 jam. Kontrol minggu depan.",
-    consultation_fee: 200000,
+    consultation_fee: 150000,
+    is_dispensed: true,
     prescribed_medicines: [
       { medicine_id: "5", qty: 2, price: 6000 },
       { medicine_id: "9", qty: 1, price: 10000 },
@@ -667,57 +818,101 @@ const CONSULTATIONS_DATA = [
   },
   {
     visit_id: "V2",
+    complaint: "Sakit gigi geraham berlubang berdenyut sampai ke kepala.",
+    diagnosis: "Pulpitis Reversibel (K04.0)",
+    notes: "Hindari makanan manis & dingin. Sikat gigi lembut 2x sehari.",
+    consultation_fee: 100000,
+    is_dispensed: true,
+    prescribed_medicines: [
+      { medicine_id: "5", qty: 2, price: 6000 },
+      { medicine_id: "8", qty: 1, price: 12000 },
+    ],
+  },
+  {
+    visit_id: "V3",
+    complaint: "Punggung terasa kaku dan nyeri setelah mengangkat barang berat.",
+    diagnosis: "Low Back Pain Akut (M54.5)",
+    notes: "Gunakan korset lumbal jika beraktivitas, kompres hangat.",
+    consultation_fee: 200000,
+    is_dispensed: true,
+    prescribed_medicines: [
+      { medicine_id: "1", qty: 2, price: 5000 },
+      { medicine_id: "9", qty: 1, price: 10000 },
+    ],
+  },
+
+  // V4 - V6: Lunas tapi Belum Ambil Obat (is_dispensed: false, SIAP DI LOKET FARMASI)
+  {
+    visit_id: "V4",
     complaint: "Alergi gatal kemerahan pada kulit tangan dan leher sejak 2 hari lalu.",
     diagnosis: "Dermatitis Alergika (L23.9)",
     notes: "Hindari pemicu alergi (seafood, debu). Oleskan salep 2x sehari pagi & malam.",
     consultation_fee: 120000,
+    is_dispensed: false,
     prescribed_medicines: [
       { medicine_id: "6", qty: 2, price: 2500 },
       { medicine_id: "10", qty: 1, price: 15000 },
     ],
   },
   {
-    visit_id: "V3",
+    visit_id: "V5",
     complaint: "Demam tinggi sudah 3 hari disertai mual dan badan lemas.",
     diagnosis: "Demam Dengue / Viral Infection (A90)",
     notes: "Minum banyak cairan (air putih, jus), cek lab darah lengkap besok pagi.",
     consultation_fee: 130000,
+    is_dispensed: false,
     prescribed_medicines: [
       { medicine_id: "1", qty: 3, price: 5000 },
       { medicine_id: "2", qty: 2, price: 3000 },
     ],
   },
   {
-    visit_id: "V4",
-    complaint: "Gatal-gatal di area punggung dan perut sejak seminggu terakhir.",
-    diagnosis: "Urticaria / Biduran (L50.9)",
-    notes: "Mandi air hangat, hindari garuk. Kontrol jika tidak membaik dalam 5 hari.",
-    consultation_fee: 120000,
-    prescribed_medicines: [
-      { medicine_id: "6", qty: 3, price: 2500 },
-      { medicine_id: "10", qty: 1, price: 15000 },
-    ],
-  },
-  {
-    visit_id: "V5",
-    complaint: "Batuk berdahak dan dada sesak di malam hari.",
-    diagnosis: "Bronkitis Akut (J20.9)",
-    notes: "Hindari udara dingin dan asap rokok. Habiskan obat sesuai anjuran.",
-    consultation_fee: 150000,
-    prescribed_medicines: [
-      { medicine_id: "3", qty: 2, price: 8000 },
-      { medicine_id: "7", qty: 1, price: 18000 },
-    ],
-  },
-  {
     visit_id: "V6",
-    complaint: "Mata merah, berair, dan terasa perih silau.",
+    complaint: "Mata merah, berair, dan terasa perih silau sehabis naik motor.",
     diagnosis: "Konjungtivitis Akut (H10.9)",
     notes: "Gunakan tetes mata teratur. Jangan menggosok mata dengan tangan kotor.",
     consultation_fee: 110000,
+    is_dispensed: false,
     prescribed_medicines: [
       { medicine_id: "6", qty: 2, price: 2500 },
       { medicine_id: "2", qty: 1, price: 3000 },
+    ],
+  },
+
+  // V7 - V9: Selesai Periksa tapi BELUM BAYAR DI KASIR (is_dispensed: false, SIAP DIPROSES DI KASIR)
+  {
+    visit_id: "V7",
+    complaint: "Pusing berputar (vertigo) dan mual saat bangun tidur pagi.",
+    diagnosis: "BPPV / Vertigo Perifer (H81.1)",
+    notes: "Hindari gerakan kepala mendadak. Istirahat posisi kepala agak tinggi.",
+    consultation_fee: 150000,
+    is_dispensed: false,
+    prescribed_medicines: [
+      { medicine_id: "5", qty: 2, price: 6000 },
+      { medicine_id: "9", qty: 1, price: 10000 },
+    ],
+  },
+  {
+    visit_id: "V8",
+    complaint: "Badan pegal linu, flu ringan dan meriang sehabis lembur malam.",
+    diagnosis: "Myalgia & Common Cold (J00)",
+    notes: "Istirahat cukup minimal 8 jam, minum air hangat dan vitamin.",
+    consultation_fee: 50000,
+    is_dispensed: false,
+    prescribed_medicines: [
+      { medicine_id: "1", qty: 2, price: 5000 },
+      { medicine_id: "2", qty: 2, price: 3000 },
+    ],
+  },
+  {
+    visit_id: "V9",
+    complaint: "Nyeri sendi lutut kanan saat berjalan atau menaiki tangga.",
+    diagnosis: "Osteoarthritis Genu (M17.9)",
+    notes: "Kurangi naik tangga sementara, lakukan peregangan lutut perlahan.",
+    consultation_fee: 200000,
+    is_dispensed: false,
+    prescribed_medicines: [
+      { medicine_id: "5", qty: 3, price: 6000 },
     ],
   },
 ];
@@ -906,14 +1101,15 @@ const INVOICES_DATA = [
     paidAt: getDaysAgo(1, 15, 45),
   },
 
-  // --- H-0 (HARI INI): 4 Lunas, 2 Unpaid ---
+  // --- H-0 (HARI INI): 6 Lunas (3 selesai obat, 3 siap di farmasi) + 3 Belum Bayar di Kasir ---
+  // 1. V1 - V3: LUNAS & SELESAI AMBIL OBAT
   {
     visit_id: "V1",
     invoice_no: "INV-2025-0018",
     status: "PAID",
-    consultation_fee: 200000,
+    consultation_fee: 150000,
     medicine_fee: 22000,
-    total: 222000,
+    total: 172000,
     payment_method: "QRIS",
     paidAt: new Date(`${todayStr}T08:00:00`),
   },
@@ -921,9 +1117,9 @@ const INVOICES_DATA = [
     visit_id: "V2",
     invoice_no: "INV-2025-0019",
     status: "PAID",
-    consultation_fee: 120000,
-    medicine_fee: 20000,
-    total: 140000,
+    consultation_fee: 100000,
+    medicine_fee: 24000,
+    total: 124000,
     payment_method: "QRIS",
     paidAt: new Date(`${todayStr}T08:15:00`),
   },
@@ -931,31 +1127,33 @@ const INVOICES_DATA = [
     visit_id: "V3",
     invoice_no: "INV-2025-0020",
     status: "PAID",
-    consultation_fee: 130000,
-    medicine_fee: 21000,
-    total: 151000,
+    consultation_fee: 200000,
+    medicine_fee: 20000,
+    total: 220000,
     payment_method: "CASH",
     paidAt: new Date(`${todayStr}T08:30:00`),
   },
+
+  // 2. V4 - V6: LUNAS TAPI BELUM AMBIL OBAT (SIAP DI LOKET FARMASI)
   {
     visit_id: "V4",
     invoice_no: "INV-2025-0021",
-    status: "UNPAID",
+    status: "PAID",
     consultation_fee: 120000,
-    medicine_fee: 22500,
-    total: 142500,
-    payment_method: "CASH",
-    paidAt: null,
+    medicine_fee: 20000,
+    total: 140000,
+    payment_method: "QRIS",
+    paidAt: new Date(`${todayStr}T08:45:00`),
   },
   {
     visit_id: "V5",
     invoice_no: "INV-2025-0022",
-    status: "UNPAID",
-    consultation_fee: 150000,
-    medicine_fee: 34000,
-    total: 184000,
+    status: "PAID",
+    consultation_fee: 130000,
+    medicine_fee: 21000,
+    total: 151000,
     payment_method: "CASH",
-    paidAt: null,
+    paidAt: new Date(`${todayStr}T09:00:00`),
   },
   {
     visit_id: "V6",
@@ -966,6 +1164,38 @@ const INVOICES_DATA = [
     total: 118000,
     payment_method: "QRIS",
     paidAt: new Date(`${todayStr}T09:15:00`),
+  },
+
+  // 3. V7 - V9: BELUM BAYAR (SIAP DIPROSES DI KASIR)
+  {
+    visit_id: "V7",
+    invoice_no: "INV-2025-0024",
+    status: "UNPAID",
+    consultation_fee: 150000,
+    medicine_fee: 22000,
+    total: 172000,
+    payment_method: "CASH",
+    paidAt: null,
+  },
+  {
+    visit_id: "V8",
+    invoice_no: "INV-2025-0025",
+    status: "UNPAID",
+    consultation_fee: 50000,
+    medicine_fee: 16000,
+    total: 66000,
+    payment_method: "QRIS",
+    paidAt: null,
+  },
+  {
+    visit_id: "V9",
+    invoice_no: "INV-2025-0026",
+    status: "UNPAID",
+    consultation_fee: 200000,
+    medicine_fee: 18000,
+    total: 218000,
+    payment_method: "CASH",
+    paidAt: null,
   },
 ];
 
@@ -1108,6 +1338,8 @@ async function main() {
         diagnosis: c.diagnosis,
         notes: c.notes,
         consultationFee: c.consultation_fee,
+        isDispensed: (c as any).is_dispensed ?? true,
+        dispensedAt: ((c as any).is_dispensed ?? true) ? today : null,
       },
     });
 

@@ -8,6 +8,7 @@ import { usePatientStore } from '../../stores/patientStore';
 import { cancelVisitService } from '../../services/visitService';
 import { toast } from 'sonner';
 import { confirmDialog } from '../../stores/confirmStore';
+import { announceQueue } from '../../utils/soundQueue';
 
 // Components
 import { StatsGrid } from '../../components/dashboard/StatsGrid';
@@ -60,6 +61,8 @@ export const DashboardPage: React.FC = () => {
     if (actionType === 'CALL_PATIENT') {
       try {
         await callPatient(visit.id);
+        const queueCode = `A-${String(visit.queueNumber).padStart(3, '0')}`;
+        announceQueue(queueCode, visit.patient?.name || '', visit.doctor?.name, visit.doctor?.spesialis);
         toast.info(`Memanggil pasien ${visit.patient?.name || ''}...`);
       } catch (err: any) {
         toast.error(err.message || 'Gagal memanggil pasien');

@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from '../../stores/authStore';
 import { useCustomerContext } from '../../layouts/CustomerLayout';
 import { confirmDialog } from '../../stores/confirmStore';
+import { MedicalRecordModal } from '../../components/customers/MedicalRecordModal';
 
 interface HealthArticle {
   id: number;
@@ -107,6 +108,7 @@ export const CustomerDashboardPage: React.FC = () => {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('ALL');
   const [activeArticle, setActiveArticle] = useState<HealthArticle | null>(null);
+  const [selectedVisitForInvoice, setSelectedVisitForInvoice] = useState<any>(null);
 
   const toggleFavorite = (e: React.MouseEvent, docId: number) => {
     e.stopPropagation();
@@ -524,6 +526,32 @@ export const CustomerDashboardPage: React.FC = () => {
             </div>
           )}
 
+          {/* Banner Bukti Pembayaran / Invoice Farmasi (Saat Lunas) */}
+          {activeVisit.visit.invoice?.status === 'PAID' && (
+            <div className="bg-emerald-50/80 rounded-2xl p-4 space-y-3 border border-emerald-200 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-emerald-950 font-extrabold text-xs">
+                  <FileText size={16} className="text-[#059669] shrink-0" />
+                  <span>Bukti Pembayaran Lunas</span>
+                </div>
+                <span className="text-[11px] font-mono font-bold text-[#059669] bg-white px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  {activeVisit.visit.invoice.invoiceNo}
+                </span>
+              </div>
+              <p className="text-xs text-emerald-900 leading-relaxed font-medium">
+                Pembayaran telah terverifikasi. Tunjukkan invoice ini ke petugas farmasi jika diminta saat pengambilan obat.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSelectedVisitForInvoice(activeVisit.visit)}
+                className="w-full py-2.5 bg-[#059669] hover:bg-[#047857] text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+              >
+                <FileText size={15} />
+                <span>Lihat Invoice & Struk Resmi</span>
+              </button>
+            </div>
+          )}
+
           {/* Tombol Batalkan */}
           {activeVisit.visit.status === 'WAITING' && (
             <div className="pt-2 border-t border-emerald-950/6 flex items-center justify-between">
@@ -877,7 +905,10 @@ export const CustomerDashboardPage: React.FC = () => {
               return (
                 <div
                   key={v.id}
-                  className="p-3.5 rounded-2xl bg-[#F6F8F6]/80 border border-emerald-950/6 flex items-center justify-between gap-3 hover:bg-[#F6F8F6] transition-all"
+                  onClick={() => v.invoice && setSelectedVisitForInvoice(v)}
+                  className={`p-3.5 rounded-2xl bg-[#F6F8F6]/80 border border-emerald-950/6 flex items-center justify-between gap-3 hover:bg-[#F6F8F6] transition-all ${
+                    v.invoice ? 'cursor-pointer hover:border-emerald-300/80' : ''
+                  }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-white border border-emerald-950/8 flex items-center justify-center font-bold text-xs shrink-0 text-[#059669] shadow-2xs">
@@ -924,6 +955,14 @@ export const CustomerDashboardPage: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* 8. Modal Struk / Invoice Resmi Pembayaran */}
+      <MedicalRecordModal
+        isOpen={!!selectedVisitForInvoice}
+        onClose={() => setSelectedVisitForInvoice(null)}
+        patient={patient}
+        visitData={selectedVisitForInvoice}
+      />
     </div>
   );
 };

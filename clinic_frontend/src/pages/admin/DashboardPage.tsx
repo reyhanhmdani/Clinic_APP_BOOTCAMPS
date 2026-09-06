@@ -71,6 +71,8 @@ export const DashboardPage: React.FC = () => {
       navigate(`/dashboard/consultations?visitId=${visit.id}`);
     } else if (actionType === 'PROCESS_PAYMENT') {
       navigate(`/dashboard/invoices?visitId=${visit.id}`);
+    } else if (actionType === 'GOTO_PHARMACY') {
+      navigate('/dashboard/pharmacy');
     } else if (actionType === 'PRINT_RECEIPT') {
       setSelectedReceiptVisit(visit);
     } else if (actionType === 'CANCEL_VISIT') {

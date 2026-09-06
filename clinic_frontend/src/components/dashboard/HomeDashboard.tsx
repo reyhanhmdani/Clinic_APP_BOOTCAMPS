@@ -16,9 +16,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   onFilterChange,
   onActionClick,
 }) => {
-  const [internalFilter, setInternalFilter] = useState<'ALL' | 'WAITING' | 'IN_KONSULTASI' | 'UNPAID' | 'COMPLETED'>(
-    'ALL',
-  );
+  const [internalFilter, setInternalFilter] = useState<
+    'ALL' | 'WAITING' | 'IN_KONSULTASI' | 'UNPAID' | 'PHARMACY' | 'COMPLETED'
+  >('ALL');
 
   // fungsi buat searching
   const [search, setSearch] = useState('');
@@ -43,12 +43,21 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       item.invoice?.status === 'UNPAID' || (item.status === 'COMPLETED' && item.invoice?.status !== 'PAID');
     const isWaiting = item.status === 'WAITING';
     const isConsulting = item.status === 'IN_KONSULTASI';
-    const isCompleted = item.status === 'COMPLETED' && item.invoice?.status === 'PAID';
+    const isPharmacy = Boolean(
+      item.status === 'COMPLETED' &&
+        item.invoice?.status === 'PAID' &&
+        item.consultation?.consultationMedicines &&
+        item.consultation.consultationMedicines.length > 0 &&
+        !item.consultation.isDispensed,
+    );
+    const isCompleted =
+      item.status === 'COMPLETED' && item.invoice?.status === 'PAID' && !isPharmacy;
 
     // Tab Filter Logic
     if (currentFilter === 'WAITING' && !isWaiting) return false;
     if (currentFilter === 'IN_KONSULTASI' && !isConsulting) return false;
     if (currentFilter === 'UNPAID' && !isUnpaid) return false;
+    if (currentFilter === 'PHARMACY' && !isPharmacy) return false;
     if (currentFilter === 'COMPLETED' && !isCompleted) return false;
 
     // Search Query Filter Logic (Nama Pasien / RM / Dokter)
@@ -77,7 +86,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const countUnpaid = visits.filter(
     (v) => v.invoice?.status === 'UNPAID' || (v.status === 'COMPLETED' && v.invoice?.status !== 'PAID'),
   ).length;
-  const countCompleted = visits.filter((v) => v.status === 'COMPLETED' && v.invoice?.status === 'PAID').length;
+  const countPharmacy = visits.filter(
+    (v) =>
+      v.status === 'COMPLETED' &&
+      v.invoice?.status === 'PAID' &&
+      v.consultation?.consultationMedicines &&
+      v.consultation.consultationMedicines.length > 0 &&
+      !v.consultation.isDispensed,
+  ).length;
+  const countCompleted = visits.filter(
+    (v) =>
+      v.status === 'COMPLETED' &&
+      v.invoice?.status === 'PAID' &&
+      (!v.consultation?.consultationMedicines ||
+        v.consultation.consultationMedicines.length === 0 ||
+        v.consultation.isDispensed),
+  ).length;
 
   const renderStatusBadge = (item: Visit) => {
     const isWaiting = item.status === 'WAITING';
@@ -188,6 +212,31 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </span>
       );
     }
+    if (
+      item.consultation?.consultationMedicines &&
+      item.consultation.consultationMedicines.length > 0 &&
+      !item.consultation.isDispensed
+    ) {
+      return (
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onActionClick && onActionClick(item, 'GOTO_PHARMACY')}
+            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
+          >
+            Serahkan Obat
+          </button>
+          <button
+            type="button"
+            onClick={() => onActionClick && onActionClick(item, 'PRINT_RECEIPT')}
+            className="p-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-full shadow-xs cursor-pointer font-bold flex items-center justify-center transition-all"
+            title="Lihat & Cetak Struk Nota"
+          >
+            <Receipt size={15} />
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="flex items-center gap-1.5">
         <span className="bg-emerald-100 text-emerald-800 font-semibold text-xs px-3 py-1 rounded-full inline-block">
@@ -247,6 +296,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           { id: 'WAITING', label: 'Menunggu', count: countWaiting },
           { id: 'IN_KONSULTASI', label: 'Diperiksa', count: countConsulting },
           { id: 'UNPAID', label: 'Belum Bayar', count: countUnpaid },
+          { id: 'PHARMACY', label: 'Ambil Obat', count: countPharmacy },
           { id: 'COMPLETED', label: 'Selesai', count: countCompleted },
         ].map((tab) => {
           const isActive = currentFilter === tab.id;

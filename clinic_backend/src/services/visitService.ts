@@ -235,7 +235,7 @@ export const getActiveCustomerVisitService = async (userId: number) => {
         },
       },
       invoice: {
-        select: { id: true, invoiceNo: true, totalAmount: true, status: true },
+        select: { id: true, invoiceNo: true, totalAmount: true, status: true, paymentMethod: true, paidAt: true },
       },
     },
     orderBy: { createdAt: 'desc' },

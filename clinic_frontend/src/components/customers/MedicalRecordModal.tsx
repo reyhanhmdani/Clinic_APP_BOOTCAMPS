@@ -9,12 +9,14 @@ interface MedicalRecordModalProps {
   visitData: CustomerHistoryVisit | null;
 }
 
-export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
-  isOpen,
-  onClose,
-  patient,
-  visitData,
-}) => {
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  TRANSFER: 'BANK TRANSFER / VA (MIDTRANS)',
+  QRIS: 'QRIS / E-WALLET (MIDTRANS)',
+  CARD: 'KARTU (MIDTRANS)',
+  CASH: 'TUNAI (LOKET KASIR)',
+};
+
+export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({ isOpen, onClose, patient, visitData }) => {
   if (!isOpen || !visitData) {
     return null;
   }
@@ -28,23 +30,20 @@ export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
             STRUK RESMI PEMBAYARAN
           </div>
           <h2 className="text-lg font-bold uppercase mt-1.5 text-slate-900">REYCLINIC MEDICAL CENTER</h2>
-          <p className="text-[11px] font-medium text-slate-500">
-            Jl. Kesehatan No. 45, Jakarta • Telp: (021) 555-0123
-          </p>
+          <p className="text-[11px] font-medium text-slate-500">Jl. Kesehatan No. 45, Jakarta • Telp: (021) 555-0123</p>
         </div>
 
         {/* Info Kunjungan & Pasien */}
         <div className="bg-slate-50 p-4 border border-slate-200/80 rounded-xl text-xs space-y-2 font-mono">
           <div className="flex justify-between">
             <span className="text-slate-500">No. Invoice:</span>
-            <span className="font-bold text-slate-800">
-              {visitData.invoice?.invoiceNo || `INV-V${visitData.id}`}
-            </span>
+            <span className="font-bold text-slate-800">{visitData.invoice?.invoiceNo || `INV-V${visitData.id}`}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">Pasien:</span>
             <span className="font-bold text-slate-800">
-              {patient?.name || (visitData as any).patient?.name} ({patient?.noRm || (visitData as any).patient?.noRm || 'RM-ONLINE'})
+              {patient?.name || (visitData as any).patient?.name} (
+              {patient?.noRm || (visitData as any).patient?.noRm || 'RM-ONLINE'})
             </span>
           </div>
           <div className="flex justify-between">
@@ -54,42 +53,41 @@ export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
           <div className="flex justify-between">
             <span className="text-slate-500">Metode Bayar:</span>
             <span className="font-bold text-slate-800">
-              {visitData.invoice?.paymentMethod || 'CASH'}
+              {PAYMENT_METHOD_LABELS[visitData.invoice?.paymentMethod || 'CASH'] || 'TUNAI (LOKET KASIR)'}
             </span>
           </div>
 
           {/* Rincian Resep Obat (Jika Ada) */}
-          {visitData.consultation?.consultationMedicines &&
-            visitData.consultation.consultationMedicines.length > 0 && (
-              <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-2">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
-                  Rincian Terapi Obat (R/):
-                </span>
-                <div className="space-y-1.5">
-                  {visitData.consultation.consultationMedicines.map((m: any, idx: number) => (
-                    <div
-                      key={m.id || idx}
-                      className="text-[11px] bg-white p-2 rounded-lg border border-slate-200/60 space-y-0.5"
-                    >
-                      <div className="flex justify-between items-center text-slate-800">
-                        <span className="font-bold">
-                          • {m.medicine?.name} ({m.qty} {m.medicine?.unit || 'pcs'})
-                        </span>
-                        <span className="font-semibold text-slate-900">
-                          Rp {Number(m.subTotal || (m.price * m.qty) || 0).toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                      {m.instructions && (
-                        <div className="text-[10px] text-emerald-800 font-medium pl-2.5 flex items-center gap-1">
-                          <span className="text-slate-400 font-normal">↳ Intruksi:</span>
-                          <span>{m.instructions}</span>
-                        </div>
-                      )}
+          {visitData.consultation?.consultationMedicines && visitData.consultation.consultationMedicines.length > 0 && (
+            <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-2">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                Rincian Terapi Obat (R/):
+              </span>
+              <div className="space-y-1.5">
+                {visitData.consultation.consultationMedicines.map((m: any, idx: number) => (
+                  <div
+                    key={m.id || idx}
+                    className="text-[11px] bg-white p-2 rounded-lg border border-slate-200/60 space-y-0.5"
+                  >
+                    <div className="flex justify-between items-center text-slate-800">
+                      <span className="font-bold">
+                        • {m.medicine?.name} ({m.qty} {m.medicine?.unit || 'pcs'})
+                      </span>
+                      <span className="font-semibold text-slate-900">
+                        Rp {Number(m.subTotal || m.price * m.qty || 0).toLocaleString('id-ID')}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    {m.instructions && (
+                      <div className="text-[10px] text-emerald-800 font-medium pl-2.5 flex items-center gap-1">
+                        <span className="text-slate-400 font-normal">↳ Instruksi:</span>
+                        <span>{m.instructions}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
         </div>
 
         {/* Total Pembayaran */}
@@ -106,7 +104,7 @@ export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({
         </p>
 
         {/* Action Buttons */}
-        <div className="flex gap-2.5 pt-2">
+        <div className="flex gap-2.5 pt-2 print:hidden">
           <button
             type="button"
             onClick={() => window.print()}

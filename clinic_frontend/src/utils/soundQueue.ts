@@ -49,14 +49,14 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   window.speechSynthesis.onvoiceschanged = refreshVoices;
 }
 
-// Fungsi pencari suara Bahasa Indonesia terbaik
+// Fungsi pencari suara Bahasa Indonesia terbaik (Prioritas Suara Wanita/Resepsionis)
 const findIndonesianVoice = (): SpeechSynthesisVoice | null => {
   refreshVoices();
   const voices = cachedVoices.length > 0 ? cachedVoices : window.speechSynthesis.getVoices();
   if (!voices || voices.length === 0) return null;
 
-  // 1. Cari suara resmi bahasa Indonesia (Google Bahasa Indonesia, Microsoft Gadis, id-ID, dsb)
-  const idVoice = voices.find((v) => {
+  // Kumpulkan semua suara Bahasa Indonesia
+  const idVoices = voices.filter((v) => {
     const lang = (v.lang || '').toLowerCase().replace('_', '-');
     const name = (v.name || '').toLowerCase();
     return (
@@ -67,15 +67,37 @@ const findIndonesianVoice = (): SpeechSynthesisVoice | null => {
       name.includes('ardi')
     );
   });
-  if (idVoice) return idVoice;
 
-  // 2. Fallback regional: Melayu (ms-MY / Bahasa Melayu) yang intonasinya sangat mirip jika Indonesia belum terunduh
-  const msVoice = voices.find((v) => {
+  if (idVoices.length > 0) {
+    // 1. Prioritas Utama: Suara Wanita Bahasa Indonesia (Microsoft Gadis di Edge, Google Bahasa Indonesia di Chrome)
+    const femaleVoice = idVoices.find((v) => {
+      const name = v.name.toLowerCase();
+      return name.includes('gadis') || name.includes('google') || name.includes('female');
+    });
+    if (femaleVoice) return femaleVoice;
+
+    // 2. Prioritas Kedua: Hindari suara pria (Ardi) jika ada alternatif suara Indonesia lainnya
+    const nonMaleVoice = idVoices.find((v) => {
+      const name = v.name.toLowerCase();
+      return !name.includes('ardi') && !name.includes('male');
+    });
+    if (nonMaleVoice) return nonMaleVoice;
+
+    // 3. Fallback: Suara Indonesia pertama yang tersedia
+    return idVoices[0];
+  }
+
+  // 4. Fallback regional: Melayu (ms-MY / Bahasa Melayu)
+  const msVoices = voices.filter((v) => {
     const lang = (v.lang || '').toLowerCase().replace('_', '-');
     const name = (v.name || '').toLowerCase();
     return lang.startsWith('ms') || name.includes('malay');
   });
-  if (msVoice) return msVoice;
+
+  if (msVoices.length > 0) {
+    const femaleMs = msVoices.find((v) => !v.name.toLowerCase().includes('male'));
+    return femaleMs || msVoices[0];
+  }
 
   return null;
 };
@@ -109,7 +131,7 @@ export const announceQueue = (
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'id-ID';
       utterance.rate = 0.88; // Tempo bicara rileks dan jelas
-      utterance.pitch = 1.02;
+      utterance.pitch = 1.05; // Pitch natural dan ramah khas resepsionis klinik
 
       // Cari dan pasang voice Bahasa Indonesia secara presisi
       const bestVoice = findIndonesianVoice();

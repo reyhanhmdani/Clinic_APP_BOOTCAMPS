@@ -208,8 +208,8 @@ ${doctorListText}
   });
 
   try {
-    // 5. Panggil Google Gemini REST API (gemini-1.5-flash)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // 5. Panggil Google Gemini REST API (gemini-2.5-flash)
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -225,7 +225,7 @@ ${doctorListText}
           temperature: 0.3,
           topP: 0.85,
           topK: 32,
-          maxOutputTokens: 700,
+          maxOutputTokens: 1200,
         },
       }),
     });

@@ -521,7 +521,7 @@ export const CustomerDashboardPage: React.FC = () => {
                 className="w-full py-2.5 bg-[#FF4D6D] hover:bg-[#E00B41] text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-95"
               >
                 <QrCode size={15} />
-                <span>Bayar Sekarang (Midtrans)</span>
+                <span>Bayar Sekarang</span>
               </button>
             </div>
           )}

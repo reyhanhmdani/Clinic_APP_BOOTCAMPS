@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pill, X, AlertCircle, Check } from 'lucide-react';
+import { Pill, X, AlertCircle, Check, Search } from 'lucide-react';
 import type { Medicine } from '../../types/clinic';
 import type { PrescriptionItem } from './Prescription';
 
@@ -19,13 +19,25 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
   alreadySelectedIds = [],
 }) => {
   const [selectedMedicineId, setSelectedMedicineId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [qty, setQty] = useState<string>('1');
   const [dose, setDose] = useState<string>('3x1 tablet sesudah makan');
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const filteredMedicines = medicines.filter((m) =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase().trim()),
+  );
+
   const selectedMed = medicines.find((m) => m.id === Number(selectedMedicineId));
+
+  const handleCloseModal = () => {
+    setError(null);
+    setSearchQuery('');
+    setSelectedMedicineId('');
+    onClose();
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +76,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
 
     // Reset Form & Close
     setSelectedMedicineId('');
+    setSearchQuery('');
     setQty('1');
     setDose('3x1 tablet sesudah makan');
     onClose();
@@ -80,7 +93,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="w-8 h-8 rounded-xl bg-[#072f1f] text-slate-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
           >
             <X size={16} />
@@ -98,9 +111,77 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
 
           {/* 1. Pilih Obat dari Database */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Daftar Obat Apotek <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Daftar Obat Apotek <span className="text-rose-500">*</span>
+              </label>
+              {searchQuery && (
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {filteredMedicines.length} ditemukan
+                </span>
+              )}
+            </div>
+
+            {/* Input Search Minimalis Cepat */}
+            <div className="relative mb-2">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setError(null);
+                }}
+                placeholder="Cari obat cepat (cth: Paracetamol)..."
+                className="w-full pl-8.5 pr-8 py-2 rounded-xl border border-slate-200 bg-slate-50/70 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] placeholder:text-slate-400 transition-colors"
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title="Hapus pencarian"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Quick-select chips saat pencarian aktif */}
+            {searchQuery.trim() && filteredMedicines.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {filteredMedicines.slice(0, 4).map((med) => {
+                  const isOutOfStock = med.stock <= 0;
+                  const isAlready = alreadySelectedIds.includes(med.id);
+                  const disabled = isOutOfStock || isAlready;
+                  const isSelected = String(med.id) === selectedMedicineId;
+                  return (
+                    <button
+                      key={med.id}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => {
+                        setSelectedMedicineId(String(med.id));
+                        setError(null);
+                      }}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
+                        isSelected
+                          ? 'bg-[#051c12] text-[#b4f105] border-[#051c12] font-bold shadow-xs'
+                          : disabled
+                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 font-medium'
+                      }`}
+                    >
+                      <span>{isSelected ? '✓' : '+'}</span>
+                      <span>{med.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Dropdown Select */}
             <select
               value={selectedMedicineId}
               onChange={(e) => {
@@ -109,8 +190,12 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
               }}
               className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white focus:border-[#051c12] cursor-pointer"
             >
-              <option value="">-- Pilih Obat Tersedia --</option>
-              {medicines.map((med) => {
+              <option value="">
+                {filteredMedicines.length === 0
+                  ? '-- Obat tidak ditemukan --'
+                  : '-- Pilih Obat Tersedia --'}
+              </option>
+              {filteredMedicines.map((med) => {
                 const isAlready = alreadySelectedIds.includes(med.id);
                 const isOutOfStock = med.stock <= 0;
                 return (
@@ -165,7 +250,7 @@ export const AddMedicineModal: React.FC<AddMedicineModalProps> = ({
           <div className="pt-2 flex justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               Batal

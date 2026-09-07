@@ -107,7 +107,7 @@ export const announceQueue = (
   queueNumber: string | number,
   patientName: string,
   doctorName?: string,
-  doctorSpecialty?: string
+  doctorSpecialty?: string,
 ) => {
   if (!('speechSynthesis' in window)) {
     console.warn('Browser tidak mendukung Web Speech API');
@@ -123,7 +123,7 @@ export const announceQueue = (
       window.speechSynthesis.cancel(); // Hentikan antrean audio jika tombol diklik berulang kali
 
       const destination = doctorName
-        ? `ruang ${doctorName}${doctorSpecialty ? `, spesialis ${doctorSpecialty}` : ''}`
+        ? `ruang ${doctorName}${doctorSpecialty ? `,${doctorSpecialty}` : ''}`
         : 'ruang pemeriksaan dokter';
 
       const text = `Nomor antrean ${queueNumber}, atas nama ${patientName}, silakan menuju ${destination}.`;

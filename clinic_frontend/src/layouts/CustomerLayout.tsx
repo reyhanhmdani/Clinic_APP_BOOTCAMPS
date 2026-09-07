@@ -20,6 +20,7 @@ import { socket } from '../services/socket';
 import { CustomerNikModal } from '../components/customers/CustomerNikModal';
 import { CustomerBookingModal } from '../components/customers/CustomerBookingModal';
 import { CustomerQrisModal } from '../components/customers/CustomerQrisModal';
+import { CustomerAiChatModal } from '../components/customers/CustomerAiChatModal';
 
 import { cancelVisitService } from '../services/visitService';
 import { getMidtransSnapTokenService } from '../services/invoiceService';
@@ -39,6 +40,7 @@ export interface CustomerContextType {
   openBookingModal: (doctorId?: number) => void;
   openNikModal: () => void;
   openQrisModal: () => void;
+  openAiModal?: () => void;
   payInvoice: (invoiceId: number) => Promise<void>;
   cancelActiveVisit: (visitId: number) => Promise<void>;
   refreshAllData: () => Promise<void>;
@@ -62,6 +64,7 @@ export const CustomerLayout: React.FC = () => {
   const [showNikModal, setShowNikModal] = useState<boolean>(false);
   const [showBookingModal, setShowBookingModal] = useState<boolean>(false);
   const [showQrisModal, setShowQrisModal] = useState<boolean>(false);
+  const [showAiModal, setShowAiModal] = useState<boolean>(false);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number>(1);
 
   // 1. Data Fetching & Lifecycle
@@ -230,6 +233,7 @@ export const CustomerLayout: React.FC = () => {
     openBookingModal: handleOpenBookingModal,
     openNikModal: () => setShowNikModal(true),
     openQrisModal: () => setShowQrisModal(true),
+    openAiModal: () => setShowAiModal(true),
     payInvoice: handlePayInvoice,
     cancelActiveVisit: handleCancelVisit,
     refreshAllData: loadData,
@@ -289,67 +293,112 @@ export const CustomerLayout: React.FC = () => {
 
       {/* 3. Floating Pill Capsule Dock + Detached Action Button (ReyClinic Glassmorphism) */}
       <div className="fixed bottom-5 inset-x-4 max-w-md mx-auto flex items-center gap-2.5 z-40 print:hidden">
-        {/* Kapsul Putih Navigasi (Icon-Only Minimalis Frosted Glass) */}
-        <nav className="flex-1 h-14 bg-white/75 backdrop-blur-2xl border border-white/80 rounded-full p-1.5 shadow-[0_10px_30px_rgba(5,150,105,0.08),0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_1px_rgba(255,255,255,0.95)] flex items-center justify-around">
-          {/* 1. Beranda */}
+        {/* Kapsul Putih Navigasi (Icon + Label Teks Cantik) */}
+        <nav className="flex-1 h-[60px] bg-white/80 backdrop-blur-2xl border border-white/80 rounded-full px-2 py-1 shadow-[0_12px_32px_rgba(5,150,105,0.08),0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_1px_rgba(255,255,255,0.95)] flex items-center justify-around">
+          {/* 1. Home */}
           <NavLink
             to="/customers"
             end
             className={({ isActive }) =>
-              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
-                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
+              `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
               }`
             }
-            title="Beranda"
+            title="Home"
           >
             {({ isActive }) => (
-              <Home size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
+              <>
+                <div
+                  className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
+                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                  }`}
+                >
+                  <Home size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
+                </div>
+                <span
+                  className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
+                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                  }`}
+                >
+                  Home
+                </span>
+              </>
             )}
           </NavLink>
 
-          {/* 2. Riwayat Medis & Invoice */}
+          {/* 2. Riwayat */}
           <NavLink
             to="/customers/history"
             className={({ isActive }) =>
-              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
-                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
+              `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
               }`
             }
-            title="Riwayat Medis & Tagihan"
+            title="Riwayat"
           >
             {({ isActive }) => (
-              <FileText size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
+              <>
+                <div
+                  className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
+                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                  }`}
+                >
+                  <FileText size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
+                </div>
+                <span
+                  className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
+                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                  }`}
+                >
+                  Riwayat
+                </span>
+              </>
             )}
           </NavLink>
 
-          {/* 3. Profil Pasien */}
+          {/* 3. Profile */}
           <NavLink
             to="/customers/profile"
             className={({ isActive }) =>
-              `w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_4px_14px_rgba(5,150,105,0.38)] border border-emerald-300/30'
-                  : 'text-[#5A6E65] hover:text-[#059669] hover:bg-emerald-50/70 active:scale-95'
+              `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
+                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
               }`
             }
-            title="Profil Pasien"
+            title="Profile"
           >
             {({ isActive }) => (
-              <User size={20} className={isActive ? 'stroke-[2.3]' : 'stroke-[1.9]'} />
+              <>
+                <div
+                  className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
+                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                  }`}
+                >
+                  <User size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
+                </div>
+                <span
+                  className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
+                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                  }`}
+                >
+                  Profile
+                </span>
+              </>
             )}
           </NavLink>
         </nav>
 
-        {/* Tombol Bulat Floating Terpisah di Kanan (Ambil Antrean - Symmetrical 56px Glass Ring) */}
+        {/* Tombol Bulat Floating Terpisah di Kanan (Tanya ReyAI Health Assistant - Symmetrical 60px Glass Ring) */}
         <button
           type="button"
-          onClick={() => handleOpenBookingModal()}
-          className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(5,150,105,0.4),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/50 ring-4 ring-white/70 backdrop-blur-xl hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group relative"
-          title="Ambil Antrean Dokter"
+          onClick={() => setShowAiModal(true)}
+          className="w-[60px] h-[60px] rounded-full bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(5,150,105,0.4),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/50 ring-4 ring-white/70 backdrop-blur-xl hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group relative"
+          title="Tanya ReyAI (Asisten Kesehatan)"
         >
           <Stethoscope size={23} className="stroke-[2.4] group-hover:rotate-12 transition-transform duration-300" />
           <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#10B981] ring-2 ring-white shadow-xs animate-pulse" />
@@ -378,6 +427,14 @@ export const CustomerLayout: React.FC = () => {
       />
 
       <CustomerQrisModal isOpen={showQrisModal} onClose={() => setShowQrisModal(false)} />
+
+      <CustomerAiChatModal
+        isOpen={showAiModal}
+        onClose={() => setShowAiModal(false)}
+        patientName={patient?.name || user?.username}
+        doctors={doctors}
+        onOpenBooking={() => handleOpenBookingModal()}
+      />
     </div>
   );
 };

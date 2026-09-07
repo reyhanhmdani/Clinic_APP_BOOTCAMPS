@@ -93,3 +93,26 @@ export const payCustomerInvoiceService = async (
   });
   return response.data.data;
 };
+
+// ReyAI Health Assistant Chat Service
+export interface CustomerAiChatPayload {
+  message: string;
+  history?: Array<{
+    role: 'user' | 'model';
+    text: string;
+  }>;
+}
+
+export interface CustomerAiChatResult {
+  reply: string;
+  recommendBooking: boolean;
+  source: 'gemini' | 'local_fallback';
+}
+
+export const sendCustomerAiChatService = async (
+  payload: CustomerAiChatPayload,
+): Promise<CustomerAiChatResult> => {
+  const response = await api.post<{ message: string; data: CustomerAiChatResult }>('/customers/ai-chat', payload);
+  return response.data.data;
+};
+

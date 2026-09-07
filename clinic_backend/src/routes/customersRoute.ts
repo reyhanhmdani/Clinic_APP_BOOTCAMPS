@@ -11,6 +11,7 @@ import {
 import { getActiveDoctorsController } from '../controllers/doctorController.js';
 import { bookCustomerVisitController, getActiveCustomerVisitController } from '../controllers/visitController.js';
 import { payCustomerInvoiceController } from '../controllers/invoiceController.js';
+import { customerAiChatController } from '../controllers/aiController.js';
 
 const router = Router();
 
@@ -36,4 +37,8 @@ router.get('/history', getCustomerHistoryController);
 
 // Pembayaran mandiri (QRIS - self payment)
 router.post('/pay-invoice', payCustomerInvoiceController);
+
+// AI Health Assistant (ReyAI - Focused on ReyClinic)
+router.post('/ai-chat', customerAiChatController);
+
 export default router;

@@ -8,8 +8,9 @@ import invoiceRoutes from './invoiceRoute.js';
 import consultationRoutes from './consultationRoute.js';
 import customerRoutes from './customersRoute.js';
 import pharmacyRoutes from './pharmacyRoute.js';
-import { authentication } from '../middlewares/authentication.js';
+import { authentication, optionalAuthentication } from '../middlewares/authentication.js';
 import { handleMidtransNotificationController } from '../controllers/invoiceController.js';
+import { customerAiChatController } from '../controllers/aiController.js';
 
 const mainRouter = express.Router();
 
@@ -18,6 +19,9 @@ mainRouter.use('/auth', authRoutes);
 
 // Route publik untuk webhook Midtrans
 mainRouter.post('/midtrans-webhook', handleMidtransNotificationController);
+
+// Route AI Chat Asisten ReyClinic (bisa diakses sebelum/sesudah login pasien)
+mainRouter.post('/customers/ai-chat', optionalAuthentication, customerAiChatController);
 
 // Kita jaga semua route harus login dulu
 mainRouter.use(authentication);

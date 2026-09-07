@@ -26,3 +26,18 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const optionalAuthentication = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+      (req as any).user = decoded;
+    }
+  } catch {
+    // Abaikan jika token invalid/expired, tetap lanjutkan sebagai guest
+  }
+  next();
+};
+

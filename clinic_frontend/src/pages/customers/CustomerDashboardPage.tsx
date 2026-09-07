@@ -13,6 +13,8 @@ import {
   PackageCheck,
   CreditCard,
   Check,
+  Ticket,
+  ArrowRight,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCustomerContext } from '../../layouts/CustomerLayout';
@@ -173,7 +175,7 @@ export const CustomerDashboardPage: React.FC = () => {
     <div className="space-y-6 animate-fade-in text-[#12241E] pb-6">
       {/* 1. Header Widget Block (Airy Light Frosted Glass) */}
       <div className="relative">
-        <div className="bg-gradient-to-br from-emerald-50/95 via-teal-50/60 to-white/95 backdrop-blur-xl rounded-3xl p-6 pt-7 pb-10 shadow-[0_10px_32px_rgba(5,150,105,0.06)] border border-emerald-200/80 relative overflow-hidden space-y-4">
+        <div className="bg-gradient-to-br from-emerald-50/95 via-teal-50/60 to-white/95 backdrop-blur-xl rounded-3xl p-6 pt-7 pb-11 shadow-[0_10px_32px_rgba(5,150,105,0.06)] border border-emerald-200/80 relative overflow-hidden space-y-4">
           <div className="absolute -top-16 -right-16 w-52 h-52 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-teal-100/50 rounded-full blur-3xl pointer-events-none" />
 
@@ -183,18 +185,33 @@ export const CustomerDashboardPage: React.FC = () => {
               Layanan Siaga Terpadu
             </span>
             <span className="text-[11px] font-mono text-[#059669] font-bold bg-white/80 px-2.5 py-0.5 rounded-full border border-emerald-200/70 shadow-2xs">
-              08:00 – 20:00 WIB
+              08:00 – 21:00 WIB
             </span>
           </div>
 
-          <div className="space-y-1.5 relative z-10 pt-1">
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#064E3B] leading-snug">
-              Kesehatan Anda, <br />
-              <span className="text-[#059669]">Prioritas Utama Kami.</span>
-            </h1>
-            <p className="text-xs text-[#065F46]/80 font-medium leading-relaxed max-w-xs">
-              Temukan dokter spesialis terpercaya dan pantau antrean rawat jalan secara real-time.
-            </p>
+          <div className="space-y-3 relative z-10 pt-1">
+            <div className="space-y-1">
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#064E3B] leading-snug">
+                Kesehatan Anda, <br />
+                <span className="text-[#059669]">Prioritas Utama Kami.</span>
+              </h1>
+              <p className="text-xs text-[#065F46]/80 font-medium leading-relaxed max-w-xs">
+                Temukan dokter spesialis terpercaya dan pantau antrean rawat jalan secara real-time.
+              </p>
+            </div>
+
+            {/* Tombol Cepat: Ambil / Bikin Antrean Dokter */}
+            <div>
+              <button
+                type="button"
+                onClick={() => openBookingModal()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#059669] via-[#047857] to-[#0D9488] hover:from-[#047857] hover:to-[#065F46] text-white text-xs font-bold shadow-[0_6px_16px_rgba(5,150,105,0.28)] hover:shadow-[0_8px_22px_rgba(5,150,105,0.38)] transition-all cursor-pointer active:scale-95 group"
+              >
+                <Ticket size={14} className="stroke-[2.5]" />
+                <span>Ambil Antrean Dokter</span>
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
           </div>
         </div>
 

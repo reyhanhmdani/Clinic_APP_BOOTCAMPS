@@ -19,7 +19,7 @@ interface CustomerAiChatModalProps {
   onClose: () => void;
   patientName?: string;
   doctors?: Doctor[];
-  onOpenBooking?: () => void;
+  onOpenBooking?: (doctorId?: number) => void;
 }
 
 export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
@@ -42,7 +42,7 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
         {
           id: 'welcome',
           sender: 'ai',
-          text: `Halo${greetingName}! 👋 Saya ReyAI, asisten kesehatan cerdas ReyClinic.\n\nSaya siap membantu Anda dengan informasi seputar jadwal dokter aktif, alur pendaftaran antrean mandiri, panduan pembayaran QRIS, serta edukasi pertolongan pertama ringan. Ada yang bisa saya bantu hari ini?`,
+          text: `Halo${greetingName}! 👋 Saya ReyAI, asisten kesehatan cerdas ReyClinic.\n\nSaya siap membantu Anda memilih poliklinik atau dokter yang tepat, cek jadwal dokter aktif, alur antrean mandiri, dan panduan pertolongan pertama. Ceritakan apa yang Anda rasakan hari ini?`,
           time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -57,10 +57,11 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
   if (!isOpen) return null;
 
   const quickPrompts = [
+    '🎯 Bantu saya pilih dokter sesuai keluhan',
+    '🦷 Sakit gigi & ngilu, ke dokter mana?',
     '🩺 Dokter yang bertugas hari ini siapa saja?',
-    '🤒 Gejala flu dan batuk penanganannya bagaimana?',
+    '🤒 Anak saya demam & batuk, ke dokter apa?',
     '📅 Bagaimana cara ambil antrean dokter?',
-    '💊 Info pengambilan obat di apotek',
   ];
 
   // Helper formatting markdown bold **text**
@@ -98,14 +99,49 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
       };
     }
 
-    // 2. Tanya Jadwal / Dokter Bertugas
+    // 2. Smart Triage: Pencocokan dokter lokal
+    // Gigi
+    if (q.includes('gigi') || q.includes('gusi') || q.includes('geraham') || q.includes('ngilu')) {
+      const doc = doctors.find((d) => d.spesialis.toLowerCase().includes('gigi')) || doctors[0];
+      return {
+        text: `Untuk keluhan gigi atau gusi, Anda disarankan berkonsultasi dengan **${doc ? doc.name : 'Dokter Gigi'}** (${doc ? doc.spesialis : 'Spesialis Gigi & Mulut'}).\n\nHindari minuman terlalu panas atau dingin sementara waktu.`,
+        actionButton: onOpenBooking && doc
+          ? {
+              label: `Daftar Antrean ke ${doc.name}`,
+              onClick: () => {
+                onClose();
+                onOpenBooking(doc.id);
+              },
+            }
+          : undefined,
+      };
+    }
+
+    // Anak
+    if (q.includes('anak') || q.includes('bayi') || q.includes('balita') || q.includes('pediatri')) {
+      const doc = doctors.find((d) => d.spesialis.toLowerCase().includes('anak')) || doctors[0];
+      return {
+        text: `Untuk kondisi balita atau anak, Anda dapat berkonsultasi dengan **${doc ? doc.name : 'Dokter Anak'}** (${doc ? doc.spesialis : 'Spesialis Anak'}).\n\nPastikan cairan si kecil tercukupi dengan baik.`,
+        actionButton: onOpenBooking && doc
+          ? {
+              label: `Daftar Antrean ke ${doc.name}`,
+              onClick: () => {
+                onClose();
+                onOpenBooking(doc.id);
+              },
+            }
+          : undefined,
+      };
+    }
+
+    // Tanya Jadwal / Dokter Bertugas
     if (q.includes('dokter') || q.includes('jadwal') || q.includes('spesialis') || q.includes('bertugas') || q.includes('tarif')) {
       if (doctors.length > 0) {
         const docList = doctors
           .map((d) => `• **dr. ${d.name}** (${d.spesialis}) — Tarif: Rp ${Number(d.fee).toLocaleString('id-ID')}`)
           .join('\n');
         return {
-          text: `Saat ini dokter yang sedang bertugas aktif di ReyClinic:\n\n${docList}\n\nIngin saya bantu daftarkan antrean ke salah satu dokter tersebut?`,
+          text: `Daftar dokter yang bertugas aktif di ReyClinic hari ini:\n\n${docList}\n\nIngin saya bantu daftarkan antrean ke dokter tujuan Anda?`,
           actionButton: onOpenBooking
             ? {
                 label: 'Daftar Antrean Dokter Sekarang',
@@ -118,71 +154,32 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
         };
       }
       return {
-        text: 'Saat ini terdapat dokter umum dan spesialis yang siap melayani di ReyClinic. Silakan lihat daftar lengkapnya pada menu pendaftaran antrean.',
+        text: 'Saat ini dokter umum dan spesialis siap melayani di ReyClinic. Silakan lihat daftar lengkapnya pada menu pendaftaran antrean.',
       };
     }
 
-    // 3. Tanya Antrean / Booking
+    // Tanya Antrean / Booking
     if (q.includes('antre') || q.includes('daftar') || q.includes('booking') || q.includes('tiket')) {
       return {
-        text: 'Untuk mendaftar antrean dokter secara mandiri, Anda cukup memilih dokter tujuan di aplikasi ini, lalu konfirmasi tiket antrean Anda. Nomor antrean akan otomatis tersambung ke layar monitor dan speaker klinik.',
+        text: 'Untuk mendaftar antrean mandiri, pilih dokter tujuan di aplikasi lalu konfirmasi tiket antrean Anda. Nomor tiket akan terbit seketika dan terhubung ke monitor lobi klinik.',
         actionButton: onOpenBooking
           ? {
-              label: 'Buka Menu Antrean',
+              label: 'Ambil Nomor Antrean',
               onClick: () => {
                 onClose();
                 onOpenBooking();
               },
             }
           : undefined,
-      };
-    }
-
-    // 4. Gejala Flu / Demam / Batuk
-    if (q.includes('flu') || q.includes('demam') || q.includes('batuk') || q.includes('pilek') || q.includes('panas')) {
-      return {
-        text: `Pertolongan pertama untuk gejala flu/demam:\n1. Istirahat cukup dan perbanyak minum air hangat (minimal 2 liter/hari).\n2. Konsumsi paracetamol sesuai dosis aturan pakai bila demam di atas 38°C.\n3. Gunakan masker untuk mencegah penularan ke keluarga.\n\n⚠️ *Catatan Medis: Informasi ini bersifat edukasi awal. Jika demam berlanjut lebih dari 3 hari, sangat disarankan berkonsultasi langsung dengan Dokter ReyClinic.*`,
-        actionButton: onOpenBooking
-          ? {
-              label: 'Konsultasikan dengan Dokter ReyClinic',
-              onClick: () => {
-                onClose();
-                onOpenBooking();
-              },
-            }
-          : undefined,
-      };
-    }
-
-    // 5. Gejala Maag / Lambung / Mual
-    if (q.includes('maag') || q.includes('lambung') || q.includes('mual') || q.includes('perut')) {
-      return {
-        text: `Untuk meredakan keluhan lambung/mual:\n• Hindari makanan pedas, asam, bersantan, dan minuman berkafein/kopi sementara waktu.\n• Makan dengan porsi kecil tapi sering (3-4 jam sekali).\n• Jangan langsung berbaring setelah makan (tunggu minimal 2 jam).\n\nBila nyeri perut menetap, segera periksakan ke dokter jaga kami.`,
-        actionButton: onOpenBooking
-          ? {
-              label: 'Buat Janji Temu Dokter',
-              onClick: () => {
-                onClose();
-                onOpenBooking();
-              },
-            }
-          : undefined,
-      };
-    }
-
-    // 6. Apotek / Obat / Pembayaran
-    if (q.includes('obat') || q.includes('apotek') || q.includes('bayar') || q.includes('qris') || q.includes('resep')) {
-      return {
-        text: 'Setelah selesai konsultasi dengan dokter, tagihan Anda akan otomatis terbit di aplikasi. Anda bisa membayar secara instan via QRIS/Virtual Account, dan obat Anda langsung disiapkan oleh bagian Farmasi tanpa perlu antre ulang di kasir.',
       };
     }
 
     // Default Fallback
     return {
-      text: `Terima kasih atas pertanyaannya! Saya ReyAI asisten khusus ReyClinic.\n\nUntuk pemeriksaan kondisi kesehatan atau konsultasi medis yang akurat, dokter profesional kami di ReyClinic siap membantu Anda secara langsung dengan rekam medis digital yang terintegrasi.`,
+      text: `Terima kasih atas pertanyaannya! Saya ReyAI siap membantu rekomendasi poliklinik atau dokter yang sesuai dengan keluhan Anda di ReyClinic.`,
       actionButton: onOpenBooking
         ? {
-            label: 'Buat Janji Temu Dokter',
+            label: 'Lihat Pilihan Dokter',
             onClick: () => {
               onClose();
               onOpenBooking();
@@ -215,13 +212,17 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
     setIsTyping(true);
 
     try {
-      // Panggil backend ReyAI API (Google Gemini Proxy + Postgres Doctor Context)
+      // Panggil backend ReyAI API (Google Gemini Proxy + Postgres Doctor Context + Triage Matcher)
       const res = await sendCustomerAiChatService({
         message: query,
         history: historyPayload,
       });
 
-      const shouldShowBooking = res.recommendBooking && Boolean(onOpenBooking);
+      const shouldShowBooking = (res.recommendBooking || Boolean(res.recommendedDoctorId)) && Boolean(onOpenBooking);
+
+      const buttonLabel = res.recommendedDoctorName
+        ? `Daftar Antrean ke ${res.recommendedDoctorName}`
+        : 'Daftar Antrean Dokter Sekarang';
 
       const aiMsg: Message = {
         id: `ai-${Date.now()}`,
@@ -230,10 +231,10 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
         time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
         actionButton: shouldShowBooking
           ? {
-              label: 'Daftar Antrean Dokter Sekarang',
+              label: buttonLabel,
               onClick: () => {
                 onClose();
-                onOpenBooking?.();
+                onOpenBooking?.(res.recommendedDoctorId);
               },
             }
           : undefined,
@@ -271,12 +272,12 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
                 <h3 className="font-extrabold text-sm sm:text-base leading-tight">ReyAI Health Assistant</h3>
                 <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black tracking-wider uppercase">
                   <Sparkles size={10} className="text-amber-300" />
-                  <span>Gemini AI</span>
+                  <span>Smart Triage</span>
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[11px] text-emerald-100/90 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-                <span>Siap Menjawab Seputar ReyClinic & Medis</span>
+                <span>Konsultasi & Rekomendasi Dokter 24/7</span>
               </div>
             </div>
           </div>
@@ -290,7 +291,24 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
           </button>
         </div>
 
-        {/* 2. Chat Message List */}
+        {/* 2. Sub-banner: Smart Triage Quick Hint */}
+        <div className="bg-emerald-50/80 border-b border-emerald-100 px-4 py-2 flex items-center justify-between text-[11px] text-[#065F46] shrink-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-sm shrink-0">🎯</span>
+            <span className="font-semibold truncate">
+              Bingung pilih dokter? Tuliskan gejala Anda pada ReyAI
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSend('Bantu saya memilih dokter yang tepat sesuai keluhan')}
+            className="text-[10px] font-extrabold text-[#059669] hover:underline shrink-0 ml-2 cursor-pointer"
+          >
+            Pilihkan →
+          </button>
+        </div>
+
+        {/* 3. Chat Message List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
           {messages.map((msg) => (
             <div
@@ -314,17 +332,19 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
                   {renderFormattedText(msg.text, msg.sender === 'user')}
                 </div>
 
-                {/* Tombol Aksi Cepat bila ada rekomendasi booking */}
+                {/* Tombol Aksi Cepat 1-Klik Booking Dokter Terkait */}
                 {msg.actionButton && (
-                  <div className="pt-1.5">
+                  <div className="pt-2">
                     <button
                       type="button"
                       onClick={msg.actionButton.onClick}
-                      className="w-full py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#059669] border border-emerald-200 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-98"
+                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 hover:from-emerald-100 hover:to-teal-100 text-[#059669] border border-emerald-300 font-extrabold text-[11px] flex items-center justify-between transition-all cursor-pointer shadow-xs active:scale-[0.98] group"
                     >
-                      <Calendar size={13} />
-                      <span>{msg.actionButton.label}</span>
-                      <ArrowRight size={12} />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Calendar size={14} className="text-[#059669] shrink-0 stroke-[2.4]" />
+                        <span className="truncate">{msg.actionButton.label}</span>
+                      </div>
+                      <ArrowRight size={13} className="shrink-0 text-[#059669] group-hover:translate-x-0.5 transition-transform" />
                     </button>
                   </div>
                 )}
@@ -362,21 +382,21 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 3. Quick Suggestion Prompts */}
+        {/* 4. Quick Suggestion Prompts */}
         <div className="px-4 py-2 border-t border-slate-200/60 bg-white/70 backdrop-blur-md overflow-x-auto scrollbar-none flex gap-1.5 shrink-0">
           {quickPrompts.map((prompt, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => handleSend(prompt)}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#059669] border border-slate-200/80 transition-colors whitespace-nowrap cursor-pointer shrink-0"
+              className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#059669] border border-slate-200/80 transition-colors whitespace-nowrap cursor-pointer shrink-0 font-medium"
             >
               {prompt}
             </button>
           ))}
         </div>
 
-        {/* 4. Chat Input Form */}
+        {/* 5. Chat Input Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -388,7 +408,7 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tanyakan jadwal dokter atau info ReyClinic..."
+            placeholder="Tuliskan keluhan Anda (misal: sakit gigi, nyeri lambung)..."
             className="flex-1 py-2.5 px-3.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-[#059669] text-slate-900 placeholder:text-slate-400"
           />
           <button

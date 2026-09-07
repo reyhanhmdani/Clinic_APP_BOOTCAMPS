@@ -106,6 +106,8 @@ export interface CustomerAiChatPayload {
 export interface CustomerAiChatResult {
   reply: string;
   recommendBooking: boolean;
+  recommendedDoctorId?: number;
+  recommendedDoctorName?: string;
   source: 'gemini' | 'local_fallback';
 }
 

@@ -23,7 +23,7 @@ export const DashboardPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { visits, fetchVisits, callPatient } = useVisitStore();
+  const { visits, fetchVisits, confirmPatientEntered } = useVisitStore();
   const { invoices, fetchInvoices } = useInvoiceStore();
   const { fetchDoctors } = useDoctorStore();
   const { fetchPatients } = usePatientStore();
@@ -60,12 +60,18 @@ export const DashboardPage: React.FC = () => {
   const handleActionClick = async (visit: Visit, actionType: string) => {
     if (actionType === 'CALL_PATIENT') {
       try {
-        await callPatient(visit.id);
         const queueCode = `A-${String(visit.queueNumber).padStart(3, '0')}`;
         announceQueue(queueCode, visit.patient?.name || '', visit.doctor?.name, visit.doctor?.spesialis);
-        toast.info(`Memanggil pasien ${visit.patient?.name || ''}...`);
+        toast.info(`📢 Memanggil antrean ${queueCode} (${visit.patient?.name || ''})...`);
       } catch (err: any) {
         toast.error(err.message || 'Gagal memanggil pasien');
+      }
+    } else if (actionType === 'PATIENT_ENTERED') {
+      try {
+        await confirmPatientEntered(visit.id);
+        toast.success(`Pasien ${visit.patient?.name || ''} telah masuk ruang periksa`);
+      } catch (err: any) {
+        toast.error(err.message || 'Gagal mengubah status antrean');
       }
     } else if (actionType === 'CONSULTATION') {
       navigate(`/dashboard/consultations?visitId=${visit.id}`);

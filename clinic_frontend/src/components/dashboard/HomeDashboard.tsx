@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox, Smartphone, Building2, Stethoscope } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, Receipt, Inbox, Smartphone, Building2, Stethoscope, Volume2, UserCheck } from 'lucide-react';
 import type { Visit } from '../../types/clinic';
 
 interface HomeDashboardProps {
@@ -179,9 +179,20 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <button
             type="button"
             onClick={() => onActionClick && onActionClick(item, 'CALL_PATIENT')}
-            className="btn-lime text-xs px-3.5 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide"
+            className="btn-lime text-xs px-3 py-1.5 rounded-full shadow-xs cursor-pointer tracking-wide flex items-center gap-1.5 active:scale-95 transition-all"
+            title="Panggil nomor antrean lewat pengeras suara (bisa diklik berulang kali)"
           >
-            Panggil Pasien
+            <Volume2 size={13} className="stroke-[2.5]" />
+            <span>Panggil</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onActionClick && onActionClick(item, 'PATIENT_ENTERED')}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-full shadow-xs cursor-pointer transition-all flex items-center gap-1 active:scale-95 border border-emerald-500/30"
+            title="Klik jika pasien sudah hadir & masuk ke ruang dokter"
+          >
+            <UserCheck size={14} className="stroke-[2.5]" />
+            <span>Masuk</span>
           </button>
           <button
             type="button"
@@ -199,9 +210,10 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <button
           type="button"
           onClick={() => onActionClick && onActionClick(item, 'CONSULTATION')}
-          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide"
+          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition-all cursor-pointer tracking-wide flex items-center gap-1.5"
         >
-          Periksa Dokter
+          <Stethoscope size={13} className="stroke-[2.5]" />
+          <span>Periksa Dokter</span>
         </button>
       );
     }

@@ -55,13 +55,12 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
   }, [messages, isTyping]);
 
   if (!isOpen) return null;
-
   const quickPrompts = [
-    '🎯 Bantu saya pilih dokter sesuai keluhan',
-    '🦷 Sakit gigi & ngilu, ke dokter mana?',
-    '🩺 Dokter yang bertugas hari ini siapa saja?',
-    '🤒 Anak saya demam & batuk, ke dokter apa?',
-    '📅 Bagaimana cara ambil antrean dokter?',
+    { icon: '🎯', label: 'Triage Dokter Sesuai Gejala', text: 'Bantu saya pilih dokter yang tepat sesuai keluhan' },
+    { icon: '🦷', label: 'Sakit Gigi & Gusi Ngilu', text: 'Sakit gigi & ngilu, ke dokter mana?' },
+    { icon: '🩺', label: 'Dokter Jaga Hari Ini', text: 'Dokter yang bertugas hari ini siapa saja?' },
+    { icon: '👶', label: 'Poli Anak & Balita', text: 'Anak saya demam & batuk, ke dokter apa?' },
+    { icon: '📅', label: 'Cara Ambil Antrean', text: 'Bagaimana cara ambil antrean dokter?' },
   ];
 
   // Helper formatting markdown bold **text**
@@ -72,7 +71,7 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
         return (
           <strong
             key={idx}
-            className={`font-bold ${isUser ? 'text-white underline decoration-emerald-300' : 'text-emerald-950 font-extrabold'}`}
+            className={`font-bold ${isUser ? 'text-white underline decoration-[#2EC4B6]' : 'text-[#004140] font-extrabold'}`}
           >
             {part.slice(2, -2)}
           </strong>
@@ -90,8 +89,19 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
 
     // 1. Cek Pertanyaan di luar topik klinik / kesehatan
     const nonClinicTerms = [
-      'koding', 'coding', 'javascript', 'python', 'presiden', 'politik', 'pemilu',
-      'film', 'anime', 'game', 'resep masakan', 'matematika', 'sejarah',
+      'koding',
+      'coding',
+      'javascript',
+      'python',
+      'presiden',
+      'politik',
+      'pemilu',
+      'film',
+      'anime',
+      'game',
+      'resep masakan',
+      'matematika',
+      'sejarah',
     ];
     if (nonClinicTerms.some((term) => q.includes(term))) {
       return {
@@ -105,15 +115,16 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
       const doc = doctors.find((d) => d.spesialis.toLowerCase().includes('gigi')) || doctors[0];
       return {
         text: `Untuk keluhan gigi atau gusi, Anda disarankan berkonsultasi dengan **${doc ? doc.name : 'Dokter Gigi'}** (${doc ? doc.spesialis : 'Spesialis Gigi & Mulut'}).\n\nHindari minuman terlalu panas atau dingin sementara waktu.`,
-        actionButton: onOpenBooking && doc
-          ? {
-              label: `Daftar Antrean ke ${doc.name}`,
-              onClick: () => {
-                onClose();
-                onOpenBooking(doc.id);
-              },
-            }
-          : undefined,
+        actionButton:
+          onOpenBooking && doc
+            ? {
+                label: `Daftar Antrean ke ${doc.name}`,
+                onClick: () => {
+                  onClose();
+                  onOpenBooking(doc.id);
+                },
+              }
+            : undefined,
       };
     }
 
@@ -122,20 +133,27 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
       const doc = doctors.find((d) => d.spesialis.toLowerCase().includes('anak')) || doctors[0];
       return {
         text: `Untuk kondisi balita atau anak, Anda dapat berkonsultasi dengan **${doc ? doc.name : 'Dokter Anak'}** (${doc ? doc.spesialis : 'Spesialis Anak'}).\n\nPastikan cairan si kecil tercukupi dengan baik.`,
-        actionButton: onOpenBooking && doc
-          ? {
-              label: `Daftar Antrean ke ${doc.name}`,
-              onClick: () => {
-                onClose();
-                onOpenBooking(doc.id);
-              },
-            }
-          : undefined,
+        actionButton:
+          onOpenBooking && doc
+            ? {
+                label: `Daftar Antrean ke ${doc.name}`,
+                onClick: () => {
+                  onClose();
+                  onOpenBooking(doc.id);
+                },
+              }
+            : undefined,
       };
     }
 
     // Tanya Jadwal / Dokter Bertugas
-    if (q.includes('dokter') || q.includes('jadwal') || q.includes('spesialis') || q.includes('bertugas') || q.includes('tarif')) {
+    if (
+      q.includes('dokter') ||
+      q.includes('jadwal') ||
+      q.includes('spesialis') ||
+      q.includes('bertugas') ||
+      q.includes('tarif')
+    ) {
       if (doctors.length > 0) {
         const docList = doctors
           .map((d) => `• **dr. ${d.name}** (${d.spesialis}) — Tarif: Rp ${Number(d.fee).toLocaleString('id-ID')}`)
@@ -158,13 +176,19 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
       };
     }
 
-    // Tanya Antrean / Booking
-    if (q.includes('antre') || q.includes('daftar') || q.includes('booking') || q.includes('tiket')) {
+    // Panduan Alur Antrean
+    if (
+      q.includes('antrean') ||
+      q.includes('daftar') ||
+      q.includes('booking') ||
+      q.includes('tiket') ||
+      q.includes('cara')
+    ) {
       return {
-        text: 'Untuk mendaftar antrean mandiri, pilih dokter tujuan di aplikasi lalu konfirmasi tiket antrean Anda. Nomor tiket akan terbit seketika dan terhubung ke monitor lobi klinik.',
+        text: 'Alur pendaftaran antrean di ReyClinic sangat mudah:\n\n1. Pastikan NIK Anda terhubung pada profil.\n2. Klik tombol **Ambil Antrean** di menu beranda.\n3. Pilih dokter spesialis tujuan Anda.\n4. Pantau nomor panggilan Anda secara real-time dari aplikasi ini.\n\nApakah Anda ingin mendaftar antrean sekarang?',
         actionButton: onOpenBooking
           ? {
-              label: 'Ambil Nomor Antrean',
+              label: 'Buka Menu Pendaftaran Antrean',
               onClick: () => {
                 onClose();
                 onOpenBooking();
@@ -174,12 +198,19 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
       };
     }
 
-    // Default Fallback
+    // Jam Operasional
+    if (q.includes('jam') || q.includes('buka') || q.includes('operasional') || q.includes('tutup')) {
+      return {
+        text: 'ReyClinic Central beroperasi setiap hari:\n\n• **Senin – Sabtu:** 08:00 – 21:00 WIB\n• **Minggu & Libur Nasional:** 09:00 – 17:00 WIB (Poli Siaga Darurat Ringan)\n\nLayanan reservasi antrean online dapat diakses 24 jam melalui aplikasi ini.',
+      };
+    }
+
+    // Default Triage Response
     return {
-      text: `Terima kasih atas pertanyaannya! Saya ReyAI siap membantu rekomendasi poliklinik atau dokter yang sesuai dengan keluhan Anda di ReyClinic.`,
+      text: 'Terima kasih telah berkonsultasi. Untuk gejala tersebut, kami menyarankan Anda berkonsultasi langsung dengan dokter jaga kami di ReyClinic agar mendapatkan diagnosa klinis dan penanganan obat yang tepat.\n\nBisa saya bantu pilihkan dokter yang bertugas hari ini?',
       actionButton: onOpenBooking
         ? {
-            label: 'Lihat Pilihan Dokter',
+            label: 'Pilih Dokter & Daftar Antrean',
             onClick: () => {
               onClose();
               onOpenBooking();
@@ -189,55 +220,56 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
     };
   };
 
-  const handleSend = async (textToSend?: string) => {
-    const query = (textToSend || input).trim();
+  const handleSend = async (manualQuery?: string) => {
+    const query = manualQuery || input.trim();
     if (!query || isTyping) return;
 
-    const userTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const userMsg: Message = {
       id: `user-${Date.now()}`,
       sender: 'user',
       text: query,
-      time: userTime,
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
     };
-
-    // Siapkan riwayat percakapan untuk konteks multi-turn AI
-    const historyPayload = messages.slice(-6).map((m) => ({
-      role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
-      text: m.text,
-    }));
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
     try {
-      // Panggil backend ReyAI API (Google Gemini Proxy + Postgres Doctor Context + Triage Matcher)
+      // 1. Panggil backend AI Controller (Google Gemini Flash / Lite Proxy)
       const res = await sendCustomerAiChatService({
         message: query,
-        history: historyPayload,
+        history: messages.slice(-6).map((m) => ({ role: m.sender === 'user' ? 'user' : 'model', text: m.text })),
       });
 
-      const shouldShowBooking = (res.recommendBooking || Boolean(res.recommendedDoctorId)) && Boolean(onOpenBooking);
+      let actionButton: { label: string; onClick: () => void } | undefined = undefined;
 
-      const buttonLabel = res.recommendedDoctorName
-        ? `Daftar Antrean ke ${res.recommendedDoctorName}`
-        : 'Daftar Antrean Dokter Sekarang';
+      // Cek apakah AI merekomendasikan dokter spesifik
+      if (res.recommendedDoctorId && onOpenBooking) {
+        const matchedDoc = doctors.find((d) => d.id === res.recommendedDoctorId);
+        actionButton = {
+          label: `Daftar Antrean ke ${matchedDoc ? matchedDoc.name : 'Dokter Rekomendasi'}`,
+          onClick: () => {
+            onClose();
+            onOpenBooking(res.recommendedDoctorId);
+          },
+        };
+      } else if (res.recommendBooking && onOpenBooking) {
+        actionButton = {
+          label: 'Lihat Jadwal & Daftar Antrean',
+          onClick: () => {
+            onClose();
+            onOpenBooking();
+          },
+        };
+      }
 
       const aiMsg: Message = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
         text: res.reply,
         time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-        actionButton: shouldShowBooking
-          ? {
-              label: buttonLabel,
-              onClick: () => {
-                onClose();
-                onOpenBooking?.(res.recommendedDoctorId);
-              },
-            }
-          : undefined,
+        actionButton,
       };
 
       setMessages((prev) => [...prev, aiMsg]);
@@ -259,108 +291,116 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-lg h-[85dvh] sm:h-[620px] bg-[#F8FAF8] border border-white/60 shadow-2xl rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200">
-        {/* 1. Header Chat (Nordic Medical Emerald) */}
-        <div className="bg-gradient-to-r from-[#059669] via-[#047857] to-[#0D9488] p-4 text-white flex items-center justify-between shrink-0 shadow-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg h-[88dvh] sm:h-[640px] bg-[#F8FAFC] border border-white/80 shadow-[0_25px_60px_-15px_rgba(14,90,89,0.25)] rounded-t-[32px] sm:rounded-[32px] flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200">
+        {/* 1. Header Chat (Pristine Medical White Glassmorphism) */}
+        <div className="px-5 py-4 bg-white/95 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between shrink-0 shadow-[0_4px_20px_-2px_rgba(14,90,89,0.03)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
-              <Stethoscope size={22} className="text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="font-extrabold text-sm sm:text-base leading-tight">ReyAI Health Assistant</h3>
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black tracking-wider uppercase">
-                  <Sparkles size={10} className="text-amber-300" />
-                  <span>Smart Triage</span>
-                </span>
+            {/* Ambient Medical Avatar */}
+            <div className="relative">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#0E5A59] via-[#116968] to-[#2EC4B6] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(14,90,89,0.25)]">
+                <Stethoscope size={22} className="stroke-[2.5]" />
               </div>
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-100/90 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-                <span>Konsultasi & Rekomendasi Dokter 24/7</span>
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2EC4B6] ring-2 ring-white shadow-xs animate-pulse" />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-sm sm:text-base text-[#0F172A] tracking-tight leading-tight">
+                  ReyAI Medical Assistant
+                </h3>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-[#64748B] font-medium mt-0.5">
+                <span className="flex items-center gap-1 text-[#0E5A59] font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2EC4B6]" />
+                  Online Siaga
+                </span>
+                <span>•</span>
+                <span>Triage & Jadwal Dokter 24/7</span>
               </div>
             </div>
           </div>
+
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer transition-colors"
+            className="w-9 h-9 rounded-full bg-slate-100/80 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center cursor-pointer transition-all active:scale-95 border border-transparent hover:border-rose-100"
             title="Tutup Chat"
           >
-            <X size={16} />
+            <X size={17} className="stroke-[2.4]" />
           </button>
         </div>
 
-        {/* 2. Sub-banner: Smart Triage Quick Hint */}
-        <div className="bg-emerald-50/80 border-b border-emerald-100 px-4 py-2 flex items-center justify-between text-[11px] text-[#065F46] shrink-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-sm shrink-0">🎯</span>
+        {/* 2. Micro Triage Status Bar */}
+        <div className="bg-[#F0FAF9]/90 border-b border-[#CCEBE9]/70 px-5 py-2 flex items-center justify-between text-[11px] text-[#0E5A59] shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[#2EC4B6] shrink-0" />
             <span className="font-semibold truncate">
-              Bingung pilih dokter? Tuliskan gejala Anda pada ReyAI
+              Ceritakan keluhan Anda untuk rekomendasi dokter & poli spesialis
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => handleSend('Bantu saya memilih dokter yang tepat sesuai keluhan')}
-            className="text-[10px] font-extrabold text-[#059669] hover:underline shrink-0 ml-2 cursor-pointer"
-          >
-            Pilihkan →
-          </button>
+          <span className="text-[10px] font-mono font-bold text-[#0E5A59] bg-white px-2 py-0.5 rounded-full border border-[#CCEBE9] shrink-0 ml-2">
+            ReyClinic AI
+          </span>
         </div>
 
         {/* 3. Chat Message List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs bg-[#F8FAFC]">
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-7 h-7 rounded-full bg-emerald-100 text-[#059669] flex items-center justify-center shrink-0 mb-1 border border-emerald-200 shadow-2xs">
-                  <Bot size={15} />
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0E5A59] to-[#147B79] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                  <Bot size={16} className="stroke-[2.3]" />
                 </div>
               )}
 
-              <div
-                className={`max-w-[84%] rounded-2xl px-3.5 py-2.5 shadow-2xs space-y-1.5 ${
-                  msg.sender === 'user'
-                    ? 'bg-gradient-to-tr from-[#059669] to-[#047857] text-white rounded-br-xs'
-                    : 'bg-white border border-slate-200/80 text-slate-800 rounded-bl-xs'
-                }`}
-              >
-                <div className="whitespace-pre-line leading-relaxed">
-                  {renderFormattedText(msg.text, msg.sender === 'user')}
-                </div>
-
-                {/* Tombol Aksi Cepat 1-Klik Booking Dokter Terkait */}
-                {msg.actionButton && (
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={msg.actionButton.onClick}
-                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 hover:from-emerald-100 hover:to-teal-100 text-[#059669] border border-emerald-300 font-extrabold text-[11px] flex items-center justify-between transition-all cursor-pointer shadow-xs active:scale-[0.98] group"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Calendar size={14} className="text-[#059669] shrink-0 stroke-[2.4]" />
-                        <span className="truncate">{msg.actionButton.label}</span>
-                      </div>
-                      <ArrowRight size={13} className="shrink-0 text-[#059669] group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+              {msg.sender === 'ai' ? (
+                <div className="max-w-[86%] sm:max-w-[80%] bg-white border border-[#E2E8F0] rounded-2xl rounded-tl-xs p-4 shadow-[0_4px_20px_-2px_rgba(14,90,89,0.06)] space-y-2.5 text-[#0F172A]">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0E5A59] flex items-center gap-1.5">
+                      <Sparkles size={11} className="text-[#2EC4B6]" />
+                      <span>ReyAI Assistant</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">{msg.time}</span>
                   </div>
-                )}
 
-                <div
-                  className={`text-[9px] font-mono text-right ${
-                    msg.sender === 'user' ? 'text-emerald-100/80' : 'text-slate-400'
-                  }`}
-                >
-                  {msg.time}
+                  <div className="whitespace-pre-line leading-relaxed text-xs text-[#1E293B]">
+                    {renderFormattedText(msg.text, false)}
+                  </div>
+
+                  {/* Tombol Aksi Cepat 1-Klik Booking Dokter Terkait */}
+                  {msg.actionButton && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={msg.actionButton.onClick}
+                        className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-[#0E5A59] via-[#0A4443] to-[#0E5A59] hover:from-[#004140] hover:to-[#002B2A] text-white font-bold text-xs flex items-center justify-between transition-all cursor-pointer shadow-[0_4px_14px_rgba(14,90,89,0.25)] active:scale-[0.98] group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Calendar size={15} className="text-[#2EC4B6] shrink-0 stroke-[2.4]" />
+                          <span className="truncate">{msg.actionButton.label}</span>
+                        </div>
+                        <ArrowRight
+                          size={14}
+                          className="shrink-0 text-white group-hover:translate-x-1 transition-transform"
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="max-w-[80%] bg-gradient-to-tr from-[#0E5A59] via-[#0A4443] to-[#0E5A59] text-white rounded-2xl rounded-tr-xs px-4 py-3 shadow-[0_4px_16px_rgba(14,90,89,0.2)] text-xs leading-relaxed">
+                  <div className="whitespace-pre-line">{msg.text}</div>
+                  <div className="text-[9px] font-mono text-right text-emerald-200/80 mt-1.5">{msg.time}</div>
+                </div>
+              )}
 
               {msg.sender === 'user' && (
-                <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mb-1">
-                  <User size={14} />
+                <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs font-bold text-xs">
+                  <User size={15} />
                 </div>
               )}
             </div>
@@ -368,14 +408,17 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-emerald-100 text-[#059669] flex items-center justify-center shrink-0">
-                <Bot size={15} />
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0E5A59] to-[#147B79] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Bot size={16} className="stroke-[2.3]" />
               </div>
-              <div className="bg-white border border-slate-200/80 rounded-2xl rounded-bl-xs px-3.5 py-2.5 shadow-2xs flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#059669] animate-bounce [animation-delay:300ms]" />
+              <div className="bg-white border border-[#E2E8F0] rounded-2xl rounded-tl-xs px-4 py-3 shadow-[0_4px_16px_-2px_rgba(14,90,89,0.05)] flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-[#64748B]">ReyAI sedang menganalisis</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E5A59] animate-bounce" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E5A59] animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E5A59] animate-bounce [animation-delay:300ms]" />
+                </div>
               </div>
             </div>
           )}
@@ -383,15 +426,19 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
         </div>
 
         {/* 4. Quick Suggestion Prompts */}
-        <div className="px-4 py-2 border-t border-slate-200/60 bg-white/70 backdrop-blur-md overflow-x-auto scrollbar-none flex gap-1.5 shrink-0">
+        <div className="px-4 py-2.5 bg-white/90 backdrop-blur-md border-t border-slate-100 overflow-x-auto no-scrollbar flex items-center gap-2 shrink-0">
+          <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider shrink-0 mr-0.5">
+            Saran:
+          </span>
           {quickPrompts.map((prompt, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => handleSend(prompt)}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#059669] border border-slate-200/80 transition-colors whitespace-nowrap cursor-pointer shrink-0 font-medium"
+              onClick={() => handleSend(prompt.text)}
+              className="text-[11px] px-3 py-1.5 rounded-full bg-white hover:bg-[#F0FAF9] text-[#0E5A59] border border-[#CCEBE9] hover:border-[#0E5A59] transition-all whitespace-nowrap cursor-pointer shrink-0 font-semibold shadow-2xs hover:shadow-xs active:scale-95 flex items-center gap-1.5"
             >
-              {prompt}
+              <span>{prompt.icon}</span>
+              <span>{prompt.label}</span>
             </button>
           ))}
         </div>
@@ -402,22 +449,24 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
             e.preventDefault();
             handleSend();
           }}
-          className="p-3 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0"
+          className="p-3.5 bg-white border-t border-slate-100 flex items-center gap-2.5 shrink-0"
         >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tuliskan keluhan Anda (misal: sakit gigi, nyeri lambung)..."
-            className="flex-1 py-2.5 px-3.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-[#059669] text-slate-900 placeholder:text-slate-400"
-          />
+          <div className="flex-1 relative flex items-center">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Tulis keluhan kesehatan Anda (contoh: sakit gigi, nyeri lambung)..."
+              className="w-full py-3 pl-4 pr-10 text-xs rounded-2xl border border-slate-200 bg-[#F8FAFC] focus:bg-white focus:outline-none focus:border-[#0E5A59] focus:ring-2 focus:ring-[#0E5A59]/10 text-[#0F172A] placeholder:text-slate-400 transition-all font-sans"
+            />
+          </div>
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="w-10 h-10 rounded-xl bg-[#059669] hover:bg-[#047857] disabled:bg-slate-200 text-white disabled:text-slate-400 flex items-center justify-center shadow-xs transition-colors cursor-pointer shrink-0"
+            className="w-11 h-11 rounded-2xl bg-[#0E5A59] hover:bg-[#004140] disabled:bg-slate-100 disabled:text-slate-300 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(14,90,89,0.25)] transition-all cursor-pointer disabled:cursor-not-allowed active:scale-95 shrink-0"
             title="Kirim Pesan"
           >
-            <Send size={15} />
+            <Send size={16} className="stroke-[2.4]" />
           </button>
         </form>
       </div>

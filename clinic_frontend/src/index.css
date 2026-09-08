@@ -2,11 +2,20 @@
 @import "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap";
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --color-primary: #0e5a59;
+  --color-primary-container: #004140;
+  --color-secondary: #2ec4b6;
+  --color-canvas: #f8fafc;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #191c1d;
-    background-color: #f8f9fa;
+    color: #0f172a;
+    background-color: #f8fafc;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -16,7 +25,8 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', 'Sora', sans-serif;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+    color: #0f172a;
   }
 }
 
@@ -28,31 +38,47 @@
   line-height: 1;
 }
 
-/* Clinical Clarity Theme Custom Utilities */
+/* Clinical Clarity Theme Tokens & Custom Utilities (DESIGN.md) */
+:root {
+  --color-primary: #0e5a59;
+  --color-primary-container: #004140;
+  --color-secondary: #2ec4b6;
+  --color-tertiary: #48bb78;
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --border-subtle: #e2e8f0;
+}
+
 .clinical-bg {
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
 }
 
 .clinical-card {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 20px -2px rgba(14, 90, 89, 0.05), 0 2px 4px -1px rgba(14, 90, 89, 0.02);
   border-radius: 1.5rem;
 }
 
 .clinical-card-sm {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 10px -1px rgba(14, 90, 89, 0.03);
   border-radius: 1rem;
 }
 
 .soft-shadow {
-  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(14, 90, 89, 0.05);
 }
 
 .ambient-shadow {
-  box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.05), 0px 4px 12px -2px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 25px -3px rgba(14, 90, 89, 0.08), 0 4px 10px -2px rgba(14, 90, 89, 0.03);
+}
+
+.teal-glow {
+  box-shadow: 0 0 24px -2px rgba(46, 196, 182, 0.35);
 }
 
 /* Tactile Clickable Interactive Class */
@@ -67,6 +93,34 @@
 }
 
 /* Buttons */
+.btn-teal {
+  background-color: #0e5a59;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.btn-teal:hover {
+  background-color: #094443;
+  box-shadow: 0 6px 18px rgba(14, 90, 89, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-teal:active {
+  transform: scale(0.95) translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.badge-mint {
+  background-color: rgba(46, 196, 182, 0.12);
+  color: #0e5a59;
+  border: 1px solid rgba(46, 196, 182, 0.3);
+  font-weight: 700;
+  border-radius: 9999px;
+}
+
 .btn-forest {
   background-color: #051c12;
   color: #ffffff;

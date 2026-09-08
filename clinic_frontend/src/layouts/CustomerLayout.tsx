@@ -240,28 +240,28 @@ export const CustomerLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-[#F6F8F6] text-[#12241E] font-sans antialiased pb-28 selection:bg-emerald-100 selection:text-[#0F4C3A]">
-      {/* 1. Header Bar (Nordic Frosted Glass) */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl px-4 sm:px-6 pt-3.5 pb-3 border-b border-emerald-950/6 print:hidden shadow-xs">
+    <div className="min-h-[100dvh] w-full bg-[#F8FAFC] text-[#0F172A] font-sans antialiased pb-28 selection:bg-[#2EC4B6]/20 selection:text-[#0E5A59]">
+      {/* 1. Header Bar (Clinical Frosted Glass) */}
+      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl px-4 sm:px-6 pt-3.5 pb-3 border-b border-[#E2E8F0] print:hidden shadow-[0_4px_20px_-2px_rgba(14,90,89,0.03)]">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-[#059669] flex items-center justify-center font-black text-base shadow-2xs shrink-0 select-none border border-emerald-200">
+            <div className="w-9 h-9 rounded-2xl bg-[#F0FAF9] text-[#0E5A59] flex items-center justify-center font-black text-base shadow-2xs shrink-0 select-none border border-[#CCEBE9]">
               <span>🩺</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#5A6E65]">
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#64748B]">
                   {patient?.name || user?.username || 'Pasien'}
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2EC4B6] ring-2 ring-[#2EC4B6]/20 animate-pulse" />
               </div>
               <button
                 type="button"
-                className="text-xs sm:text-sm font-extrabold text-[#12241E] flex items-center gap-1 leading-tight hover:text-[#059669] transition-colors cursor-pointer"
+                className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex items-center gap-1 leading-tight hover:text-[#0E5A59] transition-colors cursor-pointer"
               >
-                <MapPin size={12} className="text-[#059669]" />
+                <MapPin size={12} className="text-[#0E5A59]" />
                 <span>ReyClinic Central</span>
-                <span className="text-[9px] text-[#5A6E65]">▼</span>
+                <span className="text-[9px] text-[#64748B]">▼</span>
               </button>
             </div>
           </div>
@@ -270,7 +270,7 @@ export const CustomerLayout: React.FC = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-emerald-950/10 text-[#5A6E65] hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-2xs"
+              className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-[#E2E8F0] text-[#64748B] hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-2xs"
               title="Keluar"
             >
               <LogOut size={15} />
@@ -282,8 +282,8 @@ export const CustomerLayout: React.FC = () => {
       {/* 2. Nested Sub-Page Content */}
       <main className="max-w-md mx-auto px-4 sm:px-6 py-4 space-y-4">
         {loading && (
-          <div className="bg-white/80 backdrop-blur-md border border-emerald-950/8 rounded-2xl p-2.5 flex items-center justify-center gap-2 text-xs text-[#5A6E65] animate-pulse shadow-2xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
+          <div className="bg-white/85 backdrop-blur-md border border-[#E2E8F0] rounded-2xl p-2.5 flex items-center justify-center gap-2 text-xs text-[#64748B] animate-pulse shadow-2xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-[#2EC4B6] animate-ping" />
             <span>Memperbarui data antrean & rekam medis...</span>
           </div>
         )}
@@ -294,14 +294,14 @@ export const CustomerLayout: React.FC = () => {
       {/* 3. Floating Pill Capsule Dock + Detached Action Button (ReyClinic Glassmorphism) */}
       <div className="fixed bottom-5 inset-x-4 max-w-md mx-auto flex items-center gap-2.5 z-40 print:hidden">
         {/* Kapsul Putih Navigasi (Icon + Label Teks Cantik) */}
-        <nav className="flex-1 h-[60px] bg-white/80 backdrop-blur-2xl border border-white/80 rounded-full px-2 py-1 shadow-[0_12px_32px_rgba(5,150,105,0.08),0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_1px_rgba(255,255,255,0.95)] flex items-center justify-around">
+        <nav className="flex-1 h-[60px] bg-white/90 backdrop-blur-2xl border border-white/80 rounded-full px-2 py-1 shadow-[0_12px_32px_rgba(14,90,89,0.08),0_2px_8px_rgba(0,0,0,0.02),inset_0_1px_1px_rgba(255,255,255,0.95)] flex items-center justify-around">
           {/* 1. Home */}
           <NavLink
             to="/customers"
             end
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
+                isActive ? 'text-[#0E5A59]' : 'text-[#64748B] hover:text-[#0E5A59]'
               }`
             }
             title="Home"
@@ -311,15 +311,15 @@ export const CustomerLayout: React.FC = () => {
                 <div
                   className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
                     isActive
-                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
-                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                      ? 'bg-gradient-to-tr from-[#0E5A59] via-[#004140] to-[#0E5A59] text-white shadow-[0_2px_8px_rgba(14,90,89,0.3)]'
+                      : 'text-[#64748B] group-hover:text-[#0E5A59] group-hover:bg-[#F0FAF9]'
                   }`}
                 >
                   <Home size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
                 </div>
                 <span
                   className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
-                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                    isActive ? 'font-bold text-[#0E5A59]' : 'font-medium text-[#64748B]'
                   }`}
                 >
                   Home
@@ -333,7 +333,7 @@ export const CustomerLayout: React.FC = () => {
             to="/customers/history"
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
+                isActive ? 'text-[#0E5A59]' : 'text-[#64748B] hover:text-[#0E5A59]'
               }`
             }
             title="Riwayat"
@@ -343,15 +343,15 @@ export const CustomerLayout: React.FC = () => {
                 <div
                   className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
                     isActive
-                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
-                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                      ? 'bg-gradient-to-tr from-[#0E5A59] via-[#004140] to-[#0E5A59] text-white shadow-[0_2px_8px_rgba(14,90,89,0.3)]'
+                      : 'text-[#64748B] group-hover:text-[#0E5A59] group-hover:bg-[#F0FAF9]'
                   }`}
                 >
                   <FileText size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
                 </div>
                 <span
                   className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
-                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                    isActive ? 'font-bold text-[#0E5A59]' : 'font-medium text-[#64748B]'
                   }`}
                 >
                   Riwayat
@@ -365,7 +365,7 @@ export const CustomerLayout: React.FC = () => {
             to="/customers/profile"
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center py-0.5 transition-all cursor-pointer group active:scale-95 ${
-                isActive ? 'text-[#059669]' : 'text-[#5A6E65] hover:text-[#059669]'
+                isActive ? 'text-[#0E5A59]' : 'text-[#64748B] hover:text-[#0E5A59]'
               }`
             }
             title="Profile"
@@ -375,15 +375,15 @@ export const CustomerLayout: React.FC = () => {
                 <div
                   className={`w-9 h-6 rounded-full flex items-center justify-center transition-all ${
                     isActive
-                      ? 'bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white shadow-[0_2px_8px_rgba(5,150,105,0.32)]'
-                      : 'text-[#5A6E65] group-hover:text-[#059669] group-hover:bg-emerald-50/60'
+                      ? 'bg-gradient-to-tr from-[#0E5A59] via-[#004140] to-[#0E5A59] text-white shadow-[0_2px_8px_rgba(14,90,89,0.3)]'
+                      : 'text-[#64748B] group-hover:text-[#0E5A59] group-hover:bg-[#F0FAF9]'
                   }`}
                 >
                   <User size={16} className={isActive ? 'stroke-[2.4]' : 'stroke-[1.9]'} />
                 </div>
                 <span
                   className={`text-[10px] tracking-tight transition-colors mt-0.5 ${
-                    isActive ? 'font-bold text-[#059669]' : 'font-medium text-[#5A6E65]'
+                    isActive ? 'font-bold text-[#0E5A59]' : 'font-medium text-[#64748B]'
                   }`}
                 >
                   Profile
@@ -397,11 +397,11 @@ export const CustomerLayout: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowAiModal(true)}
-          className="w-[60px] h-[60px] rounded-full bg-gradient-to-tr from-[#059669] via-[#047857] to-[#0D9488] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(5,150,105,0.4),0_2px_8px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/50 ring-4 ring-white/70 backdrop-blur-xl hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group relative"
+          className="w-[60px] h-[60px] rounded-full bg-gradient-to-tr from-[#0E5A59] via-[#004140] to-[#2EC4B6] text-white flex items-center justify-center shadow-[0_10px_28px_rgba(14,90,89,0.35),0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.4)] border border-white/50 ring-4 ring-white/80 backdrop-blur-xl hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group relative"
           title="Tanya ReyAI (Asisten Kesehatan)"
         >
           <Stethoscope size={23} className="stroke-[2.4] group-hover:rotate-12 transition-transform duration-300" />
-          <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#10B981] ring-2 ring-white shadow-xs animate-pulse" />
+          <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#2EC4B6] ring-2 ring-white shadow-xs animate-pulse" />
         </button>
       </div>
 

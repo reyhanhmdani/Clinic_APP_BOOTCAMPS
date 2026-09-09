@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Eye, EyeOff, AlertCircle, ShieldCheck, HeartPulse, Clock } from 'lucide-react';
-import { registerService } from '../../services/authService';
+import { registerService, googleAuthService } from '../../services/authService';
 import { useAuthStore } from '../../stores/authStore';
+import { useGoogleLogin } from '@react-oauth/google';
+import { toast } from 'sonner';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -57,6 +59,32 @@ export const RegisterPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // handle submit regis via Google
+  const handleGoogleRegister = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsLoading(true);
+
+        const authData = await googleAuthService(tokenResponse.access_token);
+        loginStore(authData.user as any, authData.token);
+        toast.success('Pendaftaran dengan Google berhasil!');
+
+        if (authData.user.role === 'ADMIN') {
+          navigate('/dashboard');
+        } else {
+          navigate('/customers');
+        }
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || error.message || 'Gagal mendaftar dengan Google');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      toast.error('Pendaftaran Google dibatalkan atau gagal');
+    },
+  });
 
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center p-0 lg:p-8 font-sans antialiased overflow-x-hidden bg-[#061e15] selection:bg-[#b4f105] selection:text-[#061e15]">
@@ -233,6 +261,41 @@ export const RegisterPage: React.FC = () => {
                   <span>{isLoading ? 'Creating Account...' : 'Register'}</span>
                 </button>
               </form>
+
+              {/* Social Register Button */}
+              <div className="space-y-2.5 pt-2">
+                <div className="relative my-2 flex items-center justify-center">
+                  <div className="border-t border-slate-200 w-full" />
+                  <span className="bg-white px-2.5 text-[10px] uppercase tracking-wider text-slate-400 font-bold absolute">atau</span>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => handleGoogleRegister()}
+                  className="w-full py-3 px-4 rounded-full bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 text-xs font-bold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.37 7.34 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.04 14.28c-.24-.72-.38-1.49-.38-2.28s.14-1.56.38-2.28V6.57H1.26C.46 8.16 0 9.97 0 12s.46 3.84 1.26 5.43l3.78-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.63 1.26 6.57l3.78 2.85c.95-2.83 3.6-4.93 6.96-4.93z"
+                    />
+                  </svg>
+                  <span>Daftar Cepat dengan Google</span>
+                </button>
+              </div>
             </div>
 
             {/* Footer Switcher */}

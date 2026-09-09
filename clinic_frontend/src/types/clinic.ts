@@ -9,6 +9,8 @@ export interface User {
   username: string;
   email: string;
   role: Role;
+  googleId?: string | null;
+  provider?: string;
   createdAt?: string;
 }
 

@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import type { User } from '../types/clinic';
 
 interface AuthState {
@@ -6,6 +6,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   login: (user: User, token: string) => void;
+  updateUser: (updatedUser: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -28,6 +29,14 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.setItem('user', JSON.stringify(user));
       set({ user, token, isAuthenticated: true });
     },
+    updateUser: (updatedUser: Partial<User>) => {
+      set((state) => {
+        if (!state.user) return state;
+        const newUser = { ...state.user, ...updatedUser };
+        localStorage.setItem('user', JSON.stringify(newUser));
+        return { user: newUser };
+      });
+    },
     logout: () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -35,3 +44,4 @@ export const useAuthStore = create<AuthState>((set) => {
     },
   };
 });
+

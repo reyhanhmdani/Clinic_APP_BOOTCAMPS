@@ -53,3 +53,22 @@ export const registerService = async (input: RegisterInput): Promise<AuthRespons
   }
   return authData;
 };
+
+export const googleAuthService = async (credential: string): Promise<AuthResponse> => {
+  const response = await api.post<{ data: AuthResponse; message: string }>('/auth/google', { credential });
+  const authData = response.data.data;
+  if (!authData) {
+    throw new Error('Format respons server tidak valid');
+  }
+  return authData;
+};
+
+export const linkGoogleService = async (credential: string): Promise<User> => {
+  const response = await api.post<{ data: User; message: string }>('/auth/link-google', { credential });
+  const userData = response.data.data;
+  if (!userData) {
+    throw new Error('Format respons server tidak valid');
+  }
+  return userData;
+};
+

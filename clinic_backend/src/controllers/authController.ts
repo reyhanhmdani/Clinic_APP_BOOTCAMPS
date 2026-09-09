@@ -1,4 +1,4 @@
-import { getUserService, loginService, registerService } from '../services/authServices.js';
+import { getUserService, loginService, registerService, googleAuthService, linkGoogleService } from '../services/authServices.js';
 import { Request, Response, NextFunction } from 'express';
 
 export const getUserControler = async (req: Request, res: Response, next: NextFunction) => {
@@ -35,6 +35,37 @@ export const registerController = async (req: Request, res: Response, next: Next
     return res.status(201).json({
       message: 'Berhasil mendaftart sebagai Customer',
       data: newUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const googleAuthController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { credential } = req.body;
+    const result = await googleAuthService(credential);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login Google berhasil',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const linkGoogleController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user.id;
+    const { credential } = req.body;
+    const result = await linkGoogleService(userId, credential);
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.user,
     });
   } catch (error) {
     next(error);

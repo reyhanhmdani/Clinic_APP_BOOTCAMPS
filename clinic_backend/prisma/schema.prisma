@@ -45,8 +45,10 @@ model User {
   id        Int      @id @default(autoincrement())
   username  String?  @db.VarChar(255)
   email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
+  password  String?   @db.VarChar(255)
   role      Role     @default(CUSTOMER)
+  googleId  String?  @unique @map("google_id") @db.VarChar(255)
+  provider  String   @default("LOCAL") @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 

@@ -4,6 +4,8 @@ import { Eye, EyeOff, AlertCircle, ShieldCheck, HeartPulse, Clock } from 'lucide
 import { loginService } from '../../services/authService';
 import { useAuthStore } from '../../stores/authStore';
 import { toast } from 'sonner';
+import { useGoogleLogin } from '@react-oauth/google';
+import { googleAuthService } from '../../services/authService';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -37,6 +39,32 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsLoading(true);
+
+        // kirim akses token ke BE
+        const authData = await googleAuthService(tokenResponse.access_token);
+        loginStore(authData.user as any, authData.token);
+        toast.success('Login dengan google berhasil');
+
+        if (authData.user.role === 'ADMIN') {
+          navigate('/dashboard');
+        } else {
+          navigate('/customers');
+        }
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || error.message || 'Gagal login dengan google');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      toast.error('Login Google dibatalkan atau gagal');
+    },
+  });
+
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center p-0 lg:p-8 font-sans antialiased overflow-x-hidden bg-[#061e15] selection:bg-[#b4f105] selection:text-[#061e15]">
       {/* 1. Desktop Ambient Background */}
@@ -48,7 +76,6 @@ export const LoginPage: React.FC = () => {
 
       {/* 2. Main Responsive Grid Container */}
       <div className="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-screen lg:min-h-0">
-  
         {/* sisi kiri */}
         <div className="hidden lg:flex lg:col-span-6 flex-col justify-between space-y-7 text-white pr-6">
           <div className="space-y-4">
@@ -199,11 +226,11 @@ export const LoginPage: React.FC = () => {
                 {/* 1. Login with Google */}
                 <button
                   type="button"
+                  disabled={isLoading}
                   onClick={() => {
-                    setEmail('budi@gmail.com');
-                    setPassword('budi123');
+                    handleGoogleLogin();
                   }}
-                  className="w-full py-3 px-4 rounded-full bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 text-xs font-bold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                  className="w-full py-3 px-4 rounded-full bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 text-xs font-bold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path

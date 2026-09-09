@@ -1,13 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { User, ShieldCheck, LogOut } from 'lucide-react';
+import { User, ShieldCheck, LogOut, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useCustomerContext } from '../../layouts/CustomerLayout';
+import { useGoogleLogin } from '@react-oauth/google';
+import { linkGoogleService } from '../../services/authService';
+import { toast } from 'sonner';
 
 export const CustomerProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, updateUser, logout } = useAuthStore();
   const { patient, isNikLinked, openNikModal } = useCustomerContext();
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+
+  const handleLinkGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsLinkingGoogle(true);
+        const updatedUser = await linkGoogleService(tokenResponse.access_token);
+        updateUser(updatedUser);
+        toast.success('Akun Google berhasil ditautkan!');
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || error.message || 'Gagal menautkan akun Google');
+      } finally {
+        setIsLinkingGoogle(false);
+      }
+    },
+    onError: () => {
+      toast.error('Penautan akun Google dibatalkan');
+    },
+  });
 
   const handleLogout = () => {
     logout();
@@ -68,6 +90,67 @@ export const CustomerProfilePage: React.FC = () => {
             <span className="font-bold text-[#0F172A] text-right max-w-[200px] truncate">
               {patient?.address || '-'}
             </span>
+          </div>
+        </div>
+
+        {/* Keamanan & Integrasi Akun Google */}
+        <div className="border-t border-[#E2E8F0] pt-3.5 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#0F172A]">Integrasi Akun Google</span>
+            {user?.googleId ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                <CheckCircle2 size={13} className="text-emerald-600" />
+                <span>Terhubung</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                Belum Terhubung
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/80 border border-slate-200/70">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.37 7.34 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.04 14.28c-.24-.72-.38-1.49-.38-2.28s.14-1.56.38-2.28V6.57H1.26C.46 8.16 0 9.97 0 12s.46 3.84 1.26 5.43l3.78-3.15z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.63 1.26 6.57l3.78 2.85c.95-2.83 3.6-4.93 6.96-4.93z"
+                  />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 truncate">Google Single Sign-On</p>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {user?.googleId
+                    ? 'Akun Google aktif untuk akses cepat 1-klik'
+                    : 'Tautkan akun Google untuk kemudahan login'}
+                </p>
+              </div>
+            </div>
+
+            {!user?.googleId && (
+              <button
+                type="button"
+                disabled={isLinkingGoogle}
+                onClick={() => handleLinkGoogle()}
+                className="py-1.5 px-3 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              >
+                {isLinkingGoogle ? 'Menautkan...' : 'Hubungkan'}
+              </button>
+            )}
           </div>
         </div>
 

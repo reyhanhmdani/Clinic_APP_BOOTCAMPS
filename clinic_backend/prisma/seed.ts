@@ -10,8 +10,23 @@ const getDaysAgo = (days: number, hour = 9, minute = 0) => {
   return d;
 };
 
+// Helper tanggal lokal Indonesia (agar tidak kena UTC rollover issue sebelum jam 7 pagi)
+const getLocalTodayString = (date = new Date()) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 const today = new Date();
-const todayStr = today.toISOString().split("T")[0];
+const todayStr = getLocalTodayString(today);
+
+// Helper waktu untuk hari ini
+const getTodayTime = (hour = 8, minute = 0) => {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d;
+};
 
 // --- 1. DATA USER CUSTOMER (15 Akun) & ADMIN (1 Akun) ---
 const USERS_DATA = [
@@ -879,14 +894,14 @@ const CONSULTATIONS_DATA = [
     ],
   },
 
-  // V7 - V9: Selesai Periksa tapi BELUM BAYAR DI KASIR (is_dispensed: false, SIAP DIPROSES DI KASIR)
+  // V7: Selesai Periksa & Lunas Ambil Obat
   {
     visit_id: "V7",
     complaint: "Pusing berputar (vertigo) dan mual saat bangun tidur pagi.",
     diagnosis: "BPPV / Vertigo Perifer (H81.1)",
     notes: "Hindari gerakan kepala mendadak. Istirahat posisi kepala agak tinggi.",
     consultation_fee: 150000,
-    is_dispensed: false,
+    is_dispensed: true,
     prescribed_medicines: [
       { medicine_id: "5", qty: 2, price: 6000 },
       { medicine_id: "9", qty: 1, price: 10000 },
@@ -1166,17 +1181,19 @@ const INVOICES_DATA = [
     paidAt: new Date(`${todayStr}T09:15:00`),
   },
 
-  // 3. V7 - V9: BELUM BAYAR (SIAP DIPROSES DI KASIR)
+  // 3. V7: LUNAS TRANSFER & SELESAI AMBIL OBAT
   {
     visit_id: "V7",
     invoice_no: "INV-2025-0024",
-    status: "UNPAID",
+    status: "PAID",
     consultation_fee: 150000,
     medicine_fee: 22000,
     total: 172000,
-    payment_method: "CASH",
-    paidAt: null,
+    payment_method: "TRANSFER",
+    paidAt: new Date(`${todayStr}T09:30:00`),
   },
+
+  // 4. V8 - V9: BELUM BAYAR (SIAP DIPROSES DI KASIR SAAT DEMO)
   {
     visit_id: "V8",
     invoice_no: "INV-2025-0025",

@@ -245,8 +245,8 @@ export const CustomerLayout: React.FC = () => {
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl px-4 sm:px-6 pt-3.5 pb-3 border-b border-[#E2E8F0] print:hidden shadow-[0_4px_20px_-2px_rgba(14,90,89,0.03)]">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-[#F0FAF9] text-[#0E5A59] flex items-center justify-center font-black text-base shadow-2xs shrink-0 select-none border border-[#CCEBE9]">
-              <span>🩺</span>
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-2xs shrink-0 select-none border border-[#CCEBE9] bg-[#061e15]">
+              <img src="/logo.png" alt="ReyClinic Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">

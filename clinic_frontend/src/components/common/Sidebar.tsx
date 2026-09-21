@@ -98,8 +98,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               className="flex items-center gap-3 group select-none cursor-pointer"
               title="ReyClinic Admin"
             >
-              <div className="w-10 h-10 rounded-full bg-[#061e15] text-[#b4f105] flex items-center justify-center font-black text-lg shadow-xs group-hover:scale-105 transition-all shrink-0">
-                <span>✱</span>
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-all shrink-0 border border-slate-200/80 bg-[#061e15]">
+                <img src="/logo.png" alt="ReyClinic Logo" className="w-full h-full object-cover" />
               </div>
               <div className="md:hidden">
                 <span className="font-extrabold text-base text-slate-900 tracking-tight block leading-tight">

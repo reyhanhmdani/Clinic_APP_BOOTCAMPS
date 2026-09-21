@@ -25,7 +25,8 @@ export const MedicalRecordModal: React.FC<MedicalRecordModalProps> = ({ isOpen, 
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl p-6 space-y-4 rounded-2xl">
         {/* Header Struk */}
-        <div className="text-center pb-3 border-b border-dashed border-slate-200">
+        <div className="text-center pb-3 border-b border-dashed border-slate-200 flex flex-col items-center">
+          <img src="/logo.png" alt="ReyClinic Logo" className="w-10 h-10 rounded-xl mb-1.5 object-cover border border-slate-200/80 shadow-2xs" />
           <div className="inline-block bg-lime-100 text-lime-900 px-2.5 py-0.5 border border-lime-200 font-bold text-[10px] uppercase rounded-full">
             STRUK RESMI PEMBAYARAN
           </div>

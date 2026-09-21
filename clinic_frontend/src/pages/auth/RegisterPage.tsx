@@ -102,8 +102,8 @@ export const RegisterPage: React.FC = () => {
         {/* ============================================================ */}
         <div className="hidden lg:flex lg:col-span-6 flex-col justify-between space-y-7 text-white pr-6">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide text-white shadow-xs">
-              <span className="text-[#b4f105] text-sm">✱</span>
+            <div className="inline-flex items-center gap-2.5 bg-white/10 border border-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide text-white shadow-xs">
+              <img src="/logo.png" alt="ReyClinic Logo" className="w-5 h-5 rounded-md object-cover shrink-0" />
               <span>ReyClinic Medical Center • Registrasi Pasien</span>
             </div>
 
@@ -164,6 +164,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div className="relative z-10 flex flex-col items-center justify-center text-center pb-2">
+              <img src="/logo.png" alt="ReyClinic Logo" className="w-12 h-12 rounded-2xl shadow-lg border border-white/20 mb-2 object-cover" />
               <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-1.5">
                 Rey<span className="text-[#b4f105]">Clinic</span>
               </h1>

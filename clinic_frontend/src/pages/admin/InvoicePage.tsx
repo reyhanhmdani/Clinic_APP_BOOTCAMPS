@@ -103,8 +103,8 @@ export const InvoicePage: React.FC = () => {
         {/* Header Billing */}
         <div className="p-6 sm:p-8 bg-[#061e15] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[#b4f105] text-xl font-black">✱</span>
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <img src="/logo.png" alt="ReyClinic Logo" className="w-6 h-6 rounded-md object-cover border border-white/20 shadow-xs" />
               <span className="text-xs font-bold tracking-widest uppercase text-white/70">
                 ReyClinic Medical Center
               </span>

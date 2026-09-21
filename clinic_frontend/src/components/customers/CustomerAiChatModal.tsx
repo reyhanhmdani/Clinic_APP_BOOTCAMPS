@@ -352,8 +352,8 @@ export const CustomerAiChatModal: React.FC<CustomerAiChatModalProps> = ({
               className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0E5A59] to-[#147B79] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                  <Bot size={16} className="stroke-[2.3]" />
+                <div className="w-8 h-8 rounded-xl bg-[#061e15] border border-[#0E5A59]/40 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs overflow-hidden">
+                  <img src="/logo.png" alt="ReyAI" className="w-full h-full object-cover" />
                 </div>
               )}
 

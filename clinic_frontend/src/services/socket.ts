@@ -133,8 +133,9 @@ const rawUrl =
   import.meta.env.VITE_API_URL ||
   'http://localhost:3000';
 
-// Backend sudah resmi migrasi penuh ke Golang (Native WebSocket /ws)
-const isGoBackend = !rawUrl.includes(':3000');
+// Jika mengarah ke Go backend (:8080): gunakan NativeWebSocketClient (/ws)
+// Jika mengarah ke Express backend (:3000): gunakan io() Socket.IO client
+const isGoBackend = rawUrl.includes(':8080') || rawUrl.endsWith('/ws');
 
 export const socket: Socket | any = isGoBackend
   ? new NativeWebSocketClient(rawUrl)

@@ -19,6 +19,8 @@ node_modules/
 **/dist-ssr/
 **/build/
 **/generated/
+*.exe
+server
 
 # 4. Logs & Debugging
 logs/

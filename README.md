@@ -21,48 +21,42 @@ Eksplorasi ini berfokus pada pengalaman membangun sistem yang sama dengan dua ek
 
 ## 🔄 Alur Sistem (Flow Aplikasi)
 
-Berikut alur perjalanan data dari awal pasien mendaftar hingga selesai pemeriksaan:
+Berikut alur perjalanan data dari awal pasien mendaftar hingga selesai pemeriksaan secara end-to-end:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Pasien
-    actor Admin as Resepsionis/Admin
-    actor Dokter
-    actor Apoteker
-    actor Kasir
-    participant Sistem as Sistem ReyClinic (Go + DB)
-
-    Note over Pasien, Admin: 1. Pendaftaran & Antrean
-    alt Pasien Online (Dari HP)
-        Pasien->>Sistem: Daftar / Login (Email / Google SSO)
-        Pasien->>Sistem: Ambil nomor antrean & pilih dokter
-    else Pasien Offline (Loket Fisik)
-        Admin->>Sistem: Input data pasien & cetak antrean
+flowchart TD
+    subgraph S1["1️⃣ Pendaftaran & Antrean"]
+        A["Pasien (Online / Loket Fisik)"] --> B["Pilih Dokter & Ambil Nomor Antrean"]
+        B --> C["Pantau Antrean Live (WebSocket)"]
     end
 
-    Sistem-->>Pasien: Update status antrean live via WebSocket
-
-    Note over Dokter, Sistem: 2. Pemeriksaan Medis (EMR)
-    Dokter->>Sistem: Panggil antrean (Status: IN_KONSULTASI)
-    Dokter->>Sistem: Input diagnosa keluhan & buat resep obat digital
-    Sistem-->>Apoteker: Notifikasi resep baru masuk ke apotek
-
-    Note over Apoteker, Sistem: 3. Penyiapan Obat
-    Apoteker->>Sistem: Lihat resep masuk & siapkan obat
-    Apoteker->>Sistem: Validasi penyerahan obat (Stok otomatis berkurang)
-    Sistem-->>Kasir: Tagihan otomatis terbuat (Konsultasi + Obat)
-
-    Note over Kasir, Pasien: 4. Pembayaran (Kasir)
-    alt Pembayaran Digital (QRIS / VA)
-        Pasien->>Sistem: Buka invoice & bayar via QRIS Midtrans Snap
-        Sistem->>Sistem: Verifikasi pembayaran sukses
-    else Pembayaran Tunai (Cash)
-        Kasir->>Sistem: Terima uang tunai & tandai invoice PAID
+    subgraph S2["2️⃣ Ruang Pemeriksaan (EMR)"]
+        C --> D["Dokter Panggil Pasien Sesuai Nomor"]
+        D --> E["Input Keluhan, Diagnosa, & Tindakan"]
+        E --> F["Terbitkan Resep Obat Digital"]
     end
 
-    Sistem-->>Pasien: Kunjungan selesai (COMPLETED) & riwayat tersimpan
+    subgraph S3["3️⃣ Apotek & Farmasi"]
+        F --> G["Apoteker Terima Notifikasi Resep"]
+        G --> H["Siapkan & Serahkan Obat ke Pasien"]
+        H --> I["Stok Obat Otomatis Terpotong"]
+    end
+
+    subgraph S4["4️⃣ Kasir & Penyelesaian"]
+        I --> J["Tagihan Terbit Otomatis (Jasa Dokter + Obat)"]
+        J --> K["Pembayaran (QRIS Midtrans / Tunai Loket)"]
+        K --> L["Kunjungan Selesai & Riwayat Medis Tersimpan"]
+    end
 ```
+
+### 📋 Ringkasan 4 Tahapan Utama:
+
+| Tahap | Penanggung Jawab | Aktivitas Utama | Output Sistem |
+| :--- | :--- | :--- | :--- |
+| **1. Pendaftaran** | Pasien / Resepsionis | Registrasi akun, penautan NIK, & ambil tiket antrean poli | Nomor Tiket (`A-001`) & Live Tracker |
+| **2. Pemeriksaan** | Dokter | Anamnesis pasien, penegakan diagnosa, & peresepan obat | Rekam Medis EMR & Resep Digital |
+| **3. Farmasi** | Apoteker | Review resep digital, peracikan, & penyerahan obat | Pengurangan Stok Otomatis (Batch) |
+| **4. Kasir** | Kasir / Pasien | Pelunasan tagihan via QRIS Snap mandiri atau tunai di loket | Status `PAID`, Struk Lunas, & Riwayat |
 
 ---
 

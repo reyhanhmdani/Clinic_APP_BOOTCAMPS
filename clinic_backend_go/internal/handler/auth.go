@@ -114,12 +114,11 @@ func (h *AuthHandler) LinkGoogle(c *gin.Context) {
 		return
 	}
 
-	userIDVal, exists := c.Get("user_id")
-	if !exists {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+	userID := c.GetUint("UserID")
+	if userID == 0 {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Akses ditolak: User ID tidak ditemukan")
 		return
 	}
-	userID := userIDVal.(uint)
 
 	user, msg, err := h.authService.LinkGoogle(userID, input.Credential)
 	if err != nil {

@@ -9,10 +9,10 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  *string   `json:"-"`
 	Role      string    `json:"role"` // ADMIN, CUSTOMER
-	GoogleID  *string   `json:"google_id,omitempty" gorm:"column:google_id"`
+	GoogleID  *string   `json:"googleId,omitempty" gorm:"column:google_id"`
 	Provider  string    `json:"provider"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 
 	Patient *Patient `json:"patient,omitempty" gorm:"foreignKey:UserID"`
 }

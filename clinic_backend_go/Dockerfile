@@ -11,6 +11,7 @@ RUN go mod download
 
 # Copy source code and compile static binary for Linux
 COPY . .
+RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o server ./cmd/api
 
 # Stage 2: Minimalist runtime image

@@ -7,9 +7,9 @@ type User struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	Username  *string   `json:"username"`
 	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	Password  *string   `json:"-"`
 	Role      string    `json:"role"` // ADMIN, CUSTOMER
-	GoogleID  *string   `json:"google_id,omitempty"`
+	GoogleID  *string   `json:"google_id,omitempty" gorm:"column:google_id"`
 	Provider  string    `json:"provider"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

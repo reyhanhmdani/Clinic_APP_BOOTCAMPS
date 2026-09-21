@@ -84,6 +84,7 @@ func main() {
 		{
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/register", authHandler.Register)
+			auth.POST("/google", authHandler.GoogleAuth)
 			auth.GET("/users", authHandler.GetAllUsers)
 		}
 
@@ -91,6 +92,9 @@ func main() {
 		protected := v1.Group("/")
 		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
+			// Auth (Protected: Link Google)
+			protected.POST("/auth/link-google", authHandler.LinkGoogle)
+
 			// 1. Shared Routes (Admin & Customer)
 			protected.PATCH("/visits/:id", middleware.RequireRoles("ADMIN", "CUSTOMER"), visitHandler.UpdateVisit)
 			protected.POST("/invoices/:id/midtrans-token", middleware.RequireRoles("ADMIN", "CUSTOMER"), invoiceHandler.GetMidtransSnapToken)

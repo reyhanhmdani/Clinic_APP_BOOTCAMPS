@@ -83,3 +83,50 @@ func (h *AuthHandler) GetAllUsers(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusOK, "Berhasil mengambil data User", users)
 }
+
+type GoogleAuthInput struct {
+	Credential string `json:"credential" binding:"required"`
+}
+
+func (h *AuthHandler) GoogleAuth(c *gin.Context) {
+	var input GoogleAuthInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Google token wajib disertakan", err.Error())
+		return
+	}
+
+	user, token, err := h.authService.GoogleAuth(input.Credential)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Login Google berhasil", gin.H{
+		"token": token,
+		"user":  user,
+	})
+}
+
+func (h *AuthHandler) LinkGoogle(c *gin.Context) {
+	var input GoogleAuthInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Google token wajib disertakan", err.Error())
+		return
+	}
+
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	userID := userIDVal.(uint)
+
+	user, msg, err := h.authService.LinkGoogle(userID, input.Credential)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, msg, user)
+}
+

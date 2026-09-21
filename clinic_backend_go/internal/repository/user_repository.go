@@ -9,8 +9,10 @@ import (
 type UserRepository interface {
 	FindByEmail(email string) (*models.User, error)
 	FindByID(id uint) (*models.User, error)
+	FindByEmailOrGoogleID(email, googleID string) (*models.User, error)
 	FindAll() ([]models.User, error)
 	Create(user *models.User) error
+	Update(user *models.User) error
 }
 
 type userRepository struct {
@@ -48,6 +50,25 @@ func (r *userRepository) FindAll() ([]models.User, error) {
 	return users, err
 }
 
+func (r *userRepository) FindByEmailOrGoogleID(email, googleID string) (*models.User, error) {
+	var user models.User
+	query := r.db.Preload("Patient")
+	if googleID != "" {
+		query = query.Where("email = ? OR google_id = ?", email, googleID)
+	} else {
+		query = query.Where("email = ?", email)
+	}
+	err := query.First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (r *userRepository) Create(user *models.User) error {
 	return r.db.Create(user).Error
+}
+
+func (r *userRepository) Update(user *models.User) error {
+	return r.db.Save(user).Error
 }

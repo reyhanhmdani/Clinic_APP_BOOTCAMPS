@@ -2,7 +2,7 @@
 
 ReyClinic adalah aplikasi web manajemen klinik kesehatan terpadu yang menghubungkan seluruh alur operasional klinik—mulai dari pendaftaran mandiri pasien, antrean dokter real-time, rekam medis digital (EMR), penyiapan obat di apotek, hingga kasir dengan pembayaran digital QRIS Midtrans.
 
-Project ini awalnya dibangun menggunakan backend **Express.js (TypeScript + Prisma)**, kemudian dieksplorasi dan dibangun ulang (*rewrite*) menggunakan **Golang (Gin + GORM)** untuk mencoba stack modern **React + Go** yang lebih cepat, hemat resource, dan mudah di-deploy sebagai single container Docker.
+Project ini awalnya dibangun menggunakan backend **Express.js (TypeScript + Prisma)**, kemudian dieksplorasi dan dibangun ulang (_rewrite_) menggunakan **Golang (Gin + GORM)** untuk mencoba stack modern **React + Go** yang lebih cepat, hemat resource, dan mudah di-deploy sebagai single container Docker.
 
 ---
 
@@ -10,12 +10,12 @@ Project ini awalnya dibangun menggunakan backend **Express.js (TypeScript + Pris
 
 Eksplorasi ini berfokus pada pengalaman membangun sistem yang sama dengan dua ekosistem berbeda:
 
-* **Eksplorasi Stack React + Go**: Mencoba kombinasi frontend React modern dengan backend Golang yang terkenal efisien dan statically typed.
-* **Performa & Efisiensi Resource**: Backend Go berjalan sebagai single static binary di dalam Alpine Linux Docker dengan konsumsi RAM yang jauh lebih ringan (~15-20 MB saat idle).
-* **Native Concurrency**: Menggunakan goroutine dan native WebSocket untuk broadcast antrean pasien ke banyak browser secara real-time tanpa overhead library tambahan.
-* **Kemudahan Deployment**: Backend Go dikemas dalam multi-stage Docker build yang ringkas dan langsung siap jalan di platform seperti Render.
+- **Eksplorasi Stack React + Go**: Mencoba kombinasi frontend React modern dengan backend Golang yang terkenal efisien dan statically typed.
+- **Performa & Efisiensi Resource**: Backend Go berjalan sebagai single static binary di dalam Alpine Linux Docker dengan konsumsi RAM yang jauh lebih ringan (~15-20 MB saat idle).
+- **Native Concurrency**: Menggunakan goroutine dan native WebSocket untuk broadcast antrean pasien ke banyak browser secara real-time tanpa overhead library tambahan.
+- **Kemudahan Deployment**: Backend Go dikemas dalam multi-stage Docker build yang ringkas dan langsung siap jalan di platform seperti Render.
 
-> *Catatan: Folder backend lama (`clinic_backend`) tetap dipertahankan di repositori ini sebagai arsip perbandingan implementasi Express vs Go.*
+> _Catatan: Folder backend lama (`clinic_backend`) tetap dipertahankan di repositori ini sebagai arsip perbandingan implementasi Express vs Go._
 
 ---
 
@@ -51,55 +51,60 @@ flowchart TD
 
 ### 📋 Ringkasan 4 Tahapan Utama:
 
-| Tahap | Penanggung Jawab | Aktivitas Utama | Output Sistem |
-| :--- | :--- | :--- | :--- |
-| **1. Pendaftaran** | Pasien / Resepsionis | Registrasi akun, penautan NIK, & ambil tiket antrean poli | Nomor Tiket (`A-001`) & Live Tracker |
-| **2. Pemeriksaan** | Dokter | Anamnesis pasien, penegakan diagnosa, & peresepan obat | Rekam Medis EMR & Resep Digital |
-| **3. Farmasi** | Apoteker | Review resep digital, peracikan, & penyerahan obat | Pengurangan Stok Otomatis (Batch) |
-| **4. Kasir** | Kasir / Pasien | Pelunasan tagihan via QRIS Snap mandiri atau tunai di loket | Status `PAID`, Struk Lunas, & Riwayat |
+| Tahap              | Penanggung Jawab     | Aktivitas Utama                                             | Output Sistem                         |
+| :----------------- | :------------------- | :---------------------------------------------------------- | :------------------------------------ |
+| **1. Pendaftaran** | Pasien / Resepsionis | Registrasi akun, penautan NIK, & ambil tiket antrean poli   | Nomor Tiket (`A-001`) & Live Tracker  |
+| **2. Pemeriksaan** | Dokter               | Anamnesis pasien, penegakan diagnosa, & peresepan obat      | Rekam Medis EMR & Resep Digital       |
+| **3. Farmasi**     | Apoteker             | Review resep digital, peracikan, & penyerahan obat          | Pengurangan Stok Otomatis (Batch)     |
+| **4. Kasir**       | Kasir / Pasien       | Pelunasan tagihan via QRIS Snap mandiri atau tunai di loket | Status `PAID`, Struk Lunas, & Riwayat |
 
 ---
 
 ## ✨ Fitur Utama Berdasarkan Peran
 
 ### 1. Portal Mandiri Pasien (`/customers`)
-* **Registrasi & Google SSO**: Daftar akun baru manual atau 1-klik menggunakan akun Google.
-* **Penautan Akun (Auto-Link)**: Jika pasien sudah pernah punya rekam medis di loket fisik, akun bisa otomatis terhubung melalui NIK.
-* **Ambil Antrean Online**: Booking nomor antrean dokter hari ini langsung dari smartphone.
-* **Live Queue Monitor**: Memantau sisa antrean yang sedang berjalan secara real-time.
-* **Riwayat Medis & Resep**: Melihat catatan diagnosa masa lalu dan petunjuk aturan minum obat.
-* **Bayar Tagihan Mandiri**: Membayar invoice langsung dari portal pasien via QRIS.
+
+- **Registrasi & Google SSO**: Daftar akun baru manual atau 1-klik menggunakan akun Google.
+- **Penautan Akun (Auto-Link)**: Jika pasien sudah pernah punya rekam medis di loket fisik, akun bisa otomatis terhubung melalui NIK.
+- **Ambil Antrean Online**: Booking nomor antrean dokter hari ini langsung dari smartphone.
+- **Live Queue Monitor**: Memantau sisa antrean yang sedang berjalan secara real-time.
+- **Riwayat Medis & Resep**: Melihat catatan diagnosa masa lalu dan petunjuk aturan minum obat.
+- **Bayar Tagihan Mandiri**: Membayar invoice langsung dari portal pasien via QRIS.
 
 ### 2. Loket & Resepsionis (`/visits`, `/patients`)
-* Pendaftaran pasien baru (nama, NIK, No. RM otomatis, tanggal lahir, kontak).
-* Pengambilan nomor antrean loket fisik harian.
-* Pemantauan daftar pasien yang sedang menunggu di ruang tunggu.
+
+- Pendaftaran pasien baru (nama, NIK, No. RM otomatis, tanggal lahir, kontak).
+- Pengambilan nomor antrean loket fisik harian.
+- Pemantauan daftar pasien yang sedang menunggu di ruang tunggu.
 
 ### 3. Ruang Periksa Dokter (`/consultations`)
-* Memanggil antrean pasien berikutnya.
-* Input diagnosa medis, catatan keluhan, dan tindakan dokter.
-* Peresepan obat digital terintegrasi langsung dengan katalog apotek.
+
+- Memanggil antrean pasien berikutnya.
+- Input diagnosa medis, catatan keluhan, dan tindakan dokter.
+- Peresepan obat digital terintegrasi langsung dengan katalog apotek.
 
 ### 4. Apotek & Farmasi (`/pharmacy`)
-* Antrean resep obat yang masuk secara live begitu dokter selesai memeriksa.
-* Validasi ketersediaan stok obat.
-* Pengurangan stok obat secara otomatis dan transaksional saat obat diserahkan (*dispensed*).
+
+- Antrean resep obat yang masuk secara live begitu dokter selesai memeriksa.
+- Validasi ketersediaan stok obat.
+- Pengurangan stok obat secara otomatis dan transaksional saat obat diserahkan (_dispensed_).
 
 ### 5. Kasir & Pembayaran (`/invoices`)
-* Kalkulasi biaya otomatis: **Biaya Jasa Dokter + Total Harga Obat Resep**.
-* Integrasi **Midtrans Snap**: Pembayaran QRIS (GoPay, OVO, Dana, ShopeePay) & Virtual Account.
-* Pilihan pembayaran tunai (Cash) di kasir fisik.
+
+- Kalkulasi biaya otomatis: **Biaya Jasa Dokter + Total Harga Obat Resep**.
+- Integrasi **Midtrans Snap**: Pembayaran QRIS (GoPay, OVO, Dana, ShopeePay) & Virtual Account.
+- Pilihan pembayaran tunai (Cash) di kasir fisik.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Zustand (State Management), Axios.
-* **Backend**: Golang 1.26, Gin Gonic Framework, GORM, Gorilla WebSocket.
-* **Database**: PostgreSQL (Hosted on Neon Cloud Serverless).
-* **Payment Gateway**: Midtrans Snap API (Sandbox).
-* **Authentication**: JWT (JSON Web Token), Google OAuth 2.0.
-* **DevOps / Deployment**: Docker (Multi-stage build), Render (Backend Web Service), Vercel (Frontend SPA).
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Zustand (State Management), Axios.
+- **Backend**: Golang 1.26, Gin Gonic Framework, GORM, Gorilla WebSocket.
+- **Database**: PostgreSQL (Hosted on Neon Cloud Serverless).
+- **Payment Gateway**: Midtrans Snap API (Sandbox).
+- **Authentication**: JWT (JSON Web Token), Google OAuth 2.0.
+- **DevOps / Deployment**: Docker (Multi-stage build), Render (Backend Web Service), Vercel (Frontend SPA).
 
 ---
 
@@ -142,14 +147,17 @@ clinic_web/
 ## 🚀 Panduan Menjalankan Project di Komputer Lokal
 
 ### 1. Prasyarat
+
 Pastikan di komputer kamu sudah terpasang:
-* [Go](https://go.dev/dl/) (versi 1.24 atau yang lebih baru)
-* [Node.js](https://nodejs.org/) (versi 20 atau yang lebih baru)
-* Database [PostgreSQL](https://www.postgresql.org/) (bisa lokal atau pakai [Neon.tech](https://neon.tech/) gratis)
+
+- [Go](https://go.dev/dl/) (versi 1.24 atau yang lebih baru)
+- [Node.js](https://nodejs.org/) (versi 20 atau yang lebih baru)
+- Database [PostgreSQL](https://www.postgresql.org/) (bisa lokal atau pakai [Neon.tech](https://neon.tech/) gratis)
 
 ---
 
 ### 2. Clone Repositori
+
 ```bash
 git clone https://github.com/reyhanhmdani/Clinic_APP_BOOTCAMPS.git
 cd Clinic_APP_BOOTCAMPS
@@ -158,7 +166,9 @@ cd Clinic_APP_BOOTCAMPS
 ---
 
 ### 3. Setup Database (Seeder Data Awal)
+
 Untuk mengisi database dengan akun admin, dokter, katalog obat, dan riwayat kunjungan:
+
 ```bash
 cd clinic_backend
 
@@ -176,7 +186,9 @@ cd ..
 ---
 
 ### 4. Menjalankan Backend Golang
+
 Buka terminal baru di folder `clinic_backend_go`:
+
 ```bash
 cd clinic_backend_go
 
@@ -192,12 +204,15 @@ cd clinic_backend_go
 go mod download
 go run cmd/api/main.go
 ```
+
 > Server backend akan aktif di: `http://localhost:8080`
 
 ---
 
 ### 5. Menjalankan Frontend React
+
 Buka terminal baru di folder `clinic_frontend`:
+
 ```bash
 cd clinic_frontend
 
@@ -213,6 +228,7 @@ npm install
 # Jalankan dev server:
 npm run dev
 ```
+
 > Aplikasi web akan aktif di browser: `http://localhost:5173`
 
 ---
@@ -221,20 +237,20 @@ npm run dev
 
 Data akun bawaan dari hasil seeding:
 
-| Peran (Role) | Email | Password | Kegunaan |
-| :--- | :--- | :--- | :--- |
-| **Admin / Staf Klinik** | `admin@gmail.com` | `admin123` | Akses penuh: Pendaftaran, Dokter, Apotek, Kasir, Master Data |
-| **Pasien (Customer 1)** | `fajar@gmail.com` | `fajar123` | Coba fitur antrean mandiri & lihat riwayat resep |
-| **Pasien (Customer 2)** | `budi@gmail.com` | `budi123` | Coba portal pasien & pembayaran invoice |
-| **Google Sign-In** | *Akun Google Anda* | *(Tanpa Password)* | Klik tombol "Daftar Cepat dengan Google" di halaman Login/Register |
+| Peran (Role)            | Email              | Password           | Kegunaan                                                           |
+| :---------------------- | :----------------- | :----------------- | :----------------------------------------------------------------- |
+| **Admin / Staf Klinik** | `admin@gmail.com`  | `admin123`         | Akses penuh: Pendaftaran, Dokter, Apotek, Kasir, Master Data       |
+| **Pasien (Customer 1)** | `fajar@gmail.com`  | `fajar123`         | Coba fitur antrean mandiri & lihat riwayat resep                   |
+| **Pasien (Customer 2)** | `budi@gmail.com`   | `budi123`          | Coba portal pasien & pembayaran invoice                            |
+| **Google Sign-In**      | _Akun Google Anda_ | _(Tanpa Password)_ | Klik tombol "Daftar Cepat dengan Google" di halaman Login/Register |
 
 ---
 
 ## 🌐 Informasi Deployment Cloud
 
-* **Frontend**: Di-deploy di **Vercel** (`https://clinic-app-bootcamps.vercel.app`)
-* **Backend**: Di-deploy di **Render** menggunakan **Docker Container** (`https://reyclinic-backend-go.onrender.com`)
-* **Database**: Hosted di **Neon Cloud PostgreSQL (Singapore Region)**
+- **Frontend**: Di-deploy di **Vercel** (`https://reyclinic.vercel.app`)
+- **Backend**: Di-deploy di **Render** menggunakan **Docker Container** (`https://reyclinic-backend-go.onrender.com`)
+- **Database**: Hosted di **Neon Cloud PostgreSQL (Singapore Region)**
 
 ---
 
